@@ -25,7 +25,14 @@ typedef BaseEncoding<>  Encoding;
 
 class CharSet {
 public:
+#if 1
     typedef BaseEncoding<char>      UTF8;
+#else
+    class UTF8 : public BaseEncoding<char> {
+    public:
+        typedef char CharType;
+    };
+#endif
 
 #if defined(__linux__)
     typedef BaseEncoding<unsigned short>    UTF16;

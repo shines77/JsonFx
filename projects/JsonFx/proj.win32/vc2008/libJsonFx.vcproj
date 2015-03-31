@@ -186,6 +186,10 @@
 					RelativePath="..\..\..\..\src\JsonFx\Value.h"
 					>
 				</File>
+				<Filter
+					Name="internal"
+					>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

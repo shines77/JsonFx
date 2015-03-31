@@ -14,6 +14,8 @@ namespace JsonFx {
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 
+class DefaultAllocator;
+
 }  // namespace JsonFx
 
 #endif  /* !_JSONFX_CONFIG_H_ */

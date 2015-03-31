@@ -16,17 +16,19 @@
 
 namespace JsonFx {
 
-template <typename EncodingType = JSONFX_DEFAULT_ENCODING>
-class BaseDocument : public BaseValue<EncodingType>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultAllocator>
+class BaseDocument : public BaseValue<Encoding, Allocator>
 {
 public:
-    typedef typename EncodingType::CharType CharType;
+    typedef typename Encoding::CharType     CharType;
+    typedef typename Encoding::CharType     char_type;
+    typedef Encoding                        EncodingType;
 
 public:
     BaseDocument()  {}
     ~BaseDocument() {}
 
-    BaseDocument & parse(const CharType * text);
+    BaseDocument & parse(const char_type * text);
 
     void visit();
 };
@@ -34,15 +36,15 @@ public:
 // Define default Document class type
 typedef BaseDocument<>     Document;
 
-template <typename EncodingType>
-void BaseDocument<EncodingType>::visit()
+template <typename Encoding, typename Allocator>
+void BaseDocument<Encoding, Allocator>::visit()
 {
     printf("JsonFx::Document::visit() visited.\n\n");
 }
 
-template <typename EncodingType /*= CharSet::UTF8 */>
-BaseDocument<EncodingType> &
-BaseDocument<EncodingType>::parse(const CharType * text)
+template <typename Encoding, typename Allocator>
+BaseDocument<Encoding, Allocator> &
+BaseDocument<Encoding, Allocator>::parse(const char_type * text)
 {
     jimi_assert(text != NULL);
     printf("JsonFx::Document::parse() visited.\n\n");
