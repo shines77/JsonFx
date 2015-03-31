@@ -18,7 +18,7 @@ public:
     Json()  {}
     ~Json() {}
 
-    void get();
+    void visit();
 };
 
 }  // namespace JsonFx

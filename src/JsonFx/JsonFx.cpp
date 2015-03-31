@@ -5,10 +5,10 @@
 
 namespace JsonFx {
 
-void Json::get()
+void Json::visit()
 {
-    printf("JsonFx::Json::get() enter.\n");
-    printf("JsonFx::Json::get() over.\n\n");
+    printf("JsonFx::Json::visit() enter.\n");
+    printf("JsonFx::Json::visit() over.\n\n");
 }
 
 }  // namespace JsonFx

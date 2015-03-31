@@ -42,8 +42,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\src\jimi;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\include\jimi;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -109,8 +109,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\src\jimi;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\include\jimi;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;JIMI_LIB;JIMI_USE_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -159,6 +159,14 @@
 				Name="JsonFx"
 				>
 				<File
+					RelativePath="..\..\..\..\src\JsonFx\CharSet.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\Config.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\..\src\JsonFx\Document.h"
 					>
 				</File>
@@ -168,6 +176,10 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\src\JsonFx\JsonFx.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\StringRef.h"
 					>
 				</File>
 				<File

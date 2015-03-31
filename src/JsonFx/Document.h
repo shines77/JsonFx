@@ -8,20 +8,47 @@
 
 #include <stdio.h>
 
+#include "JsonFx/Config.h"
+#include "JsonFx/CharSet.h"
+#include "JsonFx/Value.h"
+
+#include "jimi/basic/assert.h"
+
 namespace JsonFx {
 
-class Document {
+template <typename EncodingType = JSONFX_DEFAULT_ENCODING>
+class BaseDocument : public BaseValue<EncodingType>
+{
 public:
-    Document()  {}
-    ~Document() {}
+    typedef typename EncodingType::CharType CharType;
 
-    void get();
+public:
+    BaseDocument()  {}
+    ~BaseDocument() {}
+
+    BaseDocument & parse(const CharType * text);
+
+    void visit();
 };
 
-void Document::get()
+// Define default Document class type
+typedef BaseDocument<>     Document;
+
+template <typename EncodingType>
+void BaseDocument<EncodingType>::visit()
 {
-    printf("JsonFx::Document::get() visited.\n\n");
+    printf("JsonFx::Document::visit() visited.\n\n");
 }
+
+template <typename EncodingType /*= CharSet::UTF8 */>
+BaseDocument<EncodingType> &
+BaseDocument<EncodingType>::parse(const CharType * text)
+{
+    jimi_assert(text != NULL);
+    printf("JsonFx::Document::parse() visited.\n\n");
+    return *this;
+}
+
 
 }  // namespace JsonFx
 

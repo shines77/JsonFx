@@ -8,8 +8,12 @@
 
 void JsonFx_Test()
 {
+    JsonFx::Document document;
+    document.parse("[0, 1, 2, 3]");
+
     JsonFx::Value value;
-    value.get();
+    //value.mValueType = 1;
+    value.visit();
 }
 
 int main(int argn, char * argv[])

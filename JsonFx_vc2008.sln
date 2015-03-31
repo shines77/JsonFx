@@ -7,6 +7,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JsonFxDemo", "samples\JsonF
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libJsonFx", "projects\JsonFx\proj.win32\vc2008\libJsonFx.vcproj", "{34949334-98C0-40D4-B620-9CD8C2D49955}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6CC87659-079A-4DF7-852E-8AF52192504D} = {6CC87659-079A-4DF7-852E-8AF52192504D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jimi_static", "projects\jimi\proj.win32\vc2008\Jimi_static.vcproj", "{6CC87659-079A-4DF7-852E-8AF52192504D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +27,10 @@ Global
 		{34949334-98C0-40D4-B620-9CD8C2D49955}.Debug|Win32.Build.0 = Debug|Win32
 		{34949334-98C0-40D4-B620-9CD8C2D49955}.Release|Win32.ActiveCfg = Release|Win32
 		{34949334-98C0-40D4-B620-9CD8C2D49955}.Release|Win32.Build.0 = Release|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Debug|Win32.Build.0 = Debug|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Release|Win32.ActiveCfg = Release|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
