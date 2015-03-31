@@ -6,8 +6,6 @@
 #pragma once
 #endif
 
-#include <stdio.h>
-
 void JsonFx_Test();
 
 #endif  /* !_JSONFXDEMO_H_ */

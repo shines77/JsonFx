@@ -8,16 +8,19 @@
 
 #include <stdio.h>
 
+#include "JsonFx/Value.h"
+#include "JsonFx/Document.h"
+
 namespace JsonFx {
 
-class Value {
+class Json {
 public:
-    Value()  {}
-    ~Value() {}
+    Json()  {}
+    ~Json() {}
 
     void get();
 };
 
-}
+}  // namespace JsonFx
 
 #endif  /* !_JSONFX_H_ */

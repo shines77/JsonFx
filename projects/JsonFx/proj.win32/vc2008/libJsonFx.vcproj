@@ -159,11 +159,19 @@
 				Name="JsonFx"
 				>
 				<File
+					RelativePath="..\..\..\..\src\JsonFx\Document.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\..\src\JsonFx\JsonFx.cpp"
 					>
 				</File>
 				<File
 					RelativePath="..\..\..\..\src\JsonFx\JsonFx.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\Value.h"
 					>
 				</File>
 			</Filter>
