@@ -178,10 +178,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\jimi\basic\config.h"
-						>
-					</File>
-					<File
 						RelativePath="..\..\..\..\src\jimi\basic\declare.h"
 						>
 					</File>
@@ -679,10 +675,6 @@
 					</File>
 					<File
 						RelativePath="..\..\..\..\src\jimic\basic\compiler_def.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimic\basic\config.h"
 						>
 					</File>
 					<File

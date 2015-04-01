@@ -14,6 +14,7 @@
 
 #include "JsonFx/Config.h"
 #include "JsonFx/CharSet.h"
+#include "JsonFx/Allocator.h"
 #include "JsonFx/StringRef.h"
 
 namespace JsonFx {
@@ -224,12 +225,13 @@ public:
     typedef typename Encoding::CharType     CharType;
     typedef typename Encoding::CharType     char_type;
     typedef Encoding                        EncodingType;
-    typedef BasicStringRef<CharType>         StringRefType;      //!< Reference to a constant string
+    typedef Allocator                       AllocatorType;
+    typedef BasicStringRef<CharType>        StringRefType;      //!< Reference to a constant string
 
     typedef BasicMember<Encoding, Allocator> Member;
 
-    typedef BasicValue *                     ValueIterator;      //!< Value iterator for iterating in array.
-    typedef const BasicValue *               ConstValueIterator; //!< Constant value iterator for iterating in array.
+    typedef BasicValue *                    ValueIterator;      //!< Value iterator for iterating in array.
+    typedef const BasicValue *              ConstValueIterator; //!< Constant value iterator for iterating in array.
 
     //!< Member iterator for iterating in object.
     typedef typename BasicMemberIterator<false, Encoding, Allocator>::Iterator MemberIterator;
@@ -250,7 +252,7 @@ public:
 
     explicit BasicValue(StringRefType str) : mValueData(), mValueType() { setStringRaw(str); }
 
-    ~BasicValue() {}
+    ~BasicValue() { release(); }
 
 private:
     //! Copy constructor is not permitted.
@@ -258,6 +260,7 @@ private:
 
 public:
     void visit();
+    void release();
 
     void setStringRaw(StringRefType str) {
         mValueType = kConstStringMask;
@@ -385,7 +388,7 @@ public:
     };
 
     struct Array {
-        Element *       items;
+        BasicValue *    items;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
@@ -412,6 +415,38 @@ private:
     ValueData   mValueData;
 };
 
+template <typename Encoding, typename Allocator>
+void BasicValue<Encoding, Allocator>::release()
+{
+    printf("JsonFx::BasicValue::release() enter.\n");
+    // Shortcut by Allocator's trait
+    if (AllocatorType::kNeedFree) {
+        switch (mValueType) {
+        case kArrayMask:
+            for (BasicValue * v = mValueData.array.items; v != mValueData.array.items + mValueData.array.size; ++v) {
+                v->~BasicValue();
+            }
+            AllocatorType::free(mValueData.array.items);
+            break;
+
+        case kObjectMask:
+            for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
+                m->~Member();
+            }
+            AllocatorType::free(mValueData.obj.members);
+            break;
+
+        case kCopyStrMask:
+            AllocatorType::free(const_cast<CharType *>(mValueData.str.data));
+            break;
+
+        default:
+            printf("JsonFx::BasicValue::release() -- switch(mValueType) branch = default\n");
+            break;  // Do nothing for other types.
+        }
+    }
+    printf("JsonFx::BasicValue::release() over.\n");
+}
 
 template <typename Encoding, typename Allocator>
 void BasicValue<Encoding, Allocator>::visit()

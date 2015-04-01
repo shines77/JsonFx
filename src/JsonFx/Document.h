@@ -10,6 +10,7 @@
 
 #include "JsonFx/Config.h"
 #include "JsonFx/CharSet.h"
+#include "JsonFx/Allocator.h"
 #include "JsonFx/Value.h"
 
 #include "jimi/basic/assert.h"

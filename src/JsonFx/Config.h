@@ -11,10 +11,20 @@
 
 namespace JsonFx {
 
+// Forward declaration.
+class CrtAllocator;
+
+// Forward declaration.
+template <size_t ChunkCapacity, typename BaseAllocator>
+class MemoryPoolAllocator;
+
+//! Default chunk capacity (Recommended settings for multiple systems PageSize)
+static const size_t kDefaultChunkCapacity = 16 * 4096;
+
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 
-class DefaultAllocator;
+typedef MemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator> DefaultAllocator;
 
 }  // namespace JsonFx
 
