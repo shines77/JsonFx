@@ -34,23 +34,23 @@ namespace internal {
 }  // namespace internal
 
 template <typename _CharType = JSONFX_DEFAULT_CHARTYPE>
-class BaseStringRef {
+class BasicStringRef {
 public:
     typedef _CharType   CharType;
     typedef uint32_t    SizeType;
 
 public:
-    BaseStringRef() : mData(NULL), mSize(0) {}
-    ~BaseStringRef() {}
+    BasicStringRef() : mData(NULL), mSize(0) {}
+    ~BasicStringRef() {}
 
     template<SizeType N>
-    BaseStringRef(const CharType (&str)[N])
+    BasicStringRef(const CharType (&str)[N])
         : mData(str), mSize(N - 1) {}
 
-    explicit BaseStringRef(const CharType * str)
+    explicit BasicStringRef(const CharType * str)
         : mData(str), mSize(internal::StrLen(str)) { jimi_assert(mData != NULL); }
 
-    BaseStringRef(const CharType * str, SizeType len)
+    BasicStringRef(const CharType * str, SizeType len)
         : mData(str), mSize(len) { jimi_assert(mData != NULL); }
 
     //! implicit conversion to plain CharType pointer
@@ -61,15 +61,15 @@ public:
 
 private:
     //! Disallow copy-assignment
-    BaseStringRef operator =(const BaseStringRef &src);
+    BasicStringRef operator =(const BasicStringRef &src);
 
     //! Disallow construction from non-const array
     template<SizeType N>
-    BaseStringRef(CharType (&str)[N]); /* = delete */
+    BasicStringRef(CharType (&str)[N]); /* = delete */
 };
 
 // Define default StringRef class type
-typedef BaseStringRef<>     StringRef;
+typedef BasicStringRef<>     StringRef;
 
 }  // namespace JsonFx
 

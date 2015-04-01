@@ -139,35 +139,35 @@ enum ValueTypeMask {
 
 // Forward declaration.
 template <typename Encoding, typename Allocator>
-class BaseValue;
+class BasicValue;
 
 template <typename Encoding, typename Allocator> 
-struct BaseMember
+struct BasicMember
 {
-    BaseValue<Encoding, Allocator> name;    //!< name of member (must be a string)
-    BaseValue<Encoding, Allocator> value;   //!< value of member.
+    BasicValue<Encoding, Allocator> name;    //!< name of member (must be a string)
+    BasicValue<Encoding, Allocator> value;   //!< value of member.
 };
 
 template <bool IsConst, typename Encoding, typename Allocator>
-class BaseMemberIterator
+class BasicMemberIterator
     : public std::iterator<std::random_access_iterator_tag,
-            typename internal::MaybeAddConst<IsConst, BaseMember<Encoding, Allocator> >::Type>
+            typename internal::MaybeAddConst<IsConst, BasicMember<Encoding, Allocator> >::Type>
 {
-    friend class BaseValue<Encoding, Allocator>;
-    template <bool, typename, typename> friend class BaseMemberIterator;
+    friend class BasicValue<Encoding, Allocator>;
+    template <bool, typename, typename> friend class BasicMemberIterator;
 
-    typedef BaseMember<Encoding, Allocator>                             PlainType;
+    typedef BasicMember<Encoding, Allocator>                             PlainType;
     typedef typename internal::MaybeAddConst<IsConst, PlainType>::Type  ValueType;
     typedef std::iterator<std::random_access_iterator_tag, ValueType>   BaseType;
 
 public:
     //! Iterator type itself
-    typedef BaseMemberIterator Iterator;
+    typedef BasicMemberIterator Iterator;
 
     //! Constant iterator type
-    typedef BaseMemberIterator<true, Encoding, Allocator>  ConstIterator;
+    typedef BasicMemberIterator<true, Encoding, Allocator>  ConstIterator;
     //! Non-constant iterator type
-    typedef BaseMemberIterator<false, Encoding, Allocator> NonConstIterator;
+    typedef BasicMemberIterator<false, Encoding, Allocator> NonConstIterator;
 
     //! Pointer to (const) GenericMember
     typedef typename BaseType::pointer         Pointer;
@@ -177,10 +177,10 @@ public:
     typedef typename BaseType::difference_type DifferenceType;
 
 public:
-    BaseMemberIterator() : mPtr() {}
-    BaseMemberIterator(const NonConstIterator & it) : mPtr(it.mPtr) {}
+    BasicMemberIterator() : mPtr() {}
+    BasicMemberIterator(const NonConstIterator & it) : mPtr(it.mPtr) {}
 
-    ~BaseMemberIterator() {}
+    ~BasicMemberIterator() {}
 
     Iterator & operator ++()      { ++mPtr; return *this; }
     Iterator & operator --()      { --mPtr; return *this; }
@@ -209,7 +209,7 @@ public:
 
 private:
     //! Internal constructor from plain pointer
-    explicit BaseMemberIterator(Pointer p) : mPtr(p) {}
+    explicit BasicMemberIterator(Pointer p) : mPtr(p) {}
 
     Pointer mPtr;
 };
@@ -219,42 +219,42 @@ private:
 #pragma pack(1)
 
 template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultAllocator>
-class BaseValue {
+class BasicValue {
 public:
     typedef typename Encoding::CharType     CharType;
     typedef typename Encoding::CharType     char_type;
     typedef Encoding                        EncodingType;
-    typedef BaseStringRef<CharType>         StringRefType;      //!< Reference to a constant string
+    typedef BasicStringRef<CharType>         StringRefType;      //!< Reference to a constant string
 
-    typedef BaseMember<Encoding, Allocator> Member;
+    typedef BasicMember<Encoding, Allocator> Member;
 
-    typedef BaseValue *                     ValueIterator;      //!< Value iterator for iterating in array.
-    typedef const BaseValue *               ConstValueIterator; //!< Constant value iterator for iterating in array.
+    typedef BasicValue *                     ValueIterator;      //!< Value iterator for iterating in array.
+    typedef const BasicValue *               ConstValueIterator; //!< Constant value iterator for iterating in array.
 
     //!< Member iterator for iterating in object.
-    typedef typename BaseMemberIterator<false, Encoding, Allocator>::Iterator MemberIterator;
+    typedef typename BasicMemberIterator<false, Encoding, Allocator>::Iterator MemberIterator;
     //!< Constant member iterator for iterating in object.
-    typedef typename BaseMemberIterator<true,  Encoding, Allocator>::Iterator ConstMemberIterator;
+    typedef typename BasicMemberIterator<true,  Encoding, Allocator>::Iterator ConstMemberIterator;
 
     typedef uint32_t                        SizeType;
     typedef uint32_t                        ValueType;
 
 public:
-    BaseValue() : mValueType(kNullMask), mValueData() {}
+    BasicValue() : mValueType(kNullMask), mValueData() {}
 
-    BaseValue(const CharType * str) {
+    BasicValue(const CharType * str) {
         mValueType = kStringMask;
         mValueData.str.data = str;
         mValueData.str.size = ::strlen(str);
     }
 
-    explicit BaseValue(StringRefType str) : mValueData(), mValueType() { setStringRaw(str); }
+    explicit BasicValue(StringRefType str) : mValueData(), mValueType() { setStringRaw(str); }
 
-    ~BaseValue() {}
+    ~BasicValue() {}
 
 private:
     //! Copy constructor is not permitted.
-    BaseValue(const BaseValue & rhs);
+    BasicValue(const BasicValue & rhs);
 
 public:
     void visit();
@@ -284,16 +284,16 @@ public:
 
     //MemberIterator findMember(const CharType * name) { return MemberIterator(NULL); }
     MemberIterator findMember(const CharType * name) {
-        BaseValue n(StringRefType(name).mData);
+        BasicValue n(StringRefType(name).mData);
         return findMember(n);
     }
 
     ConstMemberIterator findMember(const CharType * name) const {
-        return const_cast<BaseValue &>(*this).findMember(name);
+        return const_cast<BasicValue &>(*this).findMember(name);
     }
 
     template <typename SourceAllocator>
-    MemberIterator findMember(const BaseValue<Encoding, SourceAllocator> & name) {
+    MemberIterator findMember(const BasicValue<Encoding, SourceAllocator> & name) {
         jimi_assert(isObject());
         jimi_assert(name.isString());
         MemberIterator member = getMemberBegin();
@@ -305,8 +305,8 @@ public:
     }
 
     template <typename SourceAllocator>
-    ConstMemberIterator findMember(const BaseValue<Encoding, SourceAllocator> & name) const {
-        return const_cast<BaseValue &>(*this).findMember(name);
+    ConstMemberIterator findMember(const BasicValue<Encoding, SourceAllocator> & name) const {
+        return const_cast<BasicValue &>(*this).findMember(name);
     }
 
     MemberIterator getMemberBegin() { jimi_assert(isObject()); return MemberIterator(mValueData.obj.members); }
@@ -318,10 +318,10 @@ public:
     bool hasMember(const CharType * name) const { return (findMember(name) != getMemberEnd()); }
 
     template <typename SourceAllocator>
-    bool hasMember(const BaseValue<Encoding, SourceAllocator> & name) const { return findMember(name) != getMemberEnd(); }
+    bool hasMember(const BasicValue<Encoding, SourceAllocator> & name) const { return findMember(name) != getMemberEnd(); }
 
     template <typename SourceAllocator>
-    BaseValue & operator[] (const BaseValue<Encoding, SourceAllocator> & name) {
+    BasicValue & operator[] (const BasicValue<Encoding, SourceAllocator> & name) {
         MemberIterator member = findMember(name);
         if (member != getMemberEnd()) {
             return member->value;
@@ -329,14 +329,14 @@ public:
         else {
             // See above note
             jimi_assert(false);
-            static BaseValue nullValue;
+            static BasicValue nullValue;
             return NullValue;
         }
     }
 
 
     template <typename SourceAllocator>
-    bool stringEqual(const BaseValue<Encoding, SourceAllocator> & rhs) const {
+    bool stringEqual(const BasicValue<Encoding, SourceAllocator> & rhs) const {
         jimi_assert(isString());
         jimi_assert(rhs.isString());
 
@@ -414,7 +414,7 @@ private:
 
 
 template <typename Encoding, typename Allocator>
-void BaseValue<Encoding, Allocator>::visit()
+void BasicValue<Encoding, Allocator>::visit()
 {
     printf("JsonFx::Value::visit() visited.\n\n");
 }
@@ -423,7 +423,7 @@ void BaseValue<Encoding, Allocator>::visit()
 #pragma pack(pop)
 
 // Define default Value class type
-typedef BaseValue<>   Value;
+typedef BasicValue<>   Value;
 
 }  // namespace JsonFx
 

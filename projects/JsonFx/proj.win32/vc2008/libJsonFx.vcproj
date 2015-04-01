@@ -159,6 +159,10 @@
 				Name="JsonFx"
 				>
 				<File
+					RelativePath="..\..\..\..\src\JsonFx\Allocator.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\..\src\JsonFx\CharSet.h"
 					>
 				</File>

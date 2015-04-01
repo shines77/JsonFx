@@ -6,10 +6,10 @@
 #pragma once
 #endif
 
-namespace JsonFx {
-
 // Define default char
 #define JSONFX_DEFAULT_CHARTYPE     char
+
+namespace JsonFx {
 
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
