@@ -9,7 +9,11 @@
 // Define default char
 #define JSONFX_DEFAULT_CHARTYPE     char
 
+#define JSONFX_DEFAULT_PAGESIZE     4096
+
 namespace JsonFx {
+
+/* define in "JsonFx/Allcator.h" */
 
 // Forward declaration.
 class CrtAllocator;
@@ -18,13 +22,17 @@ class CrtAllocator;
 template <size_t ChunkCapacity, typename BaseAllocator>
 class MemoryPoolAllocator;
 
-//! Default chunk capacity (Recommended settings for multiple systems PageSize)
-static const size_t kDefaultChunkCapacity = 16 * 4096;
+// Forward declaration.
+template <size_t ChunkCapacity, typename BaseAllocator>
+class SimpleMemoryPoolAllocator;
+
+//! Default MemoryPoolAllocator chunk capacity (Recommended settings for multiple systems PageSize)
+static const size_t kDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
 
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 
-typedef MemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator> DefaultAllocator;
+typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator> DefaultPoolAllocator;
 
 }  // namespace JsonFx
 

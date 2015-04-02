@@ -64,12 +64,12 @@ template <typename T> struct RemoveConst<const T> { typedef T Type; };
 
 enum ValueType {
     // Base value type
-    kNumberType,
+    kObjectType,
     kStringType,
+    kNumberType,
     kTrueType,
     kFalseType,
     kArrayType,
-    kObjectType,
     kNullType,
 
     // Last value type
@@ -219,7 +219,7 @@ private:
 #pragma pack(push)
 #pragma pack(1)
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultAllocator>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultPoolAllocator>
 class BasicValue {
 public:
     typedef typename Encoding::CharType     CharType;
@@ -266,6 +266,13 @@ public:
         mValueType = kConstStringMask;
         mValueData.str.data = str.mData;
         mValueData.str.size = str.mSize;
+    }
+
+    void setObject() {
+        mValueType = kObjectMask;
+        mValueData.obj.members = NULL;
+        mValueData.obj.size = 0;
+        mValueData.obj.capacity = 0;
     }
 
     ValueType getType() const { return static_cast<ValueType>(mValueType & kTypeMask); }
@@ -418,7 +425,7 @@ private:
 template <typename Encoding, typename Allocator>
 void BasicValue<Encoding, Allocator>::release()
 {
-    printf("JsonFx::BasicValue::release() enter.\n");
+    //printf("JsonFx::BasicValue::release() enter.\n");
     // Shortcut by Allocator's trait
     if (AllocatorType::kNeedFree) {
         switch (mValueType) {
@@ -445,7 +452,7 @@ void BasicValue<Encoding, Allocator>::release()
             break;  // Do nothing for other types.
         }
     }
-    printf("JsonFx::BasicValue::release() over.\n");
+    //printf("JsonFx::BasicValue::release() over.\n");
 }
 
 template <typename Encoding, typename Allocator>

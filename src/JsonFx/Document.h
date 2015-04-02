@@ -17,7 +17,7 @@
 
 namespace JsonFx {
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultAllocator>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultPoolAllocator>
 class BasicDocument : public BasicValue<Encoding, Allocator>
 {
 public:
@@ -49,6 +49,8 @@ BasicDocument<Encoding, Allocator>::parse(const char_type * text)
 {
     jimi_assert(text != NULL);
     printf("JsonFx::Document::parse() visited.\n\n");
+
+    setObject();
     return *this;
 }
 
