@@ -32,7 +32,11 @@ static const size_t kDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 
-typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator> DefaultPoolAllocator;
+#if 0
+typedef MemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator>        DefaultPoolAllocator;
+#else
+typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator>  DefaultPoolAllocator;
+#endif
 
 }  // namespace JsonFx
 

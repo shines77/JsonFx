@@ -15,8 +15,15 @@
 #include "JsonFx/CharSet.h"
 #include "JsonFx/Value.h"
 
+#include "jimi/basic/arch_def.h"
 #include "jimi/basic/stddef.h"
 #include "jimi/basic/assert.h"
+
+/* If it is 0, don't allow malloc size more than the default chunk size. */
+#define JSONFX_ALLOW_ALLOC_BIGSIZE      0
+
+/* Default malloc alignment size. */
+#define JSONFX_MALLOC_ALIGNMENT_SIZE    8
 
 namespace JsonFx {
 
@@ -34,10 +41,11 @@ size_t RoundToPowerOf2(size_t n) {
     n |= n >> 4;
     n |= n >> 8;
     n |= n >> 16;
-#if defined(_M_X64) || defined(_WIN64) || defined(_M_AMD64) || defined(_M_IA64) || defined(_M_X86_64)
+#if defined(JIMI_ARCH_X64) || defined(JIMI_ARCH_IA64)
     n |= n >> 32;
 #endif
     return ++n;
+
 #else
     size_t ms1b = 1;
     while (ms1b < n) {
@@ -167,9 +175,15 @@ public:
     }
 
     void * malloc(size_t size) {
-        size = JIMI_ALIGNED_TO(size, 8);
+        // JSONFX_MALLOC_ALIGNMENT_SIZE is 8
+        size = JIMI_ALIGNED_TO(size, JSONFX_MALLOC_ALIGNMENT_SIZE);
         if (size > mChunkHeader->remain) {
-            // Add a default cappacity size chunk
+
+#if !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) || (JSONFX_ALLOW_ALLOC_BIGSIZE == 0)
+            // Add a default capacity size chunk
+            internal_AddNewChunk();
+#else  /* !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
+            // Add a default capacity size chunk
             if (size <= kDefaultChunkCapacity) {
                 internal_AddNewChunk();
             }
@@ -177,6 +191,8 @@ public:
                 size_t newChunkCapacity = internal::RoundToPowerOf2(size);
                 internal_AddNewChunk(newChunkCapacity);
             }
+#endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
+
             jimi_assert(mChunkHeader != NULL);
             jimi_assert(mChunkHeader->cursor != NULL);
         }
@@ -197,7 +213,7 @@ public:
         if (ptr == reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHeader + 1)
                 + (mChunkHeader->capacity - mChunkHeader->remain) - size)) {
             size_t increment = static_cast<size_t>(new_size - size);
-            increment = JIMI_ALIGNED_TO(increment, 8);
+            increment = JIMI_ALIGNED_TO(increment, JSONFX_MALLOC_ALIGNMENT_SIZE);
             if (increment <= mChunkHeader->remain) {
                 mChunkHeader->remain -= increment;
                 return ptr;
@@ -348,12 +364,18 @@ public:
     }
 
     void * malloc(size_t size) {
-        size = JIMI_ALIGNED_TO(size, 8);
+        // JSONFX_MALLOC_ALIGNMENT_SIZE is 8
+        size = JIMI_ALIGNED_TO(size, JSONFX_MALLOC_ALIGNMENT_SIZE);
         if (size > mChunkHead.remain) {
             // Calc the real allocate size of the actived chunk
+            jimi_assert(mChunkHead.capacity >= mChunkHead.remain);
             size_t realAllocateSize = mChunkHead.capacity - mChunkHead.remain;
             mChunkHead.sizeTotal += realAllocateSize;
 
+#if !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) || (JSONFX_ALLOW_ALLOC_BIGSIZE == 0)
+            // Add a default capacity size chunk
+            internal_AddNewChunk();
+#else  /* !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
             // Add a default capacity size chunk
             if (size <= kDefaultChunkCapacity) {
                 internal_AddNewChunk();
@@ -362,6 +384,7 @@ public:
                 size_t newChunkCapacity = internal::RoundToPowerOf2(size);
                 internal_AddNewChunk(newChunkCapacity);
             }
+#endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
 
             jimi_assert(mChunkHead.next != NULL);
             jimi_assert(mChunkHead.cursor != NULL);
@@ -372,6 +395,7 @@ public:
 
         JIMI_PVOID_ADD(mChunkHead.cursor, size);
         mChunkHead.remain -= size;
+        jimi_assert((ssize_t)mChunkHead.remain >= 0);
         return buffer;
     }
 
@@ -384,7 +408,7 @@ public:
         if (ptr == reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead.next + 1)
                 + (mChunkHead.capacity - mChunkHead.remain) - size)) {
             size_t increment = static_cast<size_t>(new_size - size);
-            increment = JIMI_ALIGNED_TO(increment, 8);
+            increment = JIMI_ALIGNED_TO(increment, JSONFX_MALLOC_ALIGNMENT_SIZE);
             if (increment <= mChunkHead.remain) {
                 mChunkHead.remain -= increment;
                 return ptr;

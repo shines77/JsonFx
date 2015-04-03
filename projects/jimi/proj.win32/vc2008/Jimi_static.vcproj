@@ -162,6 +162,10 @@
 					Name="basic"
 					>
 					<File
+						RelativePath="..\..\..\..\src\jimi\basic\arch_def.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\..\..\src\jimi\basic\assert.cpp"
 						>
 					</File>

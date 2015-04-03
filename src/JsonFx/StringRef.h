@@ -18,11 +18,11 @@ namespace internal {
 
     template <typename CharType>
     size_t StrLen(const CharType * str) {
-        size_t len = 0;
+        const CharType *orig = str;
         while (*str++ != CharType('\0')) {
-            ++len;
+            // Do nothing!
         }
-        return len;
+        return reinterpret_cast<size_t>(str - orig);
     }
 
     template <>
