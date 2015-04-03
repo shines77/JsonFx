@@ -17,38 +17,69 @@
 
 namespace JsonFx {
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultPoolAllocator>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING,
+          typename Allocator = DefaultPoolAllocator,
+          typename StackAllocator = CrtAllocator>
 class BasicDocument : public BasicValue<Encoding, Allocator>
 {
 public:
-    typedef typename Encoding::CharType     CharType;
-    typedef typename Encoding::CharType     char_type;
-    typedef Encoding                        EncodingType;
+    typedef typename Encoding::CharType     CharType;       //!< Character type derived from Encoding.
+    typedef BasicValue<Encoding, Allocator> ValueType;      //!< Value type of the document.
+    typedef Encoding                        EncodingType;   //!< Character encoding type.
+    typedef Allocator                       AllocatorType;  //!< Allocator type from template parameter.
 
 public:
-    BasicDocument()  {}
-    ~BasicDocument() {}
+    BasicDocument(const AllocatorType *allocator = NULL) : mAllocator(allocator) {
+        //jimi_assert(allocator != NULL);
+    }
 
-    BasicDocument & parse(const char_type * text);
+    ~BasicDocument() {
+        destroy();
+    }
+
+private:
+    //! Prohibit copying
+    BasicDocument(const BasicDocument &);
+    //! Prohibit assignment
+    BasicDocument & operator =(const BasicDocument &);
+
+public:
+    void destroy();
+
+    BasicDocument & parse(const CharType * text);
 
     void visit();
+
+private:
+    const AllocatorType * mAllocator;
 };
 
 // Define default Document class type
 typedef BasicDocument<>     Document;
 
-template <typename Encoding, typename Allocator>
-void BasicDocument<Encoding, Allocator>::visit()
+template <typename Encoding, typename Allocator, typename StackAllocator>
+void BasicDocument<Encoding, Allocator, StackAllocator>::visit()
 {
-    printf("JsonFx::Document::visit() visited.\n\n");
+    printf("JsonFx::BasicDocument::visit() visited.\n\n");
 }
 
-template <typename Encoding, typename Allocator>
-BasicDocument<Encoding, Allocator> &
-BasicDocument<Encoding, Allocator>::parse(const char_type * text)
+template <typename Encoding, typename Allocator, typename StackAllocator>
+void BasicDocument<Encoding, Allocator, StackAllocator>::destroy()
+{
+    if (AllocatorType::kNeedFree) {
+        if (mAllocator) {
+            delete mAllocator;
+            mAllocator = NULL;
+        }
+    }
+}
+
+template <typename Encoding, typename Allocator, typename StackAllocator>
+BasicDocument<Encoding, Allocator, StackAllocator> &
+BasicDocument<Encoding, Allocator, StackAllocator>::parse(const CharType * text)
 {
     jimi_assert(text != NULL);
-    printf("JsonFx::Document::parse() visited.\n\n");
+    printf("JsonFx::BasicDocument::parse() visited.\n\n");
 
     setObject();
     return *this;

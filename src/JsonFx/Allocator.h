@@ -19,6 +19,9 @@
 #include "jimi/basic/stddef.h"
 #include "jimi/basic/assert.h"
 
+/* Whether use profile codes when use JsonFx allocators? */
+#define JSONFX_ALLOCATOR_USE_PROFILE    1
+
 /* If it is 0, don't allow malloc size more than the default chunk size. */
 #define JSONFX_ALLOW_ALLOC_BIGSIZE      0
 
@@ -90,7 +93,7 @@ public:
 
 public:
     MemoryPoolAllocator() : mChunkHeader(NULL) {
-        internal_AddNewChunk();
+        addNewChunk();
     }
     ~MemoryPoolAllocator() {
         release();
@@ -114,94 +117,74 @@ private:
         }
     }
 
-    void internal_AddNewChunk() {
+    void * addNewChunk(size_t size) {
         ChunkHeader * newChunk = reinterpret_cast<ChunkHeader *>(AllocatorType::malloc(kChunkCapacity));
         jimi_assert(newChunk != NULL);
 
+        void * cursor = reinterpret_cast<void *>(newChunk + 1);
+
         // Do not handle out-of-memory explicitly.
-        newChunk->cursor    = reinterpret_cast<void *>(newChunk + 1);
-        newChunk->remain    = kChunkCapacity;
+        newChunk->cursor    = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
+        newChunk->remain    = kChunkCapacity - sizeof(ChunkHeader) - size;
         newChunk->capacity  = kChunkCapacity;
         newChunk->next      = mChunkHeader;
 
         mChunkHeader = newChunk;
+        return cursor;
     }
 
-    void internal_AddNewChunk(size_t nChunkCapacity) {
+    void * addNewChunk(size_t nChunkCapacity, size_t size) {
         ChunkHeader * newChunk = reinterpret_cast<ChunkHeader *>(AllocatorType::malloc(nChunkCapacity));
         jimi_assert(newChunk != NULL);
 
+        void * cursor = reinterpret_cast<void *>(newChunk + 1);
+
         // Do not handle out-of-memory explicitly.
-        newChunk->cursor    = reinterpret_cast<void *>(newChunk + 1);
-        newChunk->remain    = nChunkCapacity;
+        newChunk->cursor    = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
+        newChunk->remain    = nChunkCapacity - sizeof(ChunkHeader) - size;
         newChunk->capacity  = nChunkCapacity;
         newChunk->next      = mChunkHeader;
 
         mChunkHeader = newChunk;
+        return cursor;
     }
 
 public:
-    ChunkHeader * addNewChunk() {
-        ChunkHeader * newChunk = reinterpret_cast<ChunkHeader *>(AllocatorType::malloc(kChunkCapacity));
-        jimi_assert(newChunk != NULL);
-
-        if (newChunk != NULL) {
-            // Do not handle out-of-memory explicitly.
-            newChunk->cursor    = reinterpret_cast<void *>(newChunk + 1);
-            newChunk->remain    = kChunkCapacity;
-            newChunk->capacity  = kChunkCapacity;
-            newChunk->next      = mChunkHeader;
-
-            mChunkHeader = newChunk;
-            return newChunk;
-        }
-        return NULL;
-    }
-
-    ChunkHeader * addNewChunk(size_t nChunkCapacity) {
-        ChunkHeader * newChunk = reinterpret_cast<ChunkHeader *>(AllocatorType::malloc(nChunkCapacity));
-        jimi_assert(newChunk != NULL);
-
-        if (newChunk != NULL) {
-            newChunk->cursor    = reinterpret_cast<void *>(newChunk + 1);
-            newChunk->remain    = nChunkCapacity;
-            newChunk->capacity  = nChunkCapacity;
-            newChunk->next      = mChunkHeader;
-
-            mChunkHeader = newChunk;
-            return newChunk;
-        }
-        return NULL;
-    }
-
     void * malloc(size_t size) {
-        // JSONFX_MALLOC_ALIGNMENT_SIZE is 8
+        void * buffer;
+        // Default alignment size is 8
         size = JIMI_ALIGNED_TO(size, JSONFX_MALLOC_ALIGNMENT_SIZE);
-        if (size > mChunkHeader->remain) {
+        if (size <= mChunkHeader->remain) {
+            buffer = reinterpret_cast<void *>(mChunkHeader->cursor);
+            jimi_assert(buffer != NULL);
 
+            // mChunkHeader->cursor += size;
+            //JIMI_PVOID_ADD(mChunkHeader->cursor, size);
+            mChunkHeader->cursor = reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHeader->cursor) + size);
+
+            mChunkHeader->remain -= size;
+            jimi_assert((ssize_t)mChunkHeader->remain >= 0);
+            return buffer;
+        }
+        else {
 #if !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) || (JSONFX_ALLOW_ALLOC_BIGSIZE == 0)
             // Add a default capacity size chunk
-            internal_AddNewChunk();
+            buffer = addNewChunk();
 #else  /* !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
             // Add a default capacity size chunk
             if (size <= kDefaultChunkCapacity) {
-                internal_AddNewChunk();
+                buffer = addNewChunk();
             }
             else {
-                size_t newChunkCapacity = internal::RoundToPowerOf2(size);
-                internal_AddNewChunk(newChunkCapacity);
+                size_t newAllocSize = size + sizeof(ChunkInfo);
+                size_t newChunkCapacity = internal::RoundToPowerOf2(newAllocSize);
+                buffer = addNewChunk(newChunkCapacity);
             }
 #endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
 
-            jimi_assert(mChunkHeader != NULL);
-            jimi_assert(mChunkHeader->cursor != NULL);
+            jimi_assert(buffer != NULL);
+            return buffer;
         }
-        void * buffer = reinterpret_cast<void *>(mChunkHeader->cursor);
-        jimi_assert(buffer != NULL);
-
-        JIMI_PVOID_ADD(mChunkHeader->cursor, size);
-        mChunkHeader->remain -= size;
-        return buffer;
     }
 
     void * realloc(const void *ptr, size_t size, size_t new_size) {
@@ -211,7 +194,7 @@ public:
 
         // Simply expand it if it is the last allocation and there is sufficient space
         if (ptr == reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHeader + 1)
-                + (mChunkHeader->capacity - mChunkHeader->remain) - size)) {
+                + (mChunkHeader->capacity - mChunkHeader->remain - sizeof(ChunkInfo)) - size)) {
             size_t increment = static_cast<size_t>(new_size - size);
             increment = JIMI_ALIGNED_TO(increment, JSONFX_MALLOC_ALIGNMENT_SIZE);
             if (increment <= mChunkHeader->remain) {
@@ -252,15 +235,19 @@ public:
         size_t      remain;
         size_t      capacity;
         ChunkInfo * next;
+
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
         size_t      sizeTotal;
         size_t      capacityTotal;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
     };
 
 public:
     SimpleMemoryPoolAllocator() : mChunkHead() {
         initChunkHead();
-        internal_AddNewChunk();
+        addNewChunk();
     }
+
     ~SimpleMemoryPoolAllocator() {
         release();
     }
@@ -284,15 +271,18 @@ private:
     }
 
     void initChunkHead() {
-        mChunkHead.cursor = NULL;
-        mChunkHead.remain = 0;
-        mChunkHead.capacity = 0;
-        mChunkHead.next = NULL;
-        mChunkHead.sizeTotal = 0;
-        mChunkHead.capacityTotal = 0;
+        mChunkHead.cursor           = NULL;
+        mChunkHead.remain           = 0;
+        mChunkHead.capacity         = 0;
+        mChunkHead.next             = NULL;
+
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        mChunkHead.sizeTotal        = 0;
+        mChunkHead.capacityTotal    = 0;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
     }
 
-    void internal_AddNewChunk() {
+    void * addNewChunk(size_t size) {
         ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::malloc(kChunkCapacity));
         jimi_assert(newChunk != NULL);
 
@@ -300,15 +290,20 @@ private:
         newChunk->next              = mChunkHead.next;
         newChunk->capacity          = kChunkCapacity;
 
-        mChunkHead.cursor           = reinterpret_cast<void *>(newChunk + 1);
-        mChunkHead.remain           = kChunkCapacity;
+        void * cursor = reinterpret_cast<void *>(newChunk + 1);
+
+        mChunkHead.cursor           = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
+        mChunkHead.remain           = kChunkCapacity - sizeof(ChunkInfo) - size;
         mChunkHead.capacity         = kChunkCapacity;
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
         mChunkHead.capacityTotal   += kChunkCapacity;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
         mChunkHead.next = newChunk;
+        return cursor;
     }
 
-    void internal_AddNewChunk(size_t nChunkCapacity) {
+    void * addNewChunk(size_t nChunkCapacity, size_t size) {
         ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::malloc(nChunkCapacity));
         jimi_assert(newChunk != NULL);
 
@@ -316,87 +311,87 @@ private:
         newChunk->next              = mChunkHead.next;
         newChunk->capacity          = nChunkCapacity;
 
-        mChunkHead.cursor           = reinterpret_cast<void *>(newChunk + 1);
-        mChunkHead.remain           = nChunkCapacity;
+        void * cursor = reinterpret_cast<void *>(newChunk + 1);
+
+        mChunkHead.cursor           = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
+        mChunkHead.remain           = nChunkCapacity - sizeof(ChunkInfo) - size;
         mChunkHead.capacity         = nChunkCapacity;
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
         mChunkHead.capacityTotal   += nChunkCapacity;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
         mChunkHead.next = newChunk;
+        return cursor;
     }
 
-public:
-    ChunkInfo * addNewChunk() {
-        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::malloc(kChunkCapacity));
-        jimi_assert(newChunk != NULL);
-
-        if (newChunk != NULL) {
-            newChunk->next              = mChunkHead.next;
-            newChunk->capacity          = kChunkCapacity;
-
-            mChunkHead.cursor           = reinterpret_cast<void *>(newChunk + 1);
-            mChunkHead.remain           = kChunkCapacity;
-            mChunkHead.capacity         = kChunkCapacity;
-            mChunkHead.capacityTotal   += kChunkCapacity;
-
-            mChunkHead.next = newChunk;
-            return newChunk;
-        }
-        return NULL;
-    }
-
-    ChunkInfo * addNewChunk(size_t nChunkCapacity) {
+    void * addNewChunkToLast(size_t nChunkCapacity) {
         ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::malloc(nChunkCapacity));
         jimi_assert(newChunk != NULL);
 
-        if (newChunk != NULL) {
-            newChunk->next              = mChunkHead.next;
-            newChunk->capacity          = nChunkCapacity;
+        // Do not handle out-of-memory explicitly.
+        newChunk->next              = mChunkHead.next->next;
+        newChunk->capacity          = nChunkCapacity;
 
-            mChunkHead.cursor           = reinterpret_cast<void *>(newChunk + 1);
-            mChunkHead.remain           = nChunkCapacity;
-            mChunkHead.capacity         = nChunkCapacity;
-            mChunkHead.capacityTotal   += nChunkCapacity;
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        mChunkHead.sizeTotal       += nChunkCapacity - sizeof(ChunkInfo);
+        mChunkHead.capacityTotal   += nChunkCapacity;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
-            mChunkHead.next = newChunk;
-            return newChunk;
-        }
-        return NULL;
+        mChunkHead.next->next = newChunk;
+
+        void * cursor = reinterpret_cast<void *>(newChunk + 1);
+        return cursor;
     }
 
+public:
     void * malloc(size_t size) {
-        // JSONFX_MALLOC_ALIGNMENT_SIZE is 8
+        void * buffer;
+        // Default alignment size is 8
         size = JIMI_ALIGNED_TO(size, JSONFX_MALLOC_ALIGNMENT_SIZE);
-        if (size > mChunkHead.remain) {
+        if (size <= mChunkHead.remain) {
+            void * buffer = reinterpret_cast<void *>(mChunkHead.cursor);
+            jimi_assert(buffer != NULL);
+
+            // mChunkHead.cursor += size;
+            //JIMI_PVOID_ADD(mChunkHead.cursor, size);
+            mChunkHead.cursor = reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead.cursor) + size);
+
+            mChunkHead.remain -= size;
+            jimi_assert((ssize_t)mChunkHead.remain >= 0);
+            return buffer;
+        }
+        else {
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
             // Calc the real allocate size of the actived chunk
             jimi_assert(mChunkHead.capacity >= mChunkHead.remain);
-            size_t realAllocateSize = mChunkHead.capacity - mChunkHead.remain;
+            size_t realAllocateSize = mChunkHead.capacity - mChunkHead.remain - sizeof(ChunkInfo);
             mChunkHead.sizeTotal += realAllocateSize;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
 #if !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) || (JSONFX_ALLOW_ALLOC_BIGSIZE == 0)
             // Add a default capacity size chunk
-            internal_AddNewChunk();
+            buffer = addNewChunk();
 #else  /* !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
             // Add a default capacity size chunk
             if (size <= kDefaultChunkCapacity) {
-                internal_AddNewChunk();
+                buffer = addNewChunk(size);
             }
             else {
-                size_t newChunkCapacity = internal::RoundToPowerOf2(size);
-                internal_AddNewChunk(newChunkCapacity);
+                size_t newAllocSize = size + sizeof(ChunkInfo);
+                size_t newChunkCapacity = internal::RoundToPowerOf2(newAllocSize);
+                if ((newChunkCapacity - newAllocSize) > mChunkHead.remain)
+                    buffer = addNewChunk(newChunkCapacity, size);
+                else
+                    buffer = addNewChunkToLast(newAllocSize);
             }
 #endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
 
             jimi_assert(mChunkHead.next != NULL);
             jimi_assert(mChunkHead.cursor != NULL);
+
+            jimi_assert(buffer != NULL);
+            return buffer;
         }
-
-        void * buffer = reinterpret_cast<void *>(mChunkHead.cursor);
-        jimi_assert(buffer != NULL);
-
-        JIMI_PVOID_ADD(mChunkHead.cursor, size);
-        mChunkHead.remain -= size;
-        jimi_assert((ssize_t)mChunkHead.remain >= 0);
-        return buffer;
     }
 
     void * realloc(const void *ptr, size_t size, size_t new_size) {
@@ -406,7 +401,7 @@ public:
 
         // Simply expand it if it is the last allocation and there is sufficient space
         if (ptr == reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead.next + 1)
-                + (mChunkHead.capacity - mChunkHead.remain) - size)) {
+                + (mChunkHead.capacity - mChunkHead.remain - sizeof(ChunkInfo)) - size)) {
             size_t increment = static_cast<size_t>(new_size - size);
             increment = JIMI_ALIGNED_TO(increment, JSONFX_MALLOC_ALIGNMENT_SIZE);
             if (increment <= mChunkHead.remain) {
