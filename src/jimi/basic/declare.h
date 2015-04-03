@@ -6,6 +6,7 @@
 #pragma once
 #endif
 
+#include "jimi/basic/arch_def.h"
 #include "jimi/basic/platform_def.h"
 #include "jimi/basic/compiler_def.h"
 
