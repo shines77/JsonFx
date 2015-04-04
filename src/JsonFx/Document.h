@@ -18,19 +18,21 @@
 namespace JsonFx {
 
 template <typename Encoding = JSONFX_DEFAULT_ENCODING,
-          typename Allocator = DefaultPoolAllocator,
-          typename StackAllocator = CrtAllocator>
-class BasicDocument : public BasicValue<Encoding, Allocator>
+          typename PoolAllocator = DefaultPoolAllocator,
+          typename StackAllocator = DefaultStackAllocator>
+class BasicDocument : public BasicValue<Encoding, PoolAllocator>
 {
 public:
-    typedef typename Encoding::CharType     CharType;       //!< Character type derived from Encoding.
-    typedef BasicValue<Encoding, Allocator> ValueType;      //!< Value type of the document.
-    typedef Encoding                        EncodingType;   //!< Character encoding type.
-    typedef Allocator                       AllocatorType;  //!< Allocator type from template parameter.
+    typedef typename Encoding::CharType         CharType;           //!< Character type derived from Encoding.
+    typedef BasicValue<Encoding, PoolAllocator> ValueType;          //!< Value type of the document.
+    typedef Encoding                            EncodingType;       //!< Character encoding type.
+    typedef PoolAllocator                       PoolAllocatorType;  //!< Pool allocator type from template parameter.
+    typedef StackAllocator                      StackAllocatorType; //!< Stack allocator type from template parameter.
 
 public:
-    BasicDocument(const AllocatorType *allocator = NULL) : mAllocator(allocator) {
-        //jimi_assert(allocator != NULL);
+    BasicDocument(const PoolAllocatorType *poolAllocator = NULL)
+        : mPoolAllocator(poolAllocator), mPoolAllocatorNeedFree(false) {
+        initPoolAllocator(poolAllocator);
     }
 
     ~BasicDocument() {
@@ -44,39 +46,54 @@ private:
     BasicDocument & operator =(const BasicDocument &);
 
 public:
-    void destroy();
+    const PoolAllocatorType * getAllocator() const { return mPoolAllocator; }
 
     BasicDocument & parse(const CharType * text);
 
     void visit();
 
+    void test() {
+        printf("JsonFx::BasicDocument::test()\n\n");
+    }
+
 private:
-    const AllocatorType * mAllocator;
+    void destroy() {
+        if (this->mPoolAllocatorNeedFree) {
+            if (this->mPoolAllocator) {
+                delete this->mPoolAllocator;
+                this->mPoolAllocator = NULL;
+            }
+        }
+    }
+
+    void initPoolAllocator(const PoolAllocatorType *poolAllocator) {
+        if (poolAllocator == NULL) {
+            const PoolAllocatorType * newPoolAllocator = new PoolAllocatorType();
+            jimi_assert(newPoolAllocator != NULL);
+            if (newPoolAllocator != NULL) {
+                mPoolAllocator = newPoolAllocator;
+                mPoolAllocatorNeedFree = true;
+            }
+        }
+    }
+
+private:    
+    const PoolAllocatorType *   mPoolAllocator;
+    bool                        mPoolAllocatorNeedFree;
 };
 
 // Define default Document class type
 typedef BasicDocument<>     Document;
 
-template <typename Encoding, typename Allocator, typename StackAllocator>
-void BasicDocument<Encoding, Allocator, StackAllocator>::visit()
+template <typename Encoding, typename PoolAllocator, typename StackAllocator>
+void BasicDocument<Encoding, PoolAllocator, StackAllocator>::visit()
 {
     printf("JsonFx::BasicDocument::visit() visited.\n\n");
 }
 
-template <typename Encoding, typename Allocator, typename StackAllocator>
-void BasicDocument<Encoding, Allocator, StackAllocator>::destroy()
-{
-    if (AllocatorType::kNeedFree) {
-        if (mAllocator) {
-            delete mAllocator;
-            mAllocator = NULL;
-        }
-    }
-}
-
-template <typename Encoding, typename Allocator, typename StackAllocator>
-BasicDocument<Encoding, Allocator, StackAllocator> &
-BasicDocument<Encoding, Allocator, StackAllocator>::parse(const CharType * text)
+template <typename Encoding, typename PoolAllocator, typename StackAllocator>
+BasicDocument<Encoding, PoolAllocator, StackAllocator> &
+BasicDocument<Encoding, PoolAllocator, StackAllocator>::parse(const CharType * text)
 {
     jimi_assert(text != NULL);
     printf("JsonFx::BasicDocument::parse() visited.\n\n");

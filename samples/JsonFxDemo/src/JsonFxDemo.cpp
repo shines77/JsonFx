@@ -17,6 +17,8 @@ void JsonFx_Test()
     else
         printf("document.hasMember(\"test\") = false.\n");
 
+    document.test();
+
     JsonFx::Value value;
     value.visit();
 }

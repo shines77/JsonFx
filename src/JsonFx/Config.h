@@ -38,6 +38,8 @@ typedef MemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator>        DefaultP
 typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator>  DefaultPoolAllocator;
 #endif
 
+typedef CrtAllocator    DefaultStackAllocator;
+
 }  // namespace JsonFx
 
 #endif  /* !_JSONFX_CONFIG_H_ */

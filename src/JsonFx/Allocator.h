@@ -66,8 +66,8 @@ class CrtAllocator
 public:
     static const bool kNeedFree = true;
 
-    void * malloc(size_t size)  { return std::malloc(size); }
-    void * realloc(void * ptr, size_t size, size_t new_size) {
+    static void * malloc(size_t size)  { return std::malloc(size); }
+    static void * realloc(void * ptr, size_t size, size_t new_size) {
         (void)size;
         return std::realloc(ptr, new_size);
     }
@@ -75,7 +75,7 @@ public:
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
-          typename BaseAllocator = CrtAllocator>
+          typename BaseAllocator = DefaultStackAllocator>
 class MemoryPoolAllocator
 {
 public:
@@ -93,7 +93,7 @@ public:
 
 public:
     MemoryPoolAllocator() : mChunkHeader(NULL) {
-        addNewChunk();
+        addNewChunk(0);
     }
     ~MemoryPoolAllocator() {
         release();
@@ -216,7 +216,7 @@ private:
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
-          typename BaseAllocator = CrtAllocator>
+          typename BaseAllocator = DefaultStackAllocator>
 class SimpleMemoryPoolAllocator
 {
 public:
@@ -245,7 +245,7 @@ public:
 public:
     SimpleMemoryPoolAllocator() : mChunkHead() {
         initChunkHead();
-        addNewChunk();
+        addNewChunk(0);
     }
 
     ~SimpleMemoryPoolAllocator() {

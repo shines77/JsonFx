@@ -139,25 +139,25 @@ enum ValueTypeMask {
 };
 
 // Forward declaration.
-template <typename Encoding, typename Allocator>
+template <typename Encoding, typename PoolAllocator>
 class BasicValue;
 
-template <typename Encoding, typename Allocator> 
+template <typename Encoding, typename PoolAllocator> 
 struct BasicMember
 {
-    BasicValue<Encoding, Allocator> name;    //!< name of member (must be a string)
-    BasicValue<Encoding, Allocator> value;   //!< value of member.
+    BasicValue<Encoding, PoolAllocator> name;    //!< name of member (must be a string)
+    BasicValue<Encoding, PoolAllocator> value;   //!< value of member.
 };
 
-template <bool IsConst, typename Encoding, typename Allocator>
+template <bool IsConst, typename Encoding, typename PoolAllocator>
 class BasicMemberIterator
     : public std::iterator<std::random_access_iterator_tag,
-            typename internal::MaybeAddConst<IsConst, BasicMember<Encoding, Allocator> >::Type>
+            typename internal::MaybeAddConst<IsConst, BasicMember<Encoding, PoolAllocator> >::Type>
 {
-    friend class BasicValue<Encoding, Allocator>;
+    friend class BasicValue<Encoding, PoolAllocator>;
     template <bool, typename, typename> friend class BasicMemberIterator;
 
-    typedef BasicMember<Encoding, Allocator>                             PlainType;
+    typedef BasicMember<Encoding, PoolAllocator>                        PlainType;
     typedef typename internal::MaybeAddConst<IsConst, PlainType>::Type  ValueType;
     typedef std::iterator<std::random_access_iterator_tag, ValueType>   BaseType;
 
@@ -166,9 +166,9 @@ public:
     typedef BasicMemberIterator Iterator;
 
     //! Constant iterator type
-    typedef BasicMemberIterator<true, Encoding, Allocator>  ConstIterator;
+    typedef BasicMemberIterator<true, Encoding, PoolAllocator>  ConstIterator;
     //! Non-constant iterator type
-    typedef BasicMemberIterator<false, Encoding, Allocator> NonConstIterator;
+    typedef BasicMemberIterator<false, Encoding, PoolAllocator> NonConstIterator;
 
     //! Pointer to (const) GenericMember
     typedef typename BaseType::pointer         Pointer;
@@ -219,24 +219,23 @@ private:
 #pragma pack(push)
 #pragma pack(1)
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename Allocator = DefaultPoolAllocator>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename PoolAllocator = DefaultPoolAllocator>
 class BasicValue {
 public:
     typedef typename Encoding::CharType     CharType;
-    typedef typename Encoding::CharType     char_type;
     typedef Encoding                        EncodingType;
-    typedef Allocator                       AllocatorType;
+    typedef PoolAllocator                   PoolAllocatorType;
     typedef BasicStringRef<CharType>        StringRefType;      //!< Reference to a constant string
 
-    typedef BasicMember<Encoding, Allocator> Member;
+    typedef BasicMember<Encoding, PoolAllocator> Member;
 
     typedef BasicValue *                    ValueIterator;      //!< Value iterator for iterating in array.
     typedef const BasicValue *              ConstValueIterator; //!< Constant value iterator for iterating in array.
 
     //!< Member iterator for iterating in object.
-    typedef typename BasicMemberIterator<false, Encoding, Allocator>::Iterator MemberIterator;
+    typedef typename BasicMemberIterator<false, Encoding, PoolAllocator>::Iterator MemberIterator;
     //!< Constant member iterator for iterating in object.
-    typedef typename BasicMemberIterator<true,  Encoding, Allocator>::Iterator ConstMemberIterator;
+    typedef typename BasicMemberIterator<true,  Encoding, PoolAllocator>::Iterator ConstMemberIterator;
 
     typedef uint32_t                        SizeType;
     typedef uint32_t                        ValueType;
@@ -422,29 +421,29 @@ private:
     ValueData   mValueData;
 };
 
-template <typename Encoding, typename Allocator>
-void BasicValue<Encoding, Allocator>::release()
+template <typename Encoding, typename PoolAllocator>
+void BasicValue<Encoding, PoolAllocator>::release()
 {
     //printf("JsonFx::BasicValue::release() enter.\n");
     // Shortcut by Allocator's trait
-    if (AllocatorType::kNeedFree) {
+    if (PoolAllocatorType::kNeedFree) {
         switch (mValueType) {
         case kArrayMask:
             for (BasicValue * v = mValueData.array.items; v != mValueData.array.items + mValueData.array.size; ++v) {
                 v->~BasicValue();
             }
-            AllocatorType::free(mValueData.array.items);
+            PoolAllocatorType::free(mValueData.array.items);
             break;
 
         case kObjectMask:
             for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
                 m->~Member();
             }
-            AllocatorType::free(mValueData.obj.members);
+            PoolAllocatorType::free(mValueData.obj.members);
             break;
 
         case kCopyStrMask:
-            AllocatorType::free(const_cast<CharType *>(mValueData.str.data));
+            PoolAllocatorType::free(const_cast<CharType *>(mValueData.str.data));
             break;
 
         default:
@@ -455,8 +454,8 @@ void BasicValue<Encoding, Allocator>::release()
     //printf("JsonFx::BasicValue::release() over.\n");
 }
 
-template <typename Encoding, typename Allocator>
-void BasicValue<Encoding, Allocator>::visit()
+template <typename Encoding, typename PoolAllocator>
+void BasicValue<Encoding, PoolAllocator>::visit()
 {
     printf("JsonFx::Value::visit() visited.\n\n");
 }
