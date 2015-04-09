@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="JsonFxDemo"
+	Name="JsonFxTest"
 	ProjectGUID="{55959987-9394-4057-9815-BD89CD5E09C9}"
-	RootNamespace="JsonFxDemo"
+	RootNamespace="JsonFxTest"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\samples\JsonFxDemo\src;..\..\..\..\..\samples\JsonFxDemo\include;..\..\..\..\..\samples\JsonFxDemo;..\..\..\..\..\test\UnitTest\src;..\..\..\..\..\test\UnitTest\include;..\..\..\..\..\test\UnitTest;..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)samples\JsonFxDemo&quot;;&quot;$(SolutionDir)test\UnitTest&quot;;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\samples;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
+				AdditionalIncludeDirectories="..\..\..\..\..\samples\JsonFxTest\src;..\..\..\..\..\samples\JsonFxTest\include;..\..\..\..\..\samples\JsonFxTest;..\..\..\..\..\test\UnitTest\src;..\..\..\..\..\test\UnitTest\include;..\..\..\..\..\test\UnitTest;..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)samples\JsonFxTest&quot;;&quot;$(SolutionDir)test\UnitTest&quot;;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\samples;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -118,7 +118,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\..\..\samples\JsonFxDemo\src;..\..\..\..\..\samples\JsonFxDemo\include;..\..\..\..\..\samples\JsonFxDemo;..\..\..\..\..\test\UnitTest\src;..\..\..\..\..\test\UnitTest\include;..\..\..\..\..\test\UnitTest;..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)samples\JsonFxDemo&quot;;&quot;$(SolutionDir)test\UnitTest&quot;;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\samples;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
+				AdditionalIncludeDirectories="..\..\..\..\..\samples\JsonFxTest\src;..\..\..\..\..\samples\JsonFxTest\include;..\..\..\..\..\samples\JsonFxTest;..\..\..\..\..\test\UnitTest\src;..\..\..\..\..\test\UnitTest\include;..\..\..\..\..\test\UnitTest;..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)samples\JsonFxTest&quot;;&quot;$(SolutionDir)test\UnitTest&quot;;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\samples;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -177,11 +177,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\JsonFxDemo.cpp"
+				RelativePath="..\..\src\JsonFxTest.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\JsonFxDemo.h"
+				RelativePath="..\..\src\JsonFxTest.h"
 				>
 			</File>
 		</Filter>

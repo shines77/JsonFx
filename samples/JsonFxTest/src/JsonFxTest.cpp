@@ -1,11 +1,15 @@
 
-#include "JsonFxDemo.h"
+#include "JsonFxTest.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <memory.h>
+#include <intrin.h>
 
 #include "JsonFx/JsonFx.h"
+
+#include "jimic/system/sys_timer.h"
 
 void JsonFx_Test()
 {
@@ -20,6 +24,7 @@ void JsonFx_Test()
     document.test();
 
     JsonFx::Value value;
+    JsonFx::Value val1;
     value.visit();
 }
 

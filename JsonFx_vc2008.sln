@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JsonFxDemo", "samples\JsonFxDemo\proj.win32\vc2008\JsonFxDemo.vcproj", "{55959987-9394-4057-9815-BD89CD5E09C9}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JsonFxTest", "samples\JsonFxTest\proj.win32\vc2008\JsonFxTest.vcproj", "{55959987-9394-4057-9815-BD89CD5E09C9}"
 	ProjectSection(ProjectDependencies) = postProject
 		{34949334-98C0-40D4-B620-9CD8C2D49955} = {34949334-98C0-40D4-B620-9CD8C2D49955}
 	EndProjectSection

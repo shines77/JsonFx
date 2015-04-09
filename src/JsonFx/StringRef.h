@@ -61,7 +61,7 @@ public:
 
 private:
     //! Disallow copy-assignment
-    BasicStringRef operator =(const BasicStringRef &src);
+    BasicStringRef operator =(const BasicStringRef & src);
 
     //! Disallow construction from non-const array
     template<SizeType N>
