@@ -9,7 +9,7 @@
 
 #include "JsonFx/JsonFx.h"
 
-#include "jimic/system/sys_timer.h"
+#include "jimic/system/time.h"
 
 void JsonFx_Test()
 {
