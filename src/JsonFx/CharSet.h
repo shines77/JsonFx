@@ -13,26 +13,37 @@
 
 namespace JsonFx {
 
+enum {
+    kUTFUndefine,
+    kUTF8,
+
+    kUTF16,
+    kUTF16LE,
+    kUTF16BE,
+
+    kUTF32,
+    kUTF32LE,
+    kUTF32BE,
+
+    kUTFMax
+};
+
 template <typename _CharType = JSONFX_DEFAULT_CHARTYPE>
-class BasicEncoding
+struct BasicEncoding
 {
 public:
     typedef _CharType CharType;
+    enum { type = kUTFUndefine };
 };
 
 // Define default Encoding class type
 typedef BasicEncoding<>  Encoding;
 
-class CharSet {
+struct CharSet {
 public:
-#if 1
+
+#if 0
     typedef BasicEncoding<char>      UTF8;
-#else
-    class UTF8 : public BasicEncoding<char> {
-    public:
-        typedef char CharType;
-    };
-#endif
 
 #if defined(__linux__)
     typedef BasicEncoding<unsigned short>    UTF16;
@@ -51,14 +62,61 @@ public:
     typedef BasicEncoding<unsigned>  UTF32LE;
     typedef BasicEncoding<unsigned>  UTF32BE;
 #endif
+
+#else
+
+#if defined(_MSC_VER) && (_MSC_VER < 1600)
+#define DECLEAR_ENCODING_CLASS(encodingName, charType, encodingType) \
+    struct encodingName : public BasicEncoding<charType> {           \
+    public:                                                          \
+        typedef BasicEncoding<charType>::CharType CharType;          \
+        enum { type = encodingType };                                \
+    }
+#else
+    struct encodingName : public BasicEncoding<charType> {           \
+    public:                                                          \
+        typedef typename BasicEncoding<charType>::CharType CharType; \
+        enum { type = encodingType };                                \
+    }
+#endif
+
+    // utf-8
+    DECLEAR_ENCODING_CLASS(UTF8, char, kUTF8);
+
+#if defined(__linux__)
+    // utf-16
+    DECLEAR_ENCODING_CLASS(UTF16,   unsigned short, kUTF16);
+    DECLEAR_ENCODING_CLASS(UTF16LE, unsigned short, kUTF16LE);
+    DECLEAR_ENCODING_CLASS(UTF16BE, unsigned short, kUTF16BE);
+
+    // utf-32
+    DECLEAR_ENCODING_CLASS(UTF32,   wchar_t, kUTF32);
+    DECLEAR_ENCODING_CLASS(UTF32LE, wchar_t, kUTF32LE);
+    DECLEAR_ENCODING_CLASS(UTF32BE, wchar_t, kUTF32BE);
+#else
+    // utf-16
+    DECLEAR_ENCODING_CLASS(UTF16,   wchar_t, kUTF16);
+    DECLEAR_ENCODING_CLASS(UTF16LE, wchar_t, kUTF16LE);
+    DECLEAR_ENCODING_CLASS(UTF16BE, wchar_t, kUTF16BE);
+
+    // utf-32
+    DECLEAR_ENCODING_CLASS(UTF32,   unsigned, kUTF32);
+    DECLEAR_ENCODING_CLASS(UTF32LE, unsigned, kUTF32LE);
+    DECLEAR_ENCODING_CLASS(UTF32BE, unsigned, kUTF32BE);
+#endif
+
+#undef DECLEAR_ENCODING_CLASS
+
+#endif
 };
 
 #if 1
     typedef BasicEncoding<char>      CharSet_UTF8;
 #else
-    class CharSet_UTF8 : public BasicEncoding<char> {
+    struct CharSet_UTF8 : public BasicEncoding<char> {
     public:
-        typedef char CharType;
+        typedef typename BasicEncoding<char>::CharType CharType;
+        enum { type = kUTF8 };
     };
 #endif
 

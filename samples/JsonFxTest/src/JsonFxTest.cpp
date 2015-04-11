@@ -28,7 +28,16 @@ void JsonFx_Test()
     value.visit();
 }
 
-void JsonFx_BasicDocumentTest()
+void JsonFx_BasicDocumentTest1()
+{
+    JsonFx::BasicDocument<JsonFx::CharSet::UTF16> document;
+    document.parse(L"[0, 1, 2, 3]");
+
+    JsonFx::BasicValue<JsonFx::CharSet::UTF16> value;
+    value.visit();
+}
+
+void JsonFx_BasicDocumentTest2()
 {
     JsonFx::BasicDocument<JsonFx::CharSet_UTF16> document;
     document.parse(L"[0, 1, 2, 3]");
@@ -41,7 +50,8 @@ int main(int argn, char * argv[])
 {
     JsonFx_Test();
 
-    JsonFx_BasicDocumentTest();
+    JsonFx_BasicDocumentTest1();
+    JsonFx_BasicDocumentTest2();
 
     printf("Hello World!\n\n");
     system("pause");
