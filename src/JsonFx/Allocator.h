@@ -61,7 +61,13 @@ size_t RoundToPowerOf2(size_t n) {
 
 }  // namespace internal
 
-class CrtAllocator
+/* Just define for inheritance. */
+class StackAllocator {};
+
+/* Just define for inheritance. */
+class PoolAllocator {};
+
+class CrtAllocator : public StackAllocator
 {
 public:
     static const bool kNeedFree = true;
@@ -72,16 +78,41 @@ public:
         return std::realloc(ptr, new_size);
     }
     static void free(void * ptr) { std::free(ptr); }
+    static void free(void * ptr, size_t size) { (void)size; std::free(ptr); }
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
-          typename BaseAllocator = DefaultStackAllocator>
-class MemoryPoolAllocator
+          typename Allocator = DefaultAllocator>
+class StackPoolAllocator : public PoolAllocator
 {
 public:
-    typedef BaseAllocator   AllocatorType;
+    typedef Allocator AllocatorType;
 
-    static const bool   kNeedFree       = false;
+    static const bool kNeedFree = false;
+
+    StackPoolAllocator()  {}
+    ~StackPoolAllocator() {}
+
+    void destroy() { /* Do nothing! */ }
+
+    void * allocate(size_t size) { return AllocatorType::malloc(size); }
+
+    void * reallocate(void * ptr, size_t size, size_t new_size) {
+        return AllocatorType::realloc(ptr, size, new_size);
+    }
+
+    static void deallocate(void * ptr) { return AllocatorType::free(ptr); }
+    static void deallocate(void * ptr, size_t size) { return AllocatorType::free(ptr, size); }
+};
+
+template <size_t ChunkCapacity = kDefaultChunkCapacity,
+          typename Allocator = DefaultAllocator>
+class MemoryPoolAllocator : public PoolAllocator
+{
+public:
+    typedef Allocator   AllocatorType;
+
+    static const bool   kNeedFree       = true;
     static const size_t kChunkCapacity  = ChunkCapacity;
 
     struct ChunkHeader {
@@ -96,16 +127,10 @@ public:
         addNewChunk(0);
     }
     ~MemoryPoolAllocator() {
-        release();
+        destroy();
     }
 
-private:
-    //! Copy constructor is not permitted.
-    MemoryPoolAllocator(const MemoryPoolAllocator & rhs);               /* = delete */
-    //! Copy assignment operator is not permitted.
-    MemoryPoolAllocator& operator =(const MemoryPoolAllocator & rhs);   /* = delete */
-
-    void release() {
+    void destroy() {
         if (AllocatorType::kNeedFree) {
             ChunkHeader * pChunkHeader = mChunkHeader;
             while (pChunkHeader != NULL) {
@@ -116,6 +141,12 @@ private:
             mChunkHeader = NULL;
         }
     }
+
+private:
+    //! Copy constructor is not permitted.
+    MemoryPoolAllocator(const MemoryPoolAllocator & rhs);               /* = delete */
+    //! Copy assignment operator is not permitted.
+    MemoryPoolAllocator& operator =(const MemoryPoolAllocator & rhs);   /* = delete */
 
     void * addNewChunk(size_t size) {
         ChunkHeader * newChunk = reinterpret_cast<ChunkHeader *>(AllocatorType::malloc(kChunkCapacity));
@@ -150,7 +181,7 @@ private:
     }
 
 public:
-    void * malloc(size_t size) {
+    void * allocate(size_t size) {
         void * buffer;
         // Default alignment size is 8
         size = JIMI_ALIGNED_TO(size, JSONFX_MALLOC_ALIGNMENT_SIZE);
@@ -187,7 +218,7 @@ public:
         }
     }
 
-    void * realloc(const void *ptr, size_t size, size_t new_size) {
+    void * reallocate(const void * ptr, size_t size, size_t new_size) {
         // Do not shrink if new size is smaller than original
         if (size >= new_size)
             return ptr;
@@ -204,25 +235,26 @@ public:
         }
 
         // Realloc process: allocate and copy memory, do not free original buffer.
-        void * newBuffer = this->malloc(new_size);
+        void * newBuffer = this->allocate(new_size);
         jimi_assert(newBuffer != NULL);     // Do not handle out-of-memory explicitly.
         return std::memcpy(newBuffer, ptr, size);
     }
 
-    static void free(void * ptr) { (void)ptr; }      /* Do nothing! */
+    static void deallocate(void * ptr) { (void)ptr; }                           /* Do nothing! */
+    static void deallocate(void * ptr, size_t size) { (void)ptr; (void)size; }  /* Do nothing! */
 
 private:
     ChunkHeader * mChunkHeader;
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
-          typename BaseAllocator = DefaultStackAllocator>
-class SimpleMemoryPoolAllocator
+          typename Allocator = DefaultAllocator>
+class SimpleMemoryPoolAllocator : public PoolAllocator
 {
 public:
-    typedef BaseAllocator   AllocatorType;
+    typedef Allocator   AllocatorType;
 
-    static const bool   kNeedFree       = false;
+    static const bool   kNeedFree       = true;
     static const size_t kChunkCapacity  = ChunkCapacity;
 
     struct ChunkInfo {
@@ -249,16 +281,10 @@ public:
     }
 
     ~SimpleMemoryPoolAllocator() {
-        release();
+        destroy();
     }
 
-private:
-    //! Copy constructor is not permitted.
-    SimpleMemoryPoolAllocator(const SimpleMemoryPoolAllocator & rhs);               /* = delete */
-    //! Copy assignment operator is not permitted.
-    SimpleMemoryPoolAllocator& operator =(const SimpleMemoryPoolAllocator & rhs);   /* = delete */
-
-    void release() {
+    void destroy() {
         if (AllocatorType::kNeedFree) {
             ChunkInfo * pChunkInfo = mChunkHead.next;
             while (pChunkInfo != NULL) {
@@ -269,6 +295,12 @@ private:
             mChunkHead.next = NULL;
         }
     }
+
+private:
+    //! Copy constructor is not permitted.
+    SimpleMemoryPoolAllocator(const SimpleMemoryPoolAllocator & rhs);               /* = delete */
+    //! Copy assignment operator is not permitted.
+    SimpleMemoryPoolAllocator& operator =(const SimpleMemoryPoolAllocator & rhs);   /* = delete */
 
     void initChunkHead() {
         mChunkHead.cursor           = NULL;
@@ -344,7 +376,7 @@ private:
     }
 
 public:
-    void * malloc(size_t size) {
+    void * allocate(size_t size) {
         void * buffer;
         // Default alignment size is 8
         size = JIMI_ALIGNED_TO(size, JSONFX_MALLOC_ALIGNMENT_SIZE);
@@ -394,7 +426,7 @@ public:
         }
     }
 
-    void * realloc(const void *ptr, size_t size, size_t new_size) {
+    void * reallocate(const void * ptr, size_t size, size_t new_size) {
         // Do not shrink if new size is smaller than original
         if (size >= new_size)
             return ptr;
@@ -411,12 +443,13 @@ public:
         }
 
         // Realloc process: allocate and copy memory, do not free original buffer.
-        void * newBuffer = this->malloc(new_size);
+        void * newBuffer = this->allocate(new_size);
         jimi_assert(newBuffer != NULL);     // Do not handle out-of-memory explicitly.
         return std::memcpy(newBuffer, ptr, size);
     }
 
-    static void free(void * ptr) { (void)ptr; }      /* Do nothing! */
+    static void deallocate(void * ptr) { (void)ptr; }                           /* Do nothing! */
+    static void deallocate(void * ptr, size_t size) { (void)ptr; (void)size; }  /* Do nothing! */
 
 private:
     ChunkHead   mChunkHead;

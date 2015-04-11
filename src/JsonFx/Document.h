@@ -19,7 +19,7 @@ namespace JsonFx {
 
 template <typename Encoding = JSONFX_DEFAULT_ENCODING,
           typename PoolAllocator = DefaultPoolAllocator,
-          typename StackAllocator = DefaultStackAllocator>
+          typename Allocator = DefaultAllocator>
 class BasicDocument : public BasicValue<Encoding, PoolAllocator>
 {
 public:
@@ -27,7 +27,7 @@ public:
     typedef BasicValue<Encoding, PoolAllocator> ValueType;          //!< Value type of the document.
     typedef Encoding                            EncodingType;       //!< Character encoding type.
     typedef PoolAllocator                       PoolAllocatorType;  //!< Pool allocator type from template parameter.
-    typedef StackAllocator                      StackAllocatorType; //!< Stack allocator type from template parameter.
+    typedef Allocator                           AllocatorType;      //!< Stack allocator type from template parameter.
 
 public:
     BasicDocument(const PoolAllocatorType *poolAllocator = NULL)
@@ -85,15 +85,15 @@ private:
 // Define default Document class type
 typedef BasicDocument<>     Document;
 
-template <typename Encoding, typename PoolAllocator, typename StackAllocator>
-void BasicDocument<Encoding, PoolAllocator, StackAllocator>::visit()
+template <typename Encoding, typename PoolAllocator, typename Allocator>
+void BasicDocument<Encoding, PoolAllocator, Allocator>::visit()
 {
     printf("JsonFx::BasicDocument::visit() visited.\n\n");
 }
 
-template <typename Encoding, typename PoolAllocator, typename StackAllocator>
-BasicDocument<Encoding, PoolAllocator, StackAllocator> &
-BasicDocument<Encoding, PoolAllocator, StackAllocator>::parse(const CharType * text)
+template <typename Encoding, typename PoolAllocator, typename Allocator>
+BasicDocument<Encoding, PoolAllocator, Allocator> &
+BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
 {
     jimi_assert(text != NULL);
     printf("JsonFx::BasicDocument::parse() visited.\n\n");

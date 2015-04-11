@@ -361,16 +361,24 @@ public:
         return (std::memcmp(str1, str2, sizeof(CharType) * len1) == 0);
     }
 
-    const CharType * getString() const { jimi_assert(isString()); return ((mValueType & kInlineStrMask) ? mValueData.sso.data : mValueData.str.data); }
+    const CharType * getString() const {
+        jimi_assert(isString());
+        return ((mValueType & kInlineStrMask) ? mValueData.sso.data : mValueData.str.data);
+    }
 
-    SizeType getStringLength() const { jimi_assert(isString()); return ((mValueType & kInlineStrMask) ? (mValueData.sso.GetLength()) : mValueData.str.size); }
+    SizeType getStringLength() const {
+        jimi_assert(isString());
+        return ((mValueType & kInlineStrMask) ? (mValueData.sso.GetLength()) : mValueData.str.size);
+    }
 
 public:
     union Number {
-        int64_t  i64;
-        uint64_t u64;
-        float    f;
-        double   d;
+        int32_t     i32;
+        uint32_t    u32;
+        int64_t     i64;
+        uint64_t    u64;
+        float       f;
+        double      d;
     };
 
     struct String {
@@ -394,7 +402,7 @@ public:
     };
 
     struct Array {
-        BasicValue *    items;
+        BasicValue *    elements;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
@@ -421,6 +429,9 @@ private:
     ValueData   mValueData;
 };
 
+// Recover the packing alignment
+#pragma pack(pop)
+
 template <typename Encoding, typename PoolAllocator>
 void BasicValue<Encoding, PoolAllocator>::release()
 {
@@ -429,25 +440,25 @@ void BasicValue<Encoding, PoolAllocator>::release()
     if (PoolAllocatorType::kNeedFree) {
         switch (mValueType) {
         case kArrayMask:
-            for (BasicValue * v = mValueData.array.items; v != mValueData.array.items + mValueData.array.size; ++v) {
+            for (BasicValue * v = mValueData.array.elements; v != mValueData.array.elements + mValueData.array.size; ++v) {
                 v->~BasicValue();
             }
-            PoolAllocatorType::free(mValueData.array.items);
+            PoolAllocatorType::deallocate(mValueData.array.elements);
             break;
 
         case kObjectMask:
             for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
                 m->~Member();
             }
-            PoolAllocatorType::free(mValueData.obj.members);
+            PoolAllocatorType::deallocate(mValueData.obj.members);
             break;
 
         case kCopyStrMask:
-            PoolAllocatorType::free(const_cast<CharType *>(mValueData.str.data));
+            PoolAllocatorType::deallocate(const_cast<CharType *>(mValueData.str.data));
             break;
 
         default:
-            printf("JsonFx::BasicValue::release() -- switch(mValueType) branch = default\n");
+            printf("JsonFx::BasicValue::release() -- switch(mValueType) branch = default, mValueType = 0x%08X\n", mValueType);
             break;  // Do nothing for other types.
         }
     }
@@ -459,9 +470,6 @@ void BasicValue<Encoding, PoolAllocator>::visit()
 {
     printf("JsonFx::Value::visit() visited.\n\n");
 }
-
-// Recover the packing alignment
-#pragma pack(pop)
 
 // Define default Value class type
 typedef BasicValue<>   Value;

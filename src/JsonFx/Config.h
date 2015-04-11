@@ -19,12 +19,20 @@ namespace JsonFx {
 class CrtAllocator;
 
 // Forward declaration.
-template <size_t ChunkCapacity, typename BaseAllocator>
+template <size_t ChunkCapacity, typename Allocator>
+class StackPoolAllocator;
+
+// Forward declaration.
+template <size_t ChunkCapacity, typename Allocator>
 class MemoryPoolAllocator;
 
 // Forward declaration.
-template <size_t ChunkCapacity, typename BaseAllocator>
+template <size_t ChunkCapacity, typename Allocator>
 class SimpleMemoryPoolAllocator;
+
+// Forward declaration.
+template <size_t ChunkCapacity, typename Allocator>
+class FastMemoryPoolAllocator;
 
 //! Default MemoryPoolAllocator chunk capacity (Recommended settings for multiple systems PageSize)
 static const size_t kDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
@@ -32,13 +40,20 @@ static const size_t kDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 
-#if 0
-typedef MemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator>        DefaultPoolAllocator;
-#else
-typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, CrtAllocator>  DefaultPoolAllocator;
-#endif
+// Define default stack allocator
+typedef CrtAllocator                DefaultAllocator;
 
-typedef CrtAllocator    DefaultStackAllocator;
+#if 1
+typedef StackPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>         DefaultPoolAllocator;
+#elif 0
+typedef MemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>        DefaultPoolAllocator;
+#elif 0
+typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>  DefaultPoolAllocator;
+#else
+typedef FastMemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>    DefaultPoolAllocator;
+#else
+
+#endif
 
 }  // namespace JsonFx
 
