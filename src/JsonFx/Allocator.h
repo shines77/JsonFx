@@ -12,10 +12,11 @@
 #include <memory>
 
 #include "JsonFx/Config.h"
+#include "JsonFx/internal/Utils.h"
 #include "JsonFx/CharSet.h"
 #include "JsonFx/Value.h"
 
-#include "jimi/basic/arch_def.h"
+#include "jimi/basic/archdef.h"
 #include "jimi/basic/stddef.h"
 #include "jimi/basic/assert.h"
 
@@ -29,37 +30,6 @@
 #define JSONFX_MALLOC_ALIGNMENT_SIZE    8
 
 namespace JsonFx {
-
-namespace internal {
-
-size_t RoundToPowerOf2(size_t n) {
-#if 1
-    if (n == 0)
-        return 0;
-
-    // ms1b
-    --n;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-#if defined(JIMI_ARCH_X64) || defined(JIMI_ARCH_IA64)
-    n |= n >> 32;
-#endif
-    return ++n;
-
-#else
-    size_t ms1b = 1;
-    while (ms1b < n) {
-        ms1b <<= 1;
-    }
-
-    return ms1b;
-#endif
-}
-
-}  // namespace internal
 
 /* Just define for inheritance. */
 class StackAllocator {};

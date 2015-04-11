@@ -9,29 +9,12 @@
 #include <stdio.h>
 
 #include "JsonFx/Config.h"
+#include "JsonFx/Internal/String.h"
+
 #include "jimi/basic/stdint.h"
 #include "jimi/basic/assert.h"
 
 namespace JsonFx {
-
-namespace internal {
-
-    template <typename CharType>
-    size_t StrLen(const CharType * str) {
-        const CharType *orig = str;
-        while (*str++ != CharType('\0')) {
-            // Do nothing!
-        }
-        return reinterpret_cast<size_t>(str - orig);
-    }
-
-    template <>
-    size_t StrLen(const char * str) { return ::strlen(str); }
-
-    template <>
-    size_t StrLen(const unsigned char * str) { return ::strlen((const char *)str); }
-
-}  // namespace internal
 
 template <typename _CharType = JSONFX_DEFAULT_CHARTYPE>
 class BasicStringRef {

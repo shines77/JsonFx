@@ -26,6 +26,10 @@ void JsonFx_Test()
     JsonFx::Value value;
     JsonFx::Value val1;
     value.visit();
+
+    char *s = (char *)malloc(10);
+    s[9] = 0;
+    JsonFx::internal::StrLen(s);
 }
 
 void JsonFx_BasicDocumentTest1()

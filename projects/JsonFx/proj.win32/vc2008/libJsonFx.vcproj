@@ -193,6 +193,14 @@
 				<Filter
 					Name="internal"
 					>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\String.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Utils.h"
+						>
+					</File>
 				</Filter>
 			</Filter>
 		</Filter>

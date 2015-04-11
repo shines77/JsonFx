@@ -1,6 +1,6 @@
 
-#ifndef _JIMI_LANG_CHAR_TRAITS_H_
-#define _JIMI_LANG_CHAR_TRAITS_H_
+#ifndef _JIMI_LANG_CHARTRAITS_H_
+#define _JIMI_LANG_CHARTRAITS_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -8,16 +8,17 @@
 
 #include "jimi/basic/stddef.h"
 #include "jimi/log/log.h"
+
 #include "jimic/string/jm_strings.h"
 
 #include <string>
 
-#define CHAR_TRAITS_STRICT_CHECK_V0     0
-#define CHAR_TRAITS_STRICT_CHECK_V1     0
-#define CHAR_TRAITS_STRICT_CHECK_V2     0
-#define CHAR_TRAITS_STRICT_CHECK_V3     1
+#define CHARTRAITS_STRICT_CHECK_L0      0
+#define CHARTRAITS_STRICT_CHECK_L1      0
+#define CHARTRAITS_STRICT_CHECK_L2      0
+#define CHARTRAITS_STRICT_CHECK_L3      1
 
-#define CHAR_TRAITS_STRICT_CHECK        CHAR_TRAITS_STRICT_CHECK_V0
+#define CHARTRAITS_STRICT_CHECK_LEVEL   CHARTRAITS_STRICT_CHECK_L0
 
 namespace jimi {
 
@@ -123,7 +124,7 @@ size_t char_traits<char_type>::strlen(const char_type *_str)
 {
     char_type *_ptr;
 
-#if CHAR_TRAITS_STRICT_CHECK_V3
+#if CHARTRAITS_STRICT_CHECK_L3
     if (_str == NULL)
         return 0;
 #endif
@@ -142,7 +143,7 @@ size_t char_traits<char_type>::strnlen(const char_type *_str,
     char_type *_ptr, *_end;
     int n;
 
-#if CHAR_TRAITS_STRICT_CHECK_V3
+#if CHARTRAITS_STRICT_CHECK_L3
     if (_str == NULL)
         return 0;
 #endif
@@ -929,4 +930,4 @@ int char_traits<char_type>::i64toa_radix10(char_type *buf, int64_t val)
 
 }  /* namespace jimi */
 
-#endif  /* _JIMI_LANG_CHAR_TRAITS_H_ */
+#endif  /* _JIMI_LANG_CHARTRAITS_H_ */
