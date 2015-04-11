@@ -43,16 +43,14 @@ typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 // Define default stack allocator
 typedef CrtAllocator                DefaultAllocator;
 
-#if 1
-typedef StackPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>         DefaultPoolAllocator;
-#elif 0
+#if 0
 typedef MemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>        DefaultPoolAllocator;
 #elif 0
 typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>  DefaultPoolAllocator;
-#else
+#elif 1
 typedef FastMemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>    DefaultPoolAllocator;
 #else
-
+typedef StackPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>         DefaultPoolAllocator;
 #endif
 
 }  // namespace JsonFx
