@@ -88,7 +88,7 @@ typedef BasicDocument<>     Document;
 template <typename Encoding, typename PoolAllocator, typename Allocator>
 void BasicDocument<Encoding, PoolAllocator, Allocator>::visit()
 {
-    printf("JsonFx::BasicDocument::visit() visited.\n\n");
+    printf("JsonFx::BasicDocument::visit(). EncodingType = %d\n\n", EncodingType::type);
 }
 
 template <typename Encoding, typename PoolAllocator, typename Allocator>

@@ -245,7 +245,7 @@ public:
         ChunkInfo * head;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
-        size_t      sizeTotal;
+        size_t      usedTotal;
         size_t      capacityTotal;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
     };
@@ -278,13 +278,13 @@ private:
     SimpleMemoryPoolAllocator& operator =(const SimpleMemoryPoolAllocator & rhs);   /* = delete */
 
     void init() {
-        mChunkHead.cursor           = NULL;
-        mChunkHead.remain           = 0;
-        mChunkHead.capacity         = 0;
-        mChunkHead.head             = NULL;
+        mChunkHead.cursor   = NULL;
+        mChunkHead.remain   = 0;
+        mChunkHead.capacity = 0;
+        mChunkHead.head     = NULL;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
-        mChunkHead.sizeTotal        = 0;
+        mChunkHead.usedTotal        = 0;
         mChunkHead.capacityTotal    = 0;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
@@ -296,19 +296,19 @@ private:
         jimi_assert(newChunk != NULL);
 
         // Do not handle out-of-memory explicitly.
-        newChunk->next              = mChunkHead.head;
-        newChunk->capacity          = kChunkCapacity;
+        newChunk->next      = mChunkHead.head;
+        newChunk->capacity  = kChunkCapacity;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
-        mChunkHead.sizeTotal       += mChunkHead.capacity - mChunkHead.remain;
+        mChunkHead.usedTotal       += mChunkHead.capacity - mChunkHead.remain;
         mChunkHead.capacityTotal   += kChunkCapacity;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
         void * cursor = reinterpret_cast<void *>(newChunk + 1);
 
-        mChunkHead.cursor           = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
-        mChunkHead.remain           = kChunkCapacity - (sizeof(ChunkInfo) + size);
-        mChunkHead.capacity         = kChunkCapacity;
+        mChunkHead.cursor   = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
+        mChunkHead.remain   = kChunkCapacity - (sizeof(ChunkInfo) + size);
+        mChunkHead.capacity = kChunkCapacity;
 
         mChunkHead.head = newChunk;
         return cursor;
@@ -319,19 +319,19 @@ private:
         jimi_assert(newChunk != NULL);
 
         // Do not handle out-of-memory explicitly.
-        newChunk->next              = mChunkHead.head;
-        newChunk->capacity          = nChunkCapacity;
+        newChunk->next      = mChunkHead.head;
+        newChunk->capacity  = nChunkCapacity;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
-        mChunkHead.sizeTotal       += mChunkHead.capacity - mChunkHead.remain;
+        mChunkHead.usedTotal       += mChunkHead.capacity - mChunkHead.remain;
         mChunkHead.capacityTotal   += nChunkCapacity;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
         void * cursor = reinterpret_cast<void *>(newChunk + 1);
 
-        mChunkHead.cursor           = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
-        mChunkHead.remain           = nChunkCapacity - (sizeof(ChunkInfo) + size);
-        mChunkHead.capacity         = nChunkCapacity;
+        mChunkHead.cursor   = reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + size);
+        mChunkHead.remain   = nChunkCapacity - (sizeof(ChunkInfo) + size);
+        mChunkHead.capacity = nChunkCapacity;
 
         mChunkHead.head = newChunk;
         return cursor;
@@ -342,11 +342,11 @@ private:
         jimi_assert(newChunk != NULL);
 
         // Do not handle out-of-memory explicitly.
-        newChunk->next              = mChunkHead.head->next;
-        newChunk->capacity          = nChunkCapacity;
+        newChunk->next      = mChunkHead.head->next;
+        newChunk->capacity  = nChunkCapacity;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
-        mChunkHead.sizeTotal       += sizeof(ChunkInfo) + size;
+        mChunkHead.usedTotal       += sizeof(ChunkInfo) + size;
         mChunkHead.capacityTotal   += nChunkCapacity;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
@@ -448,7 +448,11 @@ public:
         ChunkInfo * next;
         size_t      used;
         size_t      capacity;
+#if !(defined(_WIN64) || defined(_M_X64) || defined(_M_AMD64) || defined(_M_IA64) \
+        || defined(__amd64__) || defined(__x86_64__))
+        // Align to 8 bytes in 32 bit mode
         size_t      reserve;
+#endif  /* !(_M_X64 && _M_AMD64) */
     };
 
 public:
@@ -592,8 +596,8 @@ public:
             }
 #endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
 
-            jimi_assert(mChunkHead.next != NULL);
-            jimi_assert(mChunkHead.cursor != NULL);
+            jimi_assert(mChunkHead != NULL);
+            jimi_assert(mChunkHead->next != NULL);
 
             jimi_assert(buffer != NULL);
             return buffer;

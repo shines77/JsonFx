@@ -468,7 +468,7 @@ void BasicValue<Encoding, PoolAllocator>::release()
 template <typename Encoding, typename PoolAllocator>
 void BasicValue<Encoding, PoolAllocator>::visit()
 {
-    printf("JsonFx::Value::visit() visited.\n\n");
+    printf("JsonFx::BasicValue::visit(). EncodingType = %d\n\n", EncodingType::type);
 }
 
 // Define default Value class type
