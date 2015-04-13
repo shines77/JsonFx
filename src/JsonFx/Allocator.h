@@ -37,7 +37,8 @@ class StackAllocator {};
 /* Just define for inheritance. */
 class PoolAllocator {};
 
-class CrtAllocator : public StackAllocator
+// C-RunTime Allocator
+class TrivialAllocator : public StackAllocator
 {
 public:
     static const bool kNeedFree = true;
@@ -47,7 +48,7 @@ public:
         (void)size;
         return std::realloc(ptr, new_size);
     }
-    static void free(void * ptr) { std::free(ptr); }
+    static void free(void * ptr)              { std::free(ptr); }
     static void free(void * ptr, size_t size) { (void)size; std::free(ptr); }
 };
 

@@ -16,7 +16,7 @@ namespace JsonFx {
 /* define in "JsonFx/Allcator.h" */
 
 // Forward declaration.
-class CrtAllocator;
+class TrivialAllocator;
 
 // Forward declaration.
 template <size_t ChunkCapacity, typename Allocator>
@@ -41,7 +41,7 @@ static const size_t kDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 
 // Define default stack allocator
-typedef CrtAllocator                DefaultAllocator;
+typedef TrivialAllocator            DefaultAllocator;
 
 #if 0
 typedef MemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>        DefaultPoolAllocator;
