@@ -30,8 +30,10 @@ public:
     typedef Allocator                           AllocatorType;      //!< Stack allocator type from template parameter.
 
 public:
-    BasicDocument(const PoolAllocatorType * poolAllocator = NULL)
-        : mPoolAllocator(poolAllocator), mPoolAllocatorNeedFree(false) {
+    BasicDocument(PoolAllocatorType * poolAllocator = NULL)
+        : mPoolAllocator(poolAllocator), mPoolAllocatorNeedFree(false)
+        , mErrno(0), mErrLine(-1), nErrOffset(-1)
+    {
         initPoolAllocator(poolAllocator);
     }
 
@@ -46,7 +48,7 @@ private:
     BasicDocument & operator =(const BasicDocument &);
 
 public:
-    const PoolAllocatorType * getAllocator() const { return mPoolAllocator; }
+    PoolAllocatorType * getAllocator() const { return mPoolAllocator; }
 
     BasicDocument & parse(const CharType * text);
 
@@ -66,9 +68,9 @@ private:
         }
     }
 
-    void initPoolAllocator(const PoolAllocatorType *poolAllocator) {
+    void initPoolAllocator(PoolAllocatorType * poolAllocator) {
         if (poolAllocator == NULL) {
-            const PoolAllocatorType * newPoolAllocator = new PoolAllocatorType();
+            PoolAllocatorType * newPoolAllocator = new PoolAllocatorType();
             jimi_assert(newPoolAllocator != NULL);
             if (newPoolAllocator != NULL) {
                 mPoolAllocator = newPoolAllocator;
@@ -77,9 +79,79 @@ private:
         }
     }
 
+    // The space chars including " \t\r\n"
+    bool isSpace(const CharType c) const {
+        // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+        return (c == CharType(' ')) || (c >= CharType('\t') && c <= CharType('\r'));
+    }
+
+    CharType * startObject(CharType * p) {
+        return p;
+    }
+
+    CharType * startArray(CharType * p) {
+        return p;
+    }
+
+    CharType * startString(CharType * p, CharType beginToken) {
+        // The size of string length field
+        static const size_t kSizeOfLengthField = sizeof(uint32_t);
+        // Reserve string size
+        static const size_t kReserveStringSize = 8;
+        jimi_assert(mPoolAllocator != NULL);
+        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfLengthField, kReserveStringSize));
+        jimi_assert(cursor != NULL);
+        CharType * begin   = cursor;
+        CharType * orignal = reinterpret_cast<CharType *>(mPoolAllocator->getChunkCursor());
+        CharType * bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
+
+        while (*p != beginToken && *p != CharType('\0')) {
+            if (cursor < bottom) {
+                *cursor = *p;
+                ++cursor;
+                ++p;
+            }
+            else {
+                CharType * newOrignal = reinterpret_cast<CharType *>(mPoolAllocator->addNewChunk(0));
+                CharType * newCursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfLengthField, kReserveStringSize));
+                CharType * newBegin   = newCursor;
+                jimi_assert(newCursor != NULL);
+                while (begin != cursor) {
+                    *newCursor = *begin;
+                    ++begin;
+                    ++newCursor;
+                }
+                orignal = newOrignal;
+                cursor  = newCursor;
+                begin   = newBegin;
+                bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
+                ++cursor;
+                ++p;
+            }            
+        }
+        if (*p == beginToken) {
+            ++p;
+            *cursor = CharType('\0');
+            ++cursor;
+            jimi_assert(cursor >= begin);
+            size_t length = cursor - begin;
+            jimi_assert(orignal != NULL);
+            *reinterpret_cast<uint32_t *>(orignal) = static_cast<uint32_t>(length);
+            mPoolAllocator->allocate(kSizeOfLengthField + length);
+        }
+        else {
+            mErrno = -1;
+        }
+        return p;
+    }
+
 private:    
-    const PoolAllocatorType *   mPoolAllocator;
-    bool                        mPoolAllocatorNeedFree;
+    PoolAllocatorType * mPoolAllocator;
+    bool                mPoolAllocatorNeedFree;
+
+    int         mErrno;
+    int         mErrLine;
+    int         nErrOffset;
 };
 
 // Define default Document class type
@@ -96,9 +168,37 @@ BasicDocument<Encoding, PoolAllocator, Allocator> &
 BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
 {
     jimi_assert(text != NULL);
-    printf("JsonFx::BasicDocument::parse() visited.\n\n");
+    //printf("JsonFx::BasicDocument::parse() visited.\n\n");
+    //setObject();
 
-    setObject();
+    CharType *cur = const_cast<CharType *>(text);
+    CharType beginToken;
+
+    while (*cur != CharType('\0')) {
+        // Skip space chars
+        while (isSpace(*cur))
+            ++cur;
+        if (*cur == CharType('{')) {
+            // Start a object
+            ++cur;
+            cur = startObject(cur);
+        }
+        else if (*cur == CharType('"') || *cur == CharType('\'')) {
+            // Start a string
+            beginToken = *cur;
+            ++cur;
+            cur = startString(cur, beginToken);
+        }
+        if (*cur == CharType('[')) {
+            // Start a array
+            ++cur;
+            cur = startArray(cur);
+        }
+        else {
+            ++cur;
+        }
+    }
+
     return *this;
 }
 

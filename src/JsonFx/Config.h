@@ -12,6 +12,9 @@
 //! Default memory pool inner chunk capacity
 #define JSONFX_POOL_INNER_BUFSIZE   8192
 
+#define ALIGN_PREFIX(N)             __declspec(align(N))
+#define ALIGN_SUFFIX(N)
+
 namespace JsonFx {
 
 /* define in "JsonFx/Allcator.h" */

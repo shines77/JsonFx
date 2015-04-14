@@ -13,8 +13,21 @@
 
 void JsonFx_Test()
 {
+    jmc_timestamp_t starttime;
+    jmc_timefloat_t elapsedtime;
+
+    const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\" }";
+    const char json_test[] = "[0, 1, 2, 3]";
     JsonFx::Document document;
-    document.parse("[0, 1, 2, 3]");
+
+    printf("\n");
+    starttime = jmc_get_timestamp();
+    for (size_t i = 0; i < 200000; ++i) {
+        document.parse(json);
+    }
+    elapsedtime = jmc_get_elapsedtime_msf(starttime);
+    printf("elapsed time: %0.3f ms.\n\n", elapsedtime);
+
     document.visit();
 
     if (document.hasMember("test"))
