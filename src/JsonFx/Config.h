@@ -6,10 +6,11 @@
 #pragma once
 #endif
 
-// Define default char
-#define JSONFX_DEFAULT_CHARTYPE     char
-
+//! Default system pagesize
 #define JSONFX_DEFAULT_PAGESIZE     4096
+
+//! Default memory pool inner chunk capacity
+#define JSONFX_POOL_INNER_BUFSIZE   8192
 
 namespace JsonFx {
 
@@ -19,23 +20,29 @@ namespace JsonFx {
 class TrivialAllocator;
 
 // Forward declaration.
-template <size_t ChunkCapacity, typename Allocator>
+template <size_t ChunkCapacity, size_t InnerChunkCapacity, typename Allocator>
 class StackPoolAllocator;
 
 // Forward declaration.
-template <size_t ChunkCapacity, typename Allocator>
+template <size_t ChunkCapacity, size_t InnerChunkCapacity, typename Allocator>
 class MemoryPoolAllocator;
 
 // Forward declaration.
-template <size_t ChunkCapacity, typename Allocator>
+template <size_t ChunkCapacity, size_t InnerChunkCapacity, typename Allocator>
 class SimpleMemoryPoolAllocator;
 
 // Forward declaration.
-template <size_t ChunkCapacity, typename Allocator>
+template <size_t ChunkCapacity, size_t InnerChunkCapacity, typename Allocator>
 class FastMemoryPoolAllocator;
 
-//! Default MemoryPoolAllocator chunk capacity (Recommended settings for multiple systems PageSize)
+//! Default MemoryPoolAllocator chunk capacity (Recommended settings for multiple systems PageSize.)
 static const size_t kDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
+
+//! Default MemoryPoolAllocator inner chunk capacity (On stack, recommended settings for less than or equal 64KB.)
+static const size_t kDefaultInnerChunkCapacity = JSONFX_POOL_INNER_BUFSIZE;
+
+//! Default encoding chartype
+#define JSONFX_DEFAULT_CHARTYPE     char
 
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
@@ -44,13 +51,21 @@ typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 typedef TrivialAllocator            DefaultAllocator;
 
 #if 0
-typedef MemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>        DefaultPoolAllocator;
+typedef MemoryPoolAllocator<kDefaultChunkCapacity,
+                            kDefaultInnerChunkCapacity,
+                            DefaultAllocator>           DefaultPoolAllocator;
 #elif 0
-typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>  DefaultPoolAllocator;
+typedef SimpleMemoryPoolAllocator<kDefaultChunkCapacity,
+                                  kDefaultInnerChunkCapacity,
+                                  DefaultAllocator>     DefaultPoolAllocator;
 #elif 1
-typedef FastMemoryPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>    DefaultPoolAllocator;
+typedef FastMemoryPoolAllocator<kDefaultChunkCapacity,
+                                kDefaultInnerChunkCapacity,
+                                DefaultAllocator>       DefaultPoolAllocator;
 #else
-typedef StackPoolAllocator<kDefaultChunkCapacity, DefaultAllocator>         DefaultPoolAllocator;
+typedef StackPoolAllocator<kDefaultChunkCapacity,
+                           kDefaultInnerChunkCapacity,
+                           DefaultAllocator>            DefaultPoolAllocator;
 #endif
 
 }  // namespace JsonFx

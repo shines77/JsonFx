@@ -85,24 +85,24 @@ enum ValueType {
 };
 
 enum ValueTypeMask {
-    kBoolMask       = 0x000100,
-    kInt8Mask       = 0x000200,
-    kUInt8Mask      = 0x000400,
-    kInt16Mask      = 0x000800,
-    kUInt16Mask     = 0x001000,
-    kInt32Mask      = 0x002000,
-    kUInt32Mask     = 0x004000,
-    kInt64Mask      = 0x008000,
-    kUInt64Mask     = 0x010000,
+    kBoolMask       = 0x00000100,
+    kInt8Mask       = 0x00000200,
+    kUInt8Mask      = 0x00000400,
+    kInt16Mask      = 0x00000800,
+    kUInt16Mask     = 0x00001000,
+    kInt32Mask      = 0x00002000,
+    kUInt32Mask     = 0x00004000,
+    kInt64Mask      = 0x00008000,
+    kUInt64Mask     = 0x00010000,
 
-    kIntegerMask    = 0x020000,
-    kFloatMask      = 0x040000,
-    kDoubleMask     = 0x080000,
-    kNumberMask     = 0x100000,
+    kIntegerMask    = 0x00020000,
+    kFloatMask      = 0x00040000,
+    kDoubleMask     = 0x00080000,
+    kNumberMask     = 0x00100000,
 
-    kStringMask     = 0x200000,
-    kCopyStrMask    = 0x400000,
-    kInlineStrMask  = 0x800000,
+    kStringMask     = 0x00200000,
+    kCopyStrMask    = 0x00400000,
+    kInlineStrMask  = 0x00800000,
 
     kNumberBoolMaskBase = kNumberMask | kIntegerMask | kBoolMask,
 
@@ -142,12 +142,16 @@ enum ValueTypeMask {
 template <typename Encoding, typename PoolAllocator>
 class BasicValue;
 
-template <typename Encoding, typename PoolAllocator> 
-struct BasicMember
+template <typename Encoding = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocator = DefaultPoolAllocator> 
+class BasicMember
 {
+public:
     BasicValue<Encoding, PoolAllocator> name;    //!< name of member (must be a string)
     BasicValue<Encoding, PoolAllocator> value;   //!< value of member.
 };
+
+typedef BasicMember<>   Member;
 
 template <bool IsConst, typename Encoding, typename PoolAllocator>
 class BasicMemberIterator
@@ -166,7 +170,7 @@ public:
     typedef BasicMemberIterator Iterator;
 
     //! Constant iterator type
-    typedef BasicMemberIterator<true, Encoding, PoolAllocator>  ConstIterator;
+    typedef BasicMemberIterator<true,  Encoding, PoolAllocator> ConstIterator;
     //! Non-constant iterator type
     typedef BasicMemberIterator<false, Encoding, PoolAllocator> NonConstIterator;
 
@@ -219,7 +223,8 @@ private:
 #pragma pack(push)
 #pragma pack(1)
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING, typename PoolAllocator = DefaultPoolAllocator>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocator = DefaultPoolAllocator>
 class BasicValue {
 public:
     typedef typename Encoding::CharType     CharType;
@@ -227,7 +232,7 @@ public:
     typedef PoolAllocator                   PoolAllocatorType;
     typedef BasicStringRef<CharType>        StringRefType;      //!< Reference to a constant string
 
-    typedef BasicMember<Encoding, PoolAllocator> Member;
+    typedef BasicMember<Encoding, PoolAllocator> MemberType;
 
     typedef BasicValue *                    ValueIterator;      //!< Value iterator for iterating in array.
     typedef const BasicValue *              ConstValueIterator; //!< Constant value iterator for iterating in array.
@@ -318,16 +323,32 @@ public:
         return const_cast<BasicValue &>(*this).findMember(name);
     }
 
-    MemberIterator getMemberBegin() { jimi_assert(isObject()); return MemberIterator(mValueData.obj.members); }
-    MemberIterator getMemberEnd()   { jimi_assert(isObject()); return MemberIterator(mValueData.obj.members + mValueData.obj.size); }
+    MemberIterator getMemberBegin() {
+        jimi_assert(isObject());
+        return MemberIterator(mValueData.obj.members);
+    }
+    MemberIterator getMemberEnd()   {
+        jimi_assert(isObject());
+        return MemberIterator(mValueData.obj.members + mValueData.obj.size);
+    }
 
-    ConstMemberIterator getMemberBegin() const { jimi_assert(isObject()); return ConstMemberIterator(mValueData.obj.members); }
-    ConstMemberIterator getMemberEnd() const   { jimi_assert(isObject()); return ConstMemberIterator(mValueData.obj.members + mValueData.obj.size); }
+    ConstMemberIterator getMemberBegin() const {
+        jimi_assert(isObject());
+        return ConstMemberIterator(mValueData.obj.members);
+    }
+    ConstMemberIterator getMemberEnd() const   {
+        jimi_assert(isObject());
+        return ConstMemberIterator(mValueData.obj.members + mValueData.obj.size);
+    }
 
-    bool hasMember(const CharType * name) const { return (findMember(name) != getMemberEnd()); }
+    bool hasMember(const CharType * name) const {
+        return (findMember(name) != getMemberEnd());
+    }
 
     template <typename SourceAllocator>
-    bool hasMember(const BasicValue<Encoding, SourceAllocator> & name) const { return findMember(name) != getMemberEnd(); }
+    bool hasMember(const BasicValue<Encoding, SourceAllocator> & name) const {
+        return findMember(name) != getMemberEnd();
+    }
 
     template <typename SourceAllocator>
     BasicValue & operator[] (const BasicValue<Encoding, SourceAllocator> & name) {
@@ -342,7 +363,6 @@ public:
             return NullValue;
         }
     }
-
 
     template <typename SourceAllocator>
     bool stringEqual(const BasicValue<Encoding, SourceAllocator> & rhs) const {
@@ -388,7 +408,7 @@ public:
         unsigned int    hashCode;
     };
 
-    struct ShortString {
+    struct SmallString {
         const CharType *data;
         SizeType        size;
         SizeType        capacity;
@@ -409,7 +429,7 @@ public:
     };
 
     struct Object {
-        Member *        members;
+        MemberType *    members;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
@@ -418,7 +438,7 @@ public:
     union ValueData
     {
         String      str;
-        ShortString sso;
+        SmallString sso;
         Number      num;
         Array       array;
         Object      obj;
@@ -448,7 +468,7 @@ void BasicValue<Encoding, PoolAllocator>::release()
 
         case kObjectMask:
             for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
-                m->~Member();
+                m->~MemberType();
             }
             PoolAllocatorType::deallocate(mValueData.obj.members);
             break;

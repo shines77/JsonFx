@@ -32,10 +32,19 @@
 namespace JsonFx {
 
 /* Just define for inheritance. */
-class StackAllocator {};
+class StackAllocator {
+public:
+    static const bool kNeedFree = false;
+};
 
 /* Just define for inheritance. */
-class PoolAllocator {};
+class PoolAllocator {
+public:
+    static const bool   kNeedFree           = false;
+    static const bool   kAutoRelease        = false;
+    static const size_t kChunkCapacity      = 0;
+    static const size_t kInnerChunkCapacity = 0;
+};
 
 // C-RunTime Allocator
 class TrivialAllocator : public StackAllocator
@@ -53,13 +62,17 @@ public:
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
+          size_t InnerChunkCapacity = kDefaultInnerChunkCapacity,
           typename Allocator = DefaultAllocator>
 class StackPoolAllocator : public PoolAllocator
 {
 public:
     typedef Allocator AllocatorType;
 
-    static const bool kNeedFree = false;
+    static const bool   kNeedFree           = false;
+    static const bool   kAutoRelease        = false;
+    static const size_t kChunkCapacity      = ChunkCapacity;
+    static const size_t kInnerChunkCapacity = InnerChunkCapacity;
 
     StackPoolAllocator()  {}
     ~StackPoolAllocator() {}
@@ -77,15 +90,17 @@ public:
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
+          size_t InnerChunkCapacity = kDefaultInnerChunkCapacity,
           typename Allocator = DefaultAllocator>
 class MemoryPoolAllocator : public PoolAllocator
 {
 public:
     typedef Allocator   AllocatorType;
 
-    static const bool   kNeedFree       = false;
-    static const bool   kAutoRelease    = true;
-    static const size_t kChunkCapacity  = ChunkCapacity;
+    static const bool   kNeedFree           = false;
+    static const bool   kAutoRelease        = true;
+    static const size_t kChunkCapacity      = ChunkCapacity;
+    static const size_t kInnerChunkCapacity = InnerChunkCapacity;
 
     struct ChunkHead {
         void *      cursor;
@@ -107,7 +122,9 @@ public:
             ChunkHead * pChunkHead = mChunkHead;
             while (pChunkHead != NULL) {
                 ChunkHead * next = pChunkHead->next;
-                AllocatorType::free(pChunkHead);
+                if (next != NULL) {
+                    AllocatorType::free(pChunkHead);
+                }
                 pChunkHead = next;
             }
             mChunkHead = NULL;
@@ -121,7 +138,22 @@ private:
     MemoryPoolAllocator& operator =(const MemoryPoolAllocator & rhs);   /* = delete */
 
     void init() {
-        addNewChunk(0);
+        if (kInnerChunkCapacity > sizeof(ChunkHead))
+            initInnerChunk();
+        else
+            addNewChunk(0);
+    }
+
+    void initInnerChunk() {
+        ChunkHead * newChunk = reinterpret_cast<ChunkHead *>(mInnerBuffer);
+
+        // Do not handle out-of-memory explicitly.
+        newChunk->cursor    = reinterpret_cast<void *>(newChunk + 1);
+        newChunk->remain    = kInnerChunkCapacity - sizeof(ChunkHead);
+        newChunk->capacity  = kInnerChunkCapacity;
+        newChunk->next      = mChunkHead;
+
+        mChunkHead = newChunk;
     }
 
     void * addNewChunk(size_t size) {
@@ -220,19 +252,24 @@ public:
     static void deallocate(void * ptr, size_t size) { (void)ptr; (void)size; }  /* Do nothing! */
 
 private:
+    // The chunk head info
     ChunkHead * mChunkHead;
+    // The inner buffer on stack
+    char        mInnerBuffer[kInnerChunkCapacity];
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
+          size_t InnerChunkCapacity = kDefaultInnerChunkCapacity,
           typename Allocator = DefaultAllocator>
 class SimpleMemoryPoolAllocator : public PoolAllocator
 {
 public:
     typedef Allocator   AllocatorType;
 
-    static const bool   kNeedFree       = false;
-    static const bool   kAutoRelease    = true;
-    static const size_t kChunkCapacity  = ChunkCapacity;
+    static const bool   kNeedFree           = false;
+    static const bool   kAutoRelease        = true;
+    static const size_t kChunkCapacity      = ChunkCapacity;
+    static const size_t kInnerChunkCapacity = InnerChunkCapacity;
 
     struct ChunkInfo {
         ChunkInfo * next;
@@ -265,7 +302,9 @@ public:
             ChunkInfo * pChunkInfo = mChunkHead.head;
             while (pChunkInfo != NULL) {
                 ChunkInfo * next = pChunkInfo->next;
-                AllocatorType::free(pChunkInfo);
+                if (next != NULL) {
+                    AllocatorType::free(pChunkInfo);
+                }
                 pChunkInfo = next;
             }
             mChunkHead.head = NULL;
@@ -289,7 +328,23 @@ private:
         mChunkHead.capacityTotal    = 0;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
 
-        addNewChunk(0);
+        if (kInnerChunkCapacity > sizeof(ChunkInfo))
+            initInnerChunk();
+        else
+            addNewChunk(0);
+    }
+
+    void initInnerChunk() {
+        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(mInnerBuffer);
+
+        newChunk->next      = NULL;
+        newChunk->capacity  = kInnerChunkCapacity;
+
+        mChunkHead.cursor   = reinterpret_cast<void *>(newChunk + 1);
+        mChunkHead.remain   = kInnerChunkCapacity - sizeof(ChunkInfo);
+        mChunkHead.capacity = kInnerChunkCapacity;
+
+        mChunkHead.head = newChunk;
     }
 
     void * addNewChunk(size_t size) {
@@ -431,19 +486,24 @@ public:
     static void deallocate(void * ptr, size_t size) { (void)ptr; (void)size; }  /* Do nothing! */
 
 private:
-    ChunkHead mChunkHead;
+    // The chunk head info
+    ChunkHead   mChunkHead;
+    // The inner buffer on stack
+    char        mInnerBuffer[kInnerChunkCapacity];
 };
 
 template <size_t ChunkCapacity = kDefaultChunkCapacity,
+          size_t InnerChunkCapacity = kDefaultInnerChunkCapacity,
           typename Allocator = DefaultAllocator>
 class FastMemoryPoolAllocator : public PoolAllocator
 {
 public:
     typedef Allocator   AllocatorType;
 
-    static const bool   kNeedFree       = false;
-    static const bool   kAutoRelease    = true;
-    static const size_t kChunkCapacity  = ChunkCapacity;
+    static const bool   kNeedFree           = false;
+    static const bool   kAutoRelease        = true;
+    static const size_t kChunkCapacity      = ChunkCapacity;
+    static const size_t kInnerChunkCapacity = InnerChunkCapacity;
 
     struct ChunkInfo {
         ChunkInfo * next;
@@ -459,7 +519,7 @@ public:
 public:
     FastMemoryPoolAllocator() : mChunkHead(NULL)
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
-        , mUsedTotal(0), mCapacityTotal(0)
+        , mUsedTotal(0), mCapacityTotal(kInnerChunkCapacity)
 #endif
     {
         init();
@@ -474,7 +534,9 @@ public:
             ChunkInfo * pChunkInfo = mChunkHead;
             while (pChunkInfo != NULL) {
                 ChunkInfo * next = pChunkInfo->next;
-                AllocatorType::free(pChunkInfo);
+                if (next != NULL) {
+                    AllocatorType::free(pChunkInfo);
+                }
                 pChunkInfo = next;
             }
             mChunkHead = NULL;
@@ -487,18 +549,30 @@ private:
     //! Copy assignment operator is not permitted.
     FastMemoryPoolAllocator& operator =(const FastMemoryPoolAllocator & rhs);   /* = delete */
 
-    void init() {
-        //internal_init();
-        addNewChunk(0);
-    }
-
     void internal_init() {
         mChunkHead      = NULL;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
         mUsedTotal      = 0;
-        mCapacityTotal  = kChunkCapacity;
+        mCapacityTotal  = kInnerChunkCapacity;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
+    }
+
+    void init() {
+        if (kInnerChunkCapacity > sizeof(ChunkInfo))
+            initInnerChunk();
+        else
+            addNewChunk(0);
+    }
+
+    void initInnerChunk() {
+        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(mInnerBuffer);
+
+        newChunk->next     = NULL;
+        newChunk->used     = sizeof(ChunkInfo);
+        newChunk->capacity = kInnerChunkCapacity;
+
+        mChunkHead = newChunk;
     }
 
     void * addNewChunk(size_t size) {
@@ -637,6 +711,9 @@ private:
     size_t      mUsedTotal;
     size_t      mCapacityTotal;
 #endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
+
+    // The inner buffer on stack
+    char        mInnerBuffer[kInnerChunkCapacity];
 };
 
 }  // namespace JsonFx

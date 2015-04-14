@@ -30,7 +30,7 @@ public:
     typedef Allocator                           AllocatorType;      //!< Stack allocator type from template parameter.
 
 public:
-    BasicDocument(const PoolAllocatorType *poolAllocator = NULL)
+    BasicDocument(const PoolAllocatorType * poolAllocator = NULL)
         : mPoolAllocator(poolAllocator), mPoolAllocatorNeedFree(false) {
         initPoolAllocator(poolAllocator);
     }
