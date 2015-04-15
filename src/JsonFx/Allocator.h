@@ -750,6 +750,17 @@ public:
         }
     }
 
+    void * allocateLarge(size_t size) {
+        size_t allocSize = size + sizeof(ChunkInfo);
+
+        void * buffer = insertNewChunkToLast(allocSize, size);
+        jimi_assert(mChunkHead != NULL);
+        jimi_assert(mChunkHead->next != NULL);
+
+        jimi_assert(buffer != NULL);
+        return buffer;
+    }
+
     void * reallocate(const void * ptr, size_t size, size_t new_size) {
         // Do not shrink if new size is smaller than original
         if (size >= new_size)

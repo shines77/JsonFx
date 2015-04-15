@@ -110,6 +110,8 @@ private:
                 *cursor++ = *p++;
             }
             else {
+                // The remain space in the active chunk is not enough to store the string's
+                // characters, so we allocate a new chunk to store it.
                 CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->fastReserve(kSizeOfHeadField, kReserveStringSize));
                 CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
@@ -119,8 +121,24 @@ private:
                 cursor  = newCursor;
                 begin   = newBegin;
                 bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
+
+                while (*p != beginToken && *p != _Ch('\0')) {
+                    if (cursor < bottom) {
+                        *cursor++ = *p++;
+                    }
+                    else {
+                        // If it need allocate memory second time, mean the string's length
+                        // is more than PoolAllocator's kChunkCapacoty bytes, so we find
+                        // out the string's length first, and allocate the enough memory
+                        // to fill the string's characters.
+                        size_t lenNow = cursor - begin;
+                        //p = startLargeString(p, beginToken, lenNow);
+                        return p;
+                    }
+                }
             }            
         }
+        // It's the ending of string.
         if (*p == beginToken) {
             ++p;
             *cursor = _Ch('\0');
@@ -132,9 +150,63 @@ private:
             *pHeadInfo = static_cast<uint32_t>(kConstStringFlags);
             pHeadInfo++;
             *pHeadInfo = static_cast<uint32_t>(length);
-            mPoolAllocator->allocate(kSizeOfHeadField + length);
+            mPoolAllocator->allocate(kSizeOfHeadField + length * sizeof(CharType));
         }
         else {
+            // Error: The tail token is not match.
+            mErrno = -1;
+        }
+        return p;
+    }
+
+    CharType * startLargeString(CharType * p, CharType beginToken, size_t lenNow) {
+        // The size of string length field
+        static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
+
+        size_t lenTail, lenTotal;
+        CharType *origPtr, *savePtr;
+
+        // Get the original begin address of p.
+        origPtr = p - lenNow;
+        savePtr = p;
+
+        // Find the full length of string
+        while (*p != beginToken && *p != _Ch('\0')) {
+            ++p;
+        }
+
+        // The length of tail characters of string.
+        lenTail = p - savePtr;
+        // Get the full length
+        lenTotal = lenNow + lenTail + 1;
+
+        // Allocate the large chunk, and insert it to last.
+        jimi_assert(mPoolAllocator != NULL);
+        CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->allocateLarge(kSizeOfHeadField + lenTotal * sizeof(CharType)));
+        jimi_assert(newCursor != NULL);
+
+        uint32_t * pHeadInfo = reinterpret_cast<uint32_t *>(newCursor);
+        *pHeadInfo = static_cast<uint32_t>(kConstStringFlags);
+        pHeadInfo++;
+        *pHeadInfo = static_cast<uint32_t>(lenTotal);
+
+        // Start copy the string's characters.
+        newCursor = reinterpret_cast<CharType *>(pHeadInfo);
+        if (*p == beginToken) {
+            while (*origPtr != beginToken) {
+                *newCursor++ = *origPtr++;
+            }
+            *newCursor = _Ch('\0');
+            ++p;
+        }
+        else {
+            // Error: The tail token is not match.
+            if (*p == _Ch('\0')) {
+                while (*origPtr != _Ch('\0')) {
+                    *newCursor++ = *origPtr++;
+                }
+                *newCursor = _Ch('\0');
+            }
             mErrno = -1;
         }
         return p;

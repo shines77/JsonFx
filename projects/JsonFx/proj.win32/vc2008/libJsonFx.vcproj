@@ -191,7 +191,7 @@
 					>
 				</File>
 				<Filter
-					Name="internal"
+					Name="Internal"
 					>
 					<File
 						RelativePath="..\..\..\..\src\JsonFx\Internal\String.h"
