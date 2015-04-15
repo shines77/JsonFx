@@ -114,15 +114,11 @@ private:
                 CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
                 while (begin != cursor) {
-                    *newCursor = *begin;
-                    ++begin;
-                    ++newCursor;
+                    *newCursor++ = *begin++;
                 }
                 cursor  = newCursor;
-                ++cursor;
                 begin   = newBegin;
                 bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
-                ++p;
             }            
         }
         if (*p == beginToken) {
