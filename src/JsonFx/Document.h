@@ -132,7 +132,7 @@ private:
                         // out the string's length first, and allocate the enough memory
                         // to fill the string's characters.
                         size_t lenNow = cursor - begin;
-                        //p = startLargeString(p, beginToken, lenNow);
+                        p = startLargeString(p, beginToken, lenNow);
                         return p;
                     }
                 }
