@@ -85,57 +85,63 @@ enum ValueType {
 };
 
 enum ValueTypeMask {
-    kBoolMask       = 0x00000100,
-    kInt8Mask       = 0x00000200,
-    kUInt8Mask      = 0x00000400,
-    kInt16Mask      = 0x00000800,
-    kUInt16Mask     = 0x00001000,
-    kInt32Mask      = 0x00002000,
-    kUInt32Mask     = 0x00004000,
-    kInt64Mask      = 0x00008000,
-    kUInt64Mask     = 0x00010000,
+    kBoolMask           = 0x00000100,
+    kInt8Mask           = 0x00000200,
+    kUInt8Mask          = 0x00000400,
+    kInt16Mask          = 0x00000800,
+    kUInt16Mask         = 0x00001000,
+    kInt32Mask          = 0x00002000,
+    kUInt32Mask         = 0x00004000,
+    kInt64Mask          = 0x00008000,
+    kUInt64Mask         = 0x00010000,
 
-    kIntegerMask    = 0x00020000,
-    kFloatMask      = 0x00040000,
-    kDoubleMask     = 0x00080000,
-    kNumberMask     = 0x00100000,
+    kIntegerMask        = 0x00020000,
+    kFloatMask          = 0x00040000,
+    kDoubleMask         = 0x00080000,
+    kNumberMask         = 0x00100000,
 
-    kStringMask     = 0x00200000,
-    kCopyStrMask    = 0x00400000,
-    kInlineStrMask  = 0x00800000,
+    kStringMask         = 0x00200000,
+    kCopyStringMask     = 0x00400000,
+    kInlineStringMask   = 0x00800000,
 
-    kNumberBoolMaskBase = kNumberMask | kIntegerMask | kBoolMask,
+    kNumberBoolMask     = kNumberMask | kIntegerMask | kBoolMask,
 
-    kNumberBoolMask     = kNumberMask | kIntegerMask | kBoolMask | kBoolType,
-    kTrueMask           = kNumberMask | kIntegerMask | kBoolMask | kTrueType,
-    kFalseMask          = kNumberMask | kIntegerMask | kBoolMask | kFalseType,
+    kBoolFlags          = kNumberMask | kIntegerMask | kBoolMask   | kBoolType,
+    kTrueFlags          = kNumberMask | kIntegerMask | kBoolMask   | kTrueType,
+    kFalseFlags         = kNumberMask | kIntegerMask | kBoolMask   | kFalseType,
 
-    kNumberIntegerMaskBase = kNumberMask | kIntegerMask,
+    kNumberIntegerMask  = kNumberMask | kIntegerMask,
 
-    kNumberIntegerMask  = kNumberMask | kIntegerMask | kIntegerType,
-    kNumberIntMask      = kNumberMask | kIntegerMask | kInt32Mask  | kNumberType,
-    kNumberUIntMask     = kNumberMask | kIntegerMask | kUInt32Mask | kNumberType,
+    kIntegerFlags       = kNumberMask | kIntegerMask               | kIntegerType,
+    kIntFlags           = kNumberMask | kIntegerMask | kInt32Mask  | kNumberType,
+    kUIntFlags          = kNumberMask | kIntegerMask | kUInt32Mask | kNumberType,
 
-    kNumberInt64Mask    = kNumberMask | kIntegerMask | kInt64Mask  | kNumberType,
-    kNumberUInt64Mask   = kNumberMask | kIntegerMask | kUInt64Mask | kNumberType,
+    kInt64Flags         = kNumberMask | kIntegerMask | kInt64Mask  | kNumberType,
+    kUInt64Flags        = kNumberMask | kIntegerMask | kUInt64Mask | kNumberType,
 
-    kNumberFloatMask    = kNumberMask | kFloatMask  | kNumberType,
-    kNumberDoubleMask   = kNumberMask | kDoubleMask | kNumberType,
+    kFloatFlags         = kNumberMask | kFloatMask   | kNumberType,
+    kDoubleFlags        = kNumberMask | kDoubleMask  | kNumberType,
 
-    kNumberAnyMask      = kNumberMask | kIntegerMask
-                         | kInt32Mask | kUInt32Mask | kInt64Mask | kUInt64Mask
-                         | kFloatMask | kDoubleMask | kNumberType,
+    kNumberAnyFlags     = kNumberMask | kIntegerMask
+                         | kInt32Mask | kUInt32Mask  | kInt64Mask | kUInt64Mask
+                         | kFloatMask | kDoubleMask  | kNumberType,
 
-    kConstStringMask    = kStringMask | kStringType,
-    kCopyStringMask     = kStringMask | kCopyStrMask | kStringType,
-    kShortStringMask    = kStringMask | kCopyStrMask | kInlineStrMask | kStringType,
+    kConstStringFlags   = kStringMask                   | kStringType,   
+    kCopyStringFlags    = kStringMask | kCopyStringMask | kStringType,
+    kShortStringFlags   = kStringMask | kCopyStringMask | kInlineStringMask | kStringType,
+    kStringFlags        = kConstStringFlags,
 
-    kArrayMask      = kArrayType,
-    kObjectMask     = kObjectType,
-    kNullMask       = kNullType,
+    kArrayMask          = kArrayType,
+    kObjectMask         = kObjectType,
+    kNullMask           = kNullType,
+
+    kArrayFlags         = kArrayType,
+    kObjectFlags        = kObjectType,
+    kNullFlags          = kNullType,
 
     // Value type mask
-    kTypeMask       = 0xFF
+    kTypeMask           = 0xFF,
+    kFlagMask           = 0xFFFFFF00
 };
 
 // Forward declaration.
@@ -246,10 +252,10 @@ public:
     typedef uint32_t                        ValueType;
 
 public:
-    BasicValue() : mValueType(kNullMask), mValueData() {}
+    BasicValue() : mValueType(kNullFlags), mValueData() {}
 
     BasicValue(const CharType * str) {
-        mValueType = kStringMask;
+        mValueType = kStringFlags;
         mValueData.str.data = str;
         mValueData.str.size = ::strlen(str);
     }
@@ -281,20 +287,20 @@ public:
 
     ValueType getType() const { return static_cast<ValueType>(mValueType & kTypeMask); }
 
-    bool isNull()   const { return (mValueType == kNullMask);               }
-    bool isFalse()  const { return (mValueType == kFalseMask);              }
-    bool isTrue()   const { return (mValueType == kTrueMask);               }
-    bool isBool()   const { return ((mValueType & kBoolMask) != 0);         }
-    bool isObject() const { return (mValueType == kObjectMask);             }
-    bool isArray()  const { return (mValueType == kArrayMask);              }
+    bool isNull()   const { return (mValueType == kNullFlags);              }
+    bool isFalse()  const { return (mValueType == kFalseFlags);             }
+    bool isTrue()   const { return (mValueType == kTrueFlags);              }
+    bool isBool()   const { return ((mValueType & kBoolFlags) != 0);        }
+    bool isObject() const { return (mValueType == kObjectFlags);            }
+    bool isArray()  const { return (mValueType == kArrayFlags);             }
     bool isNumber() const { return ((mValueType & kNumberMask) != 0);       }
-    bool isInt()    const { return ((mValueType & kNumberIntMask) != 0);    }
-    bool isUint()   const { return ((mValueType & kNumberUIntMask) != 0);   }
-    bool isInt64()  const { return ((mValueType & kInt64Mask) != 0);        }
-    bool isUint64() const { return ((mValueType & kUInt64Mask) != 0);       }
-    bool isFloat()  const { return ((mValueType & kDoubleMask) != 0);       }
-    bool isDouble() const { return ((mValueType & kDoubleMask) != 0);       }
-    bool isString() const { return ((mValueType & kStringMask) != 0);       }
+    bool isInt()    const { return ((mValueType & kIntFlags)   != 0);       }
+    bool isUint()   const { return ((mValueType & kUIntFlags)  != 0);       }
+    bool isInt64()  const { return ((mValueType & kInt64Flags)  != 0);      }
+    bool isUint64() const { return ((mValueType & kUInt64Flags) != 0);      }
+    bool isFloat()  const { return ((mValueType & kFloatFlags)  != 0);      }
+    bool isDouble() const { return ((mValueType & kDoubleFlags) != 0);      }
+    bool isString() const { return ((mValueType & kStringFlags) != 0);      }
 
     //MemberIterator findMember(const CharType * name) { return MemberIterator(NULL); }
     MemberIterator findMember(const CharType * name) {
@@ -383,12 +389,12 @@ public:
 
     const CharType * getString() const {
         jimi_assert(isString());
-        return ((mValueType & kInlineStrMask) ? mValueData.sso.data : mValueData.str.data);
+        return ((mValueType & kInlineStringMask) ? mValueData.sso.data : mValueData.str.data);
     }
 
     SizeType getStringLength() const {
         jimi_assert(isString());
-        return ((mValueType & kInlineStrMask) ? (mValueData.sso.GetLength()) : mValueData.str.size);
+        return ((mValueType & kInlineStringMask) ? (mValueData.sso.GetLength()) : mValueData.str.size);
     }
 
 public:
@@ -459,21 +465,21 @@ void BasicValue<Encoding, PoolAllocator>::release()
     // Shortcut by Allocator's trait
     if (PoolAllocatorType::kNeedFree) {
         switch (mValueType) {
-        case kArrayMask:
+        case kArrayFlags:
             for (BasicValue * v = mValueData.array.elements; v != mValueData.array.elements + mValueData.array.size; ++v) {
                 v->~BasicValue();
             }
             PoolAllocatorType::deallocate(mValueData.array.elements);
             break;
 
-        case kObjectMask:
+        case kObjectFlags:
             for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
                 m->~MemberType();
             }
             PoolAllocatorType::deallocate(mValueData.obj.members);
             break;
 
-        case kCopyStrMask:
+        case kCopyStringFlags:
             PoolAllocatorType::deallocate(const_cast<CharType *>(mValueData.str.data));
             break;
 

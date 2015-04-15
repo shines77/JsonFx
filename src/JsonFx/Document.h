@@ -7,6 +7,7 @@
 #endif
 
 #include <stdio.h>
+#include <tchar.h>
 
 #include "JsonFx/Config.h"
 #include "JsonFx/CharSet.h"
@@ -79,10 +80,10 @@ private:
         }
     }
 
-    // The space chars including " \t\r\n"
+    // The space chars including " \t\n\r"
     bool isSpace(const CharType c) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        return (c == CharType(' ')) || (c >= CharType('\t') && c <= CharType('\r'));
+        return (c == _Ch(' ')) || (c >= _Ch('\t') && c <= _Ch('\r'));
     }
 
     CharType * startObject(CharType * p) {
@@ -94,50 +95,48 @@ private:
     }
 
     CharType * startString(CharType * p, CharType beginToken) {
+        jimi_assert(mPoolAllocator != NULL);
         // The size of string length field
-        static const size_t kSizeOfLengthField = sizeof(uint32_t);
+        static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
         // Reserve string size
         static const size_t kReserveStringSize = 8;
-        jimi_assert(mPoolAllocator != NULL);
-        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfLengthField, kReserveStringSize));
+        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->reserve(kSizeOfHeadField, kReserveStringSize));
         jimi_assert(cursor != NULL);
         CharType * begin   = cursor;
-        CharType * orignal = reinterpret_cast<CharType *>(mPoolAllocator->getChunkCursor());
         CharType * bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
 
-        while (*p != beginToken && *p != CharType('\0')) {
+        while (*p != beginToken && *p != _Ch('\0')) {
             if (cursor < bottom) {
-                *cursor = *p;
-                ++cursor;
-                ++p;
+                *cursor++ = *p++;
             }
             else {
-                CharType * newOrignal = reinterpret_cast<CharType *>(mPoolAllocator->addNewChunk(0));
-                CharType * newCursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfLengthField, kReserveStringSize));
-                CharType * newBegin   = newCursor;
+                CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->fastReserve(kSizeOfHeadField, kReserveStringSize));
+                CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
                 while (begin != cursor) {
                     *newCursor = *begin;
                     ++begin;
                     ++newCursor;
                 }
-                orignal = newOrignal;
                 cursor  = newCursor;
+                ++cursor;
                 begin   = newBegin;
                 bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
-                ++cursor;
                 ++p;
             }            
         }
         if (*p == beginToken) {
             ++p;
-            *cursor = CharType('\0');
+            *cursor = _Ch('\0');
             ++cursor;
             jimi_assert(cursor >= begin);
             size_t length = cursor - begin;
-            jimi_assert(orignal != NULL);
-            *reinterpret_cast<uint32_t *>(orignal) = static_cast<uint32_t>(length);
-            mPoolAllocator->allocate(kSizeOfLengthField + length);
+            uint32_t * pHeadInfo = reinterpret_cast<uint32_t *>(reinterpret_cast<char *>(begin) - kSizeOfHeadField);
+            jimi_assert(pHeadInfo != NULL);
+            *pHeadInfo = static_cast<uint32_t>(kConstStringFlags);
+            pHeadInfo++;
+            *pHeadInfo = static_cast<uint32_t>(length);
+            mPoolAllocator->allocate(kSizeOfHeadField + length);
         }
         else {
             mErrno = -1;
@@ -169,27 +168,27 @@ BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
 {
     jimi_assert(text != NULL);
     //printf("JsonFx::BasicDocument::parse() visited.\n\n");
-    //setObject();
+    setObject();
 
     CharType *cur = const_cast<CharType *>(text);
     CharType beginToken;
 
-    while (*cur != CharType('\0')) {
+    while (*cur != _Ch('\0')) {
         // Skip space chars
         while (isSpace(*cur))
             ++cur;
-        if (*cur == CharType('{')) {
+        if (*cur == _Ch('{')) {
             // Start a object
             ++cur;
             cur = startObject(cur);
         }
-        else if (*cur == CharType('"') || *cur == CharType('\'')) {
+        else if (*cur == _Ch('"') || *cur == _Ch('\'')) {
             // Start a string
             beginToken = *cur;
             ++cur;
             cur = startString(cur, beginToken);
         }
-        if (*cur == CharType('[')) {
+        if (*cur == _Ch('[')) {
             // Start a array
             ++cur;
             cur = startArray(cur);

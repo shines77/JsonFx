@@ -15,6 +15,22 @@
 #define ALIGN_PREFIX(N)             __declspec(align(N))
 #define ALIGN_SUFFIX(N)
 
+#ifndef _Ch
+#ifndef __cplusplus
+#define _Ch(c)        ((CharType)c)
+#else   /* !__cplusplus */
+#define _Ch(c)        static_cast<CharType>(c)
+#endif  /* __cplusplus */
+#endif  /* _Ch */
+
+#ifndef _Tx
+#ifdef _UNICODE
+#define _Tx(text)      L ## text
+#else   /* !_UNICODE */
+#define _Tx(text)      text
+#endif  /* _UNICODE */
+#endif  /* _Tx */
+
 namespace JsonFx {
 
 /* define in "JsonFx/Allcator.h" */
