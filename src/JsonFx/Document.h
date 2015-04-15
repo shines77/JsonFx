@@ -94,7 +94,8 @@ private:
         return p;
     }
 
-    CharType * startString(CharType * p, CharType beginToken) {
+    template <CharType beginToken>
+    CharType * startString(CharType * p) {
         jimi_assert(mPoolAllocator != NULL);
         // The size of string length field
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
@@ -132,13 +133,13 @@ private:
                         // out the string's length first, and allocate the enough memory
                         // to fill the string's characters.
                         size_t lenNow = cursor - begin;
-                        p = startLargeString(p, beginToken, lenNow);
+                        p = startLargeString<beginToken>(p, lenNow);
                         return p;
                     }
                 }
             }            
         }
-        // It's the ending of string.
+        // It's the ending of string token.
         if (*p == beginToken) {
             ++p;
             *cursor = _Ch('\0');
@@ -159,7 +160,8 @@ private:
         return p;
     }
 
-    CharType * startLargeString(CharType * p, CharType beginToken, size_t lenNow) {
+    template <CharType beginToken>
+    CharType * startLargeString(CharType * p, size_t lenNow) {
         // The size of string length field
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
 
@@ -250,11 +252,17 @@ BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
             ++cur;
             cur = startObject(cur);
         }
-        else if (*cur == _Ch('"') || *cur == _Ch('\'')) {
-            // Start a string
+        else if (*cur == _Ch('"')) {
+            // Start a string begin from token "
             beginToken = *cur;
             ++cur;
-            cur = startString(cur, beginToken);
+            cur = startString<_Ch('"')>(cur);
+        }
+        else if (*cur == _Ch('\'')) {
+            // Start a string begin from token \'
+            beginToken = *cur;
+            ++cur;
+            cur = startString<_Ch('\'')>(cur);
         }
         if (*cur == _Ch('[')) {
             // Start a array
