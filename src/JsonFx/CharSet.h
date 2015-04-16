@@ -50,7 +50,7 @@ typedef JSONFX_DEFAULT_ENCODING     DefaultEncoding;
 
 #if defined(ENCODING_USE_CLASS_WRAPPER) && (ENCODING_USE_CLASS_WRAPPER != 0)
 
-#if defined(_MSC_VER) && (_MSC_VER < 1600)
+#if defined(_MSC_VER) && (_MSC_VER < 1700)
 #define DECLEAR_ENCODING_CLASS(encodingName, charType, encodingType)        \
     struct encodingName : public BasicEncoding<charType, encodingType> {    \
     public:                                                                 \

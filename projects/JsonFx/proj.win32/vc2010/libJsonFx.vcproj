@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Jimi_shared"
-	ProjectGUID="{7AE39F1A-493B-4A38-AC5C-137C2A394933}"
-	RootNamespace="Jimi_shared"
+	Name="libJsonFx"
+	ProjectGUID="{34949334-98C0-40D4-B620-9CD8C2D49955}"
+	RootNamespace="libJsonFx"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -18,10 +18,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)bin\$(MsvcPlatformToolset)\$(ProjectName)\$(MsvcPlatformShortName)-$(ConfigurationName)\"
-			IntermediateDirectory="$(SolutionDir)gen\obj\$(MsvcPlatformToolset)\$(ProjectName)\$(MsvcPlatformShortName)-$(ConfigurationName)\"
-			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\ProjEnv\vc2008\ProjEnvProperty_32.vsprops"
+			OutputDirectory="$(SolutionDir)lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)"
+			IntermediateDirectory="$(SolutionDir)gen\obj\$(MsvcPlatformToolset)\$(ProjectName)\$(MsvcPlatformShortName)-$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="..\..\..\ProjEnv\vc2010\ProjEnvProperty_32.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -42,8 +42,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\jimi;..\..\..\..\..\include;..\..\..\..\..\include\jimi;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\src\jimi;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\include\jimi;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,14 +61,12 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\$(ProjectName)_debug.lib"
 				AdditionalLibraryDirectories="&quot;..\..\..\..\..\lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;..\..\..\..\..\lib;..\..\..\..\..\deps;&quot;$(SolutionDir)lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)deps&quot;;&quot;.\lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;.\lib;.\deps;&quot;$(ProjectDir)lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;&quot;$(ProjectDir)lib&quot;;&quot;$(ProjectDir)deps&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -80,18 +78,15 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)bin\$(MsvcPlatformToolset)\$(ProjectName)\$(MsvcPlatformShortName)-$(ConfigurationName)\"
-			IntermediateDirectory="$(SolutionDir)gen\obj\$(MsvcPlatformToolset)\$(ProjectName)\$(MsvcPlatformShortName)-$(ConfigurationName)\"
-			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\ProjEnv\vc2008\ProjEnvProperty_32.vsprops"
+			OutputDirectory="$(SolutionDir)lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)"
+			IntermediateDirectory="$(SolutionDir)gen\obj\$(MsvcPlatformToolset)\$(ProjectName)\$(MsvcPlatformShortName)-$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="..\..\..\ProjEnv\vc2010\ProjEnvProperty_32.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -114,8 +109,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\jimi;..\..\..\..\..\include;..\..\..\..\..\include\jimi;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\src\jimi;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\include\jimi;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;&quot;$(SolutionDir)src&quot;;&quot;$(SolutionDir)include&quot;;.\src;.\include;.\test;.\deps;&quot;$(ProjectDir)src&quot;;&quot;$(ProjectDir)include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;JIMI_LIB;JIMI_USE_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -132,14 +127,11 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
 				AdditionalLibraryDirectories="&quot;..\..\..\..\..\lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;..\..\..\..\..\lib;..\..\..\..\..\deps;&quot;$(SolutionDir)lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;&quot;$(SolutionDir)lib&quot;;&quot;$(SolutionDir)deps&quot;;&quot;.\lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;.\lib;.\deps;&quot;$(ProjectDir)lib\$(MsvcPlatformToolset)\$(MsvcPlatformShortName)&quot;;&quot;$(ProjectDir)lib&quot;;&quot;$(ProjectDir)deps&quot;"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -151,9 +143,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -163,106 +152,94 @@
 	<Files>
 		<Filter
 			Name="src"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{169CCC3D-4A90-459B-B350-BD44794F768E}"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx;h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<Filter
-				Name="jimi"
+				Name="JsonFx"
 				>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\Allocator.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\CharSet.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\Config.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\Document.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\JsonFx.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\JsonFx.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\StringRef.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\..\src\JsonFx\Value.h"
+					>
+				</File>
 				<Filter
-					Name="basic"
+					Name="Internal"
 					>
 					<File
-						RelativePath="..\..\..\..\src\jimi\basic\assert.cpp"
+						RelativePath="..\..\..\..\src\JsonFx\Internal\String.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\jimi\basic\assert.h"
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Traits.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\jimi\basic\common.h"
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Utils.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Allocator"
+					>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Allocator\FastPoolAllocator.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\jimi\basic\compiler_def.h"
+						RelativePath="..\..\..\..\src\JsonFx\Allocator\SimplePoolAllocator.h"
 						>
 					</File>
 					<File
-						RelativePath="..\..\..\..\src\jimi\basic\config.h"
+						RelativePath="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h"
 						>
 					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\declare.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\declare_comm.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\export.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\inttypes.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\machine.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\namespace.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\platform_def.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\stdbool.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\stddef.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\..\..\src\jimi\basic\stdint.h"
-						>
-					</File>
-					<Filter
-						Name="msvc"
-						>
-						<File
-							RelativePath="..\..\..\..\src\jimi\basic\msvc\inttypes.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\jimi\basic\msvc\stdbool.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\..\src\jimi\basic\msvc\stdint.h"
-							>
-						</File>
-					</Filter>
 				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="include"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{D42CCBAC-8696-4B97-89EE-6DCA7D57A35C}"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 		</Filter>
 		<Filter
 			Name="res"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{577FCAF1-90E8-4437-B350-A2CDC12D7C3F}"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<File
+			RelativePath=".\ReadMe.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
