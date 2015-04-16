@@ -10,7 +10,9 @@
 #include "JsonFx/JsonFx.h"
 
 #include "jimic/system/time.h"
-#include "jimic/basic/vld.h"
+
+// Visual Leak Detector(vld) for Visual C++
+//#include "jimi/basic/vld.h"
 
 void JsonFx_Test()
 {
