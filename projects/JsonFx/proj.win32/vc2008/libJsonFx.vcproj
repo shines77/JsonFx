@@ -198,7 +198,27 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Traits.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\..\..\src\JsonFx\Internal\Utils.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Allocator"
+					>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Allocator\FastPoolAllocator.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Allocator\SimplePoolAllocator.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h"
 						>
 					</File>
 				</Filter>

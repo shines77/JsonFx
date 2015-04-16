@@ -14,7 +14,7 @@
 namespace JsonFx {
 
 enum {
-    kUTFUndefine,
+    kUTFUnknown,
     kUTF8,
 
     kUTF16,
@@ -29,7 +29,7 @@ enum {
 };
 
 template <typename _CharType = JSONFX_DEFAULT_CHARTYPE,
-          size_t _EncodingType = kUTFUndefine>
+          size_t _EncodingType = kUTFUnknown>
 struct BasicEncoding
 {
 public:

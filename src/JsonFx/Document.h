@@ -7,7 +7,6 @@
 #endif
 
 #include <stdio.h>
-#include <tchar.h>
 
 #include "JsonFx/Config.h"
 #include "JsonFx/CharSet.h"
@@ -29,6 +28,14 @@ public:
     typedef Encoding                            EncodingType;       //!< Character encoding type.
     typedef PoolAllocator                       PoolAllocatorType;  //!< Pool allocator type from template parameter.
     typedef Allocator                           AllocatorType;      //!< Stack allocator type from template parameter.
+
+private:    
+    PoolAllocatorType * mPoolAllocator;
+    bool                mPoolAllocatorNeedFree;
+
+    int         mErrno;
+    int         mErrLine;
+    int         nErrOffset;
 
 public:
     BasicDocument(PoolAllocatorType * poolAllocator = NULL)
@@ -213,14 +220,6 @@ private:
         }
         return p;
     }
-
-private:    
-    PoolAllocatorType * mPoolAllocator;
-    bool                mPoolAllocatorNeedFree;
-
-    int         mErrno;
-    int         mErrLine;
-    int         nErrOffset;
 };
 
 // Define default Document class type

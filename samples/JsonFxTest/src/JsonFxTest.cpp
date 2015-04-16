@@ -10,20 +10,22 @@
 #include "JsonFx/JsonFx.h"
 
 #include "jimic/system/time.h"
+#include "jimic/basic/vld.h"
 
 void JsonFx_Test()
 {
+#if defined(NDEBUG)
+    static const size_t kLoopCount = 200000;
+#else
+    static const size_t kLoopCount = 1000;
+#endif
+
     jmc_timestamp_t starttime;
     jmc_timefloat_t elapsedtime;
 
     const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\" }";
     const char json_test[] = "[0, 1, 2, 3]";
     JsonFx::Document document;
-#if defined(NDEBUG)
-    static const size_t kLoopCount = 200000;
-#else
-    static const size_t kLoopCount = 1;
-#endif
 
     printf("\n");
     starttime = jmc_get_timestamp();

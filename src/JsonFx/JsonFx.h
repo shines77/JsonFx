@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 
+#include "JsonFx/Allocator.h"
 #include "JsonFx/Value.h"
 #include "JsonFx/Document.h"
 
