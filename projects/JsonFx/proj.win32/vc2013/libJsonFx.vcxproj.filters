@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx;h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\JsonFx">
+      <UniqueIdentifier>{61df2114-f13a-4ee3-be4d-e9803d22d3fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\JsonFx\Internal">
+      <UniqueIdentifier>{d07fe86c-f364-42c9-a00d-be17be9ba539}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\JsonFx\Allocator">
+      <UniqueIdentifier>{537ddeea-8ab2-4cff-9c20-f1e55646b308}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Allocator.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\CharSet.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Config.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Document.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\JsonFx.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\StringRef.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Value.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\String.h">
+      <Filter>src\JsonFx\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Traits.h">
+      <Filter>src\JsonFx\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Utils.h">
+      <Filter>src\JsonFx\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\FastPoolAllocator.h">
+      <Filter>src\JsonFx\Allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\SimplePoolAllocator.h">
+      <Filter>src\JsonFx\Allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h">
+      <Filter>src\JsonFx\Allocator</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\JsonFx\JsonFx.cpp">
+      <Filter>src\JsonFx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+</Project>

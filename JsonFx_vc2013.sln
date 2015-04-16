@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JsonFxTest", "samples\JsonFxTest\proj.win32\vc2013\JsonFxTest.vcxproj", "{55959987-9394-4057-9815-BD89CD5E09C9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libJsonFx", "projects\JsonFx\proj.win32\vc2013\libJsonFx.vcxproj", "{34949334-98C0-40D4-B620-9CD8C2D49955}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jimi_static", "projects\jimi\proj.win32\vc2013\Jimi_static.vcxproj", "{6CC87659-079A-4DF7-852E-8AF52192504D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55959987-9394-4057-9815-BD89CD5E09C9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{55959987-9394-4057-9815-BD89CD5E09C9}.Debug|Win32.Build.0 = Debug|Win32
+		{55959987-9394-4057-9815-BD89CD5E09C9}.Release|Win32.ActiveCfg = Release|Win32
+		{55959987-9394-4057-9815-BD89CD5E09C9}.Release|Win32.Build.0 = Release|Win32
+		{34949334-98C0-40D4-B620-9CD8C2D49955}.Debug|Win32.ActiveCfg = Debug|Win32
+		{34949334-98C0-40D4-B620-9CD8C2D49955}.Debug|Win32.Build.0 = Debug|Win32
+		{34949334-98C0-40D4-B620-9CD8C2D49955}.Release|Win32.ActiveCfg = Release|Win32
+		{34949334-98C0-40D4-B620-9CD8C2D49955}.Release|Win32.Build.0 = Release|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Debug|Win32.Build.0 = Debug|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Release|Win32.ActiveCfg = Release|Win32
+		{6CC87659-079A-4DF7-852E-8AF52192504D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

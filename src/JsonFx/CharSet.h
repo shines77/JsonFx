@@ -50,21 +50,21 @@ typedef JSONFX_DEFAULT_ENCODING     DefaultEncoding;
 
 #if defined(ENCODING_USE_CLASS_WRAPPER) && (ENCODING_USE_CLASS_WRAPPER != 0)
 
-#if defined(_MSC_VER) && (_MSC_VER < 1700)
+#if defined(_MSC_VER) && (_MSC_VER != 0)
 #define DECLEAR_ENCODING_CLASS(encodingName, charType, encodingType)        \
     struct encodingName : public BasicEncoding<charType, encodingType> {    \
     public:                                                                 \
-        typedef BasicEncoding<charType>::CharType CharType;                 \
+        typedef BasicEncoding<charType, encodingType>::CharType CharType;   \
         enum { type = encodingType };                                       \
     }
 #else
 #define DECLEAR_ENCODING_CLASS(encodingName, charType, encodingType)        \
     struct encodingName : public BasicEncoding<charType, encodingType> {    \
     public:                                                                 \
-        typedef typename BasicEncoding<charType>::CharType CharType;        \
+        typedef typename BasicEncoding<charType, encodingType>::CharType CharType; \
         enum { type = encodingType };                                       \
     }
-#endif  /* _MSC_VER < 1600 */
+#endif  /* defined(_MSC_VER) */
 
 struct CharSet {
 public:
