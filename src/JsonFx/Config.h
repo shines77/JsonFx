@@ -6,13 +6,17 @@
 #pragma once
 #endif
 
-//! Default system pagesize
-#define JSONFX_DEFAULT_PAGESIZE     4096
+//! The default system pagesize.
+#define JSONFX_DEFAULT_PAGESIZE         4096
 
-//! Default memory pool inner chunk capacity
-#define JSONFX_POOL_INNER_BUFSIZE   8192
+//! The memory pool min chunk size.
+#define JSONFX_POOL_MIN_CHUNK_THRESHOLD 64
 
-#define ALIGN_PREFIX(N)             __declspec(align(N))
+//! The memory pool inner chunk capacity.
+//! Recommended setting to 128, 256, 4096 or 8192.
+#define JSONFX_POOL_INNER_BUFSIZE       256
+
+#define ALIGN_PREFIX(N)                 __declspec(align(N))
 #define ALIGN_SUFFIX(N)
 
 #ifndef _Ch
@@ -40,7 +44,7 @@ class TrivialAllocator;
 
 // Forward declaration.
 template <size_t ChunkCapacity, size_t InnerChunkCapacity, typename Allocator>
-class StackPoolAllocator;
+class HeapPoolAllocator;
 
 // Forward declaration.
 template <size_t ChunkCapacity, size_t InnerChunkCapacity, typename Allocator>
@@ -70,21 +74,17 @@ typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 typedef TrivialAllocator            DefaultAllocator;
 
 #if 0
-typedef StdPoolAllocator<gDefaultChunkCapacity,
-                         gDefaultInnerChunkCapacity,
-                         DefaultAllocator>          DefaultPoolAllocator;
-#elif 0
 typedef SimplePoolAllocator<gDefaultChunkCapacity,
                             gDefaultInnerChunkCapacity,
-                            DefaultAllocator>       DefaultPoolAllocator;
+                            DefaultAllocator>           DefaultPoolAllocator;
 #elif 1
-typedef FastPoolAllocator<gDefaultChunkCapacity,
-                          gDefaultInnerChunkCapacity,
-                          DefaultAllocator>         DefaultPoolAllocator;
+typedef FastPoolAllocator<  gDefaultChunkCapacity,
+                            gDefaultInnerChunkCapacity,
+                            DefaultAllocator>           DefaultPoolAllocator;
 #else
-typedef StackPoolAllocator<gDefaultChunkCapacity,
-                           gDefaultInnerChunkCapacity,
-                           DefaultAllocator>        DefaultPoolAllocator;
+typedef StdPoolAllocator<   gDefaultChunkCapacity,
+                            gDefaultInnerChunkCapacity,
+                            DefaultAllocator>           DefaultPoolAllocator;
 #endif
 
 }  // namespace JsonFx

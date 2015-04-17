@@ -71,7 +71,7 @@ private:
     StdPoolAllocator & operator =(const StdPoolAllocator & rhs);  /* = delete */
 
     void init() {
-        if (kInnerChunkCapacity > sizeof(ChunkHead))
+        if (kInnerChunkCapacity > (sizeof(ChunkHead) + kAlignmentSize))
             initInnerChunk();
         else
             addNewChunk(0);

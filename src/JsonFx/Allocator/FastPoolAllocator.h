@@ -22,12 +22,18 @@ class FastPoolAllocator : public PoolAllocator
 public:
     typedef Allocator   AllocatorType;
 
+    // Forward declaration.
+    struct ChunkInfo;
+
     static const bool   kNeedFree           = false;
     static const bool   kAutoRelease        = true;
     static const size_t kChunkCapacity      = ChunkCapacity;
     static const size_t kInnerChunkCapacity = InnerChunkCapacity;
     static const size_t kAlignmentSize      = JSONFX_POOL_ALIGNMENT_SIZE;
-
+    static const size_t kChunkCapacityLimit = sizeof(ChunkInfo);
+    static const size_t kMinChunkCapacityThreshold =
+                    JIMI_MAX(kChunkCapacityLimit + kAlignmentSize * 2,
+                             JSONFX_POOL_MIN_CHUNK_THRESHOLD);
     //
     // Notice: For the allocated address aligned to kAlignmentSize bytes,
     //         the size of struct ChunkInfo must be setting for multiple of kAlignmentSize.
@@ -45,6 +51,8 @@ public:
 
 private:
     ChunkInfo * mChunkHead;
+    void *      mUserBuffer;
+    size_t      mUserBufSize;
 
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
     size_t      mUsedTotal;
@@ -57,12 +65,24 @@ private:
     ALIGN_SUFFIX(JSONFX_POOL_ALIGNMENT_SIZE);
 
 public:
-    FastPoolAllocator() : mChunkHead(NULL)
+    FastPoolAllocator()
+        : mChunkHead(NULL), mUserBuffer(NULL), mUserBufSize(0)
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
         , mUsedTotal(0), mCapacityTotal(kInnerChunkCapacity)
 #endif
     {
+        jimi_assert(kChunkCapacity >= kMinChunkCapacityThreshold);
         init();
+    }
+
+    FastPoolAllocator(void * userBuffer, size_t bufSize)
+        : mChunkHead(NULL), mUserBuffer(userBuffer), mUserBufSize(bufSize)
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        , mUsedTotal(0), mCapacityTotal(bufSize)
+#endif
+    {
+        jimi_assert(kChunkCapacity >= kMinChunkCapacityThreshold);
+        init(userBuffer, bufSize);
     }
 
     ~FastPoolAllocator() {
@@ -83,6 +103,28 @@ public:
         }
     }
 
+    void reset() {
+        // Release malloc chunk lists.
+        destroy();
+        // Reset used total counter
+        mUsedTotal = 0;
+        // Reset the first chunk info and counter info.
+        init(mUserBuffer, mUserBufSize);
+    }
+
+    void * getUserBuffer() const     { return mUserBuffer;  }
+    void * getUserBufferSize() const { return mUserBufSize; }
+
+    void * setUserBuffer(void * userBuffer, size_t bufSize) {
+        void * oldUserBuffer = mUserBuffer;
+        if (size >= kMinChunkCapacityThreshold) {
+            mUserBuffer  = userBuffer;
+            mUserBufSize = bufSize;
+            return oldUserBuffer;
+        }
+        return NULL;
+    }
+
 private:
     //! Copy constructor is not permitted.
     FastPoolAllocator(const FastPoolAllocator & rhs);               /* = delete */
@@ -99,10 +141,24 @@ private:
     }
 
     void init() {
-        if (kInnerChunkCapacity > sizeof(ChunkInfo))
+        if (kInnerChunkCapacity > kChunkCapacityLimit) {
             initInnerChunk();
-        else
+            if (kInnerChunkCapacity <= kMinChunkCapacityThreshold)
+                addNewChunk(0);
+        }
+        else {
             addNewChunk(0);
+        }
+    }
+
+    void init(void * buffer, size_t size) {
+        if (buffer != NULL) {
+            if (size > kMinChunkCapacityThreshold) {
+                initInnerChunk(buffer, size);
+                return;
+            }
+        }
+        init();
     }
 
     void initInnerChunk() {
@@ -113,10 +169,29 @@ private:
         newChunk->capacity = kInnerChunkCapacity;
 
         mChunkHead = newChunk;
+
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        mCapacityTotal = kInnerChunkCapacity;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */  
+    }
+
+    void initInnerChunk(void * buffer, size_t size) {
+        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(buffer);
+
+        newChunk->next     = NULL;
+        newChunk->used     = sizeof(ChunkInfo);
+        newChunk->capacity = size;
+
+        mChunkHead = newChunk;
+
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        mCapacityTotal = size;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */  
     }
 
     void * addNewChunk(size_t nChunkCapacity, size_t size) {
-        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::aligned_malloc(nChunkCapacity, kAlignmentSize));
+        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>
+                    (AllocatorType::aligned_malloc(nChunkCapacity, kAlignmentSize));
         jimi_assert(newChunk != NULL);
 
         // Do not handle out-of-memory explicitly.
@@ -136,7 +211,8 @@ private:
     }
 
     void * insertNewChunkToLast(size_t nChunkCapacity, size_t size) {
-        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::aligned_malloc(nChunkCapacity, kAlignmentSize));
+        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>
+                    (AllocatorType::aligned_malloc(nChunkCapacity, kAlignmentSize));
         jimi_assert(newChunk != NULL);
 
         // Do not handle out-of-memory explicitly.
@@ -156,8 +232,25 @@ private:
     }
 
 public:
+    size_t getUsed() const {
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        return (mUsedTotal + mChunkHead->used);
+#else
+        return 0;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
+    }
+
+    size_t getCapacity() const {
+#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+        return mCapacityTotal;
+#else
+        return 0;
+#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
+    }
+
     void * addNewChunk(size_t size) {
-        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>(AllocatorType::aligned_malloc(kChunkCapacity, kAlignmentSize));
+        ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>
+                    (AllocatorType::aligned_malloc(kChunkCapacity, kAlignmentSize));
         jimi_assert(newChunk != NULL);
 
         // Do not handle out-of-memory explicitly.
@@ -234,11 +327,13 @@ public:
 
     void * allocate(size_t size) {
         void * buffer;
+        size_t remain;
         jimi_assert(mChunkHead != NULL);
         // Default alignment size is 8
         size = JIMI_ALIGNED_TO(size, kAlignmentSize);
+        remain = mChunkHead->capacity - mChunkHead->used;
         // If the chunk has enough space to allocate size bytes
-        if (mChunkHead->used + size <= mChunkHead->capacity) {
+        if (size <= remain) {
             buffer = reinterpret_cast<char *>(mChunkHead) + mChunkHead->used;
             jimi_assert(buffer != NULL);
 
@@ -248,23 +343,32 @@ public:
         }
         else {
 #if !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) || (JSONFX_ALLOW_ALLOC_BIGSIZE == 0)
+            // The allocate size can not be greater than (kChunkCapacity - sizeof(ChunkInfo)).
+            jimi_assert(size <= (kChunkCapacity - sizeof(ChunkInfo)));
             // Add a default capacity size chunk
             buffer = addNewChunk(size);
 #else  /* !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
             // Add a default capacity size chunk
-            if (size <= kChunkCapacity) {
+            if (size <= (kChunkCapacity - sizeof(ChunkInfo))) {
                 buffer = addNewChunk(size);
             }
             else {
                 size_t newAllocSize = size + sizeof(ChunkInfo);
-                size_t newChunkCapacity = internal::RoundToPowerOf2(newAllocSize);
-                if ((newChunkCapacity - newAllocSize) > (mChunkHead->capacity - mChunkHead->used))
-                    buffer = addNewChunk(newChunkCapacity, size);
-                else
+                newAllocSize = JIMI_ALIGNED_TO(newAllocSize, kAlignmentSize);
+                if (remain >= 512) {
+                    // When remain >= 512
                     buffer = insertNewChunkToLast(newAllocSize, size);
+                }
+                else {
+                    // When remain < 512
+                    size_t newChunkCapacity = internal::RoundToPowerOf2(newAllocSize);
+                    if ((newChunkCapacity - newAllocSize) >= 1024)
+                        buffer = addNewChunk(newChunkCapacity, size);
+                    else
+                        buffer = insertNewChunkToLast(newAllocSize, size);
+                }
             }
 #endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
-
             jimi_assert(mChunkHead != NULL);
             jimi_assert(mChunkHead->next != NULL);
 
@@ -275,6 +379,7 @@ public:
 
     void * allocateLarge(size_t size) {
         size_t allocSize = size + sizeof(ChunkInfo);
+        allocSize = JIMI_ALIGNED_TO(allocSize, kAlignmentSize);
 
         void * buffer = insertNewChunkToLast(allocSize, size);
         jimi_assert(mChunkHead != NULL);

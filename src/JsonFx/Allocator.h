@@ -23,7 +23,7 @@
 namespace JsonFx {
 
 /* Just define for inheritance. */
-class StackAllocator {
+class HeapAllocator {
 #if 0
 public:
     static const bool kNeedFree = false;
@@ -43,7 +43,7 @@ public:
 };
 
 // C-RunTime Allocator
-class TrivialAllocator : public StackAllocator
+class TrivialAllocator : public HeapAllocator
 {
 public:
     static const bool kNeedFree = true;
@@ -67,7 +67,7 @@ public:
 template <size_t ChunkCapacity = gDefaultChunkCapacity,
           size_t InnerChunkCapacity = gDefaultInnerChunkCapacity,
           typename Allocator = DefaultAllocator>
-class StackPoolAllocator : public PoolAllocator
+class HeapPoolAllocator : public PoolAllocator
 {
 public:
     typedef Allocator AllocatorType;
@@ -78,12 +78,14 @@ public:
     static const size_t kInnerChunkCapacity = InnerChunkCapacity;
     static const size_t kAlignmentSize      = JSONFX_POOL_ALIGNMENT_SIZE;
 
-    StackPoolAllocator()  {}
-    ~StackPoolAllocator() {}
+    HeapPoolAllocator()  {}
+    ~HeapPoolAllocator() {}
 
     void destroy() { /* Do nothing! */ }
 
     void * allocate(size_t size) { return AllocatorType::malloc(size); }
+
+    void * allocateLarge(size_t size) { return AllocatorType::malloc(size); }
 
     void * reallocate(void * ptr, size_t size, size_t new_size) {
         return AllocatorType::realloc(ptr, size, new_size);
