@@ -22,6 +22,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="src\JsonFx\Stream">
+      <UniqueIdentifier>{02f74158-9de2-4601-ae90-9c2c61375068}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator.h">
@@ -62,6 +65,27 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h">
       <Filter>src\JsonFx\Allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\InputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\OutputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FileInputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FileOutputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringBufferInputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringBufferOutputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Closeable.h">
+      <Filter>src\JsonFx\Internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

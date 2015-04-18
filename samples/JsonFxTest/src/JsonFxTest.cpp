@@ -3,12 +3,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <tchar.h>
 #include <memory.h>
 #include <intrin.h>
 
 #include "JsonFx/Config.h"
 #include "JsonFx/JsonFx.h"
+
+//#include "JsonFx/Stream/InputStream.h"
+#include "JsonFx/Stream/FileInputStream.h"
 
 #include "jimic/system/time.h"
 
@@ -23,10 +25,34 @@ void JsonFx_Test()
     static const size_t kLoopCount = 1000;
 #endif
 
+    JsonFx::FileInputStream fileInputStream;
+    fileInputStream.close();
+    printf("\n");
+
+    JsonFx::InputStream *inputStream = new JsonFx::FileInputStream();
+    inputStream->close();
+    printf("\n");
+
+    if (inputStream)
+        delete inputStream;
+    printf("\n");
+
+    JsonFx::FileInputStreamImpl fileInputStreamImpl;
+    fileInputStreamImpl.close();
+    printf("\n");
+
+    JsonFx::InputStreamImpl<JsonFx::FileInputStreamImpl> *inputStreamImpl = new JsonFx::FileInputStreamImpl();
+    inputStreamImpl->close();
+    printf("\n");
+
+    if (inputStreamImpl)
+        delete inputStreamImpl;
+    printf("\n");
+
     jmc_timestamp_t starttime;
     jmc_timefloat_t elapsedtime;
     char buffer[4096] = { 0 };
-#if 0
+#if 1
     JsonFx::DefaultPoolAllocator poolAllocator(buffer, sizeof(buffer));
 #else
     JsonFx::DefaultPoolAllocator poolAllocator;

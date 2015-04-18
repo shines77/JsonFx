@@ -73,7 +73,7 @@ typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
 // Define default stack allocator
 typedef TrivialAllocator            DefaultAllocator;
 
-#if 0
+#if 1
 typedef SimplePoolAllocator<gDefaultChunkCapacity,
                             gDefaultInnerChunkCapacity,
                             DefaultAllocator>           DefaultPoolAllocator;
