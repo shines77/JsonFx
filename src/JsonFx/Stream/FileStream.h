@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_FILE_INPUTSTREAM_H_
-#define _JSONFX_STREAM_FILE_INPUTSTREAM_H_
+#ifndef _JSONFX_STREAM_FILESTREAM_H_
+#define _JSONFX_STREAM_FILESTREAM_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -13,19 +13,21 @@
 #include "jimi/basic/assert.h"
 
 #include "JsonFx/Stream/Detail/FileDef.h"
-#include "JsonFx/Stream/InputStream.h"
+#include "JsonFx/Stream/FileInputStream.h"
+#include "JsonFx/Stream/FileOutputStream.h"
 
 namespace JsonFx {
 
 // Forward declaration.
 template <typename T>
-class FileInputStreamBase;
+class FileStreamBase;
 
-// Define default FileInputStreamBase<T>.
-typedef FileInputStreamBase<_Char>  FileInputStream;
+// Define default FileStreamBase<T>.
+typedef FileStreamBase<_Char>  FileStream;
 
 template <typename T>
-class FileInputStreamBase : public InputStreamBase<T>
+class FileStreamBase : public InputStreamBase<T>,
+                       public OutputStreamBase<T>
 {
 public:
     typedef typename InputStreamBase<T>::CharType    CharType;
@@ -38,27 +40,27 @@ private:
     FILE *  mFile;
 
 public:
-    FileInputStreamBase() : mFile(NULL) {
-        printf("00 FileInputStreamBase<T>::FileInputStreamBase() visited.\n");
+    FileStreamBase() : mFile(NULL) {
+        printf("00 FileStreamBase<T>::FileStreamBase() visited.\n");
     }
 
-    FileInputStreamBase(FILE * hFile) : mFile(hFile) {
-        printf("00 FileInputStreamBase<T>::FileInputStreamBase(FILE * hFile) visited.\n");
+    FileStreamBase(FILE * hFile) : mFile(hFile) {
+        printf("00 FileStreamBase<T>::FileStreamBase(FILE * hFile) visited.\n");
     }
 
-    FileInputStreamBase(char * filename) : mFile(NULL) {
-        printf("00 FileInputStreamBase<T>::FileInputStreamBase(char * filename) visited.\n");
+    FileStreamBase(char * filename) : mFile(NULL) {
+        printf("00 FileStreamBase<T>::FileStreamBase(char * filename) visited.\n");
         mFile = fopen(filename, "rb");
     }
 
-    FileInputStreamBase(std::string filename) : mFile(NULL) {
-        printf("00 FileInputStreamBase<T>::FileInputStreamBase(std::string filename) visited.\n");
+    FileStreamBase(std::string filename) : mFile(NULL) {
+        printf("00 FileStreamBase<T>::FileStreamBase(std::string filename) visited.\n");
         mFile = fopen(filename.c_str(), "rb");
         jimi_assert(mFile != NULL);
     }
 
-    ~FileInputStreamBase() {
-        printf("01 FileInputStreamBase<T>::~FileInputStreamBase() visited.\n");
+    ~FileStreamBase() {
+        printf("01 FileStreamBase<T>::~FileStreamBase() visited.\n");
         close();
     }
 
@@ -67,7 +69,7 @@ public:
     }
 
     void close() {
-        printf("10 FileInputStreamBase<T>::close() visited.\n");
+        printf("10 FileStreamBase<T>::close() visited.\n");
         if (mFile != NULL) {
             fclose(mFile);
             mFile = NULL;
@@ -75,7 +77,7 @@ public:
     }
 
     int available() {
-        printf("10 FileInputStreamBase<T>::available() visited.\n");
+        printf("10 FileStreamBase<T>::available() visited.\n");
         return 0;
     }
     
@@ -97,4 +99,4 @@ public:
 
 }  // namespace JsonFx
 
-#endif  /* _JSONFX_STREAM_FILE_INPUTSTREAM_H_ */
+#endif  /* _JSONFX_STREAM_FILESTREAM_H_ */

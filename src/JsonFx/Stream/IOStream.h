@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_OUTPUTSTREAM_H_
-#define _JSONFX_STREAM_OUTPUTSTREAM_H_
+#ifndef _JSONFX_STREAM_IOSTREAM_H_
+#define _JSONFX_STREAM_IOSTREAM_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -9,56 +9,47 @@
 #include <stdio.h>
 
 #include "jimi/basic/stdsize.h"
-#include "JsonFx/Stream/IOStream.h"
+
+#include "JsonFx/Config.h"
+#include "JsonFx/Internal/Closeable.h"
 
 namespace JsonFx {
 
 // Forward declaration.
 template <typename T>
-class OutputStreamBase;
+class IOStreamBase;
 
-// Define default OutputStreamBase<T>
-typedef OutputStreamBase<_Char>  OutputStream;
+// Define default IOStreamBase<T>.
+typedef IOStreamBase<_Char>  IOStream;
 
 template <typename T>
-class OutputStreamBase : public IOStreamBase<T>
+class IOStreamBase : public internal::Closeable
 {
 public:
-    typedef typename IOStreamBase<T>::CharType    CharType;
-    typedef typename IOStreamBase<T>::SizeType    SizeType;
+    typedef T       CharType;
+    typedef size_t  SizeType;
 
 public:
     // Whether support mark() method?
     static const bool kSupportMarked = false;
 
 public:
-    OutputStreamBase() {
-        printf("00 OutputStreamBase<T>::OutputStreamBase() visited.\n");
+    IOStreamBase() {
+        printf("00 IOStreamBase<T>::IOStreamBase() visited.\n");
     }
 
-    ~OutputStreamBase() {
-        printf("00 OutputStreamBase<T>::~OutputStreamBase() visited.\n");
+    ~IOStreamBase() {
+        printf("00 IOStreamBase<T>::~IOStreamBase() visited.\n");
         close();
     }
 
     void close() {
-        printf("10 OutputStreamBase<T>::close() visited.\n");
-#if 0
-        T * pThis = static_cast<T *>(this);
-        if (pThis != NULL)
-            pThis->close();
-#endif
+        printf("10 IOStreamBase<T>::close() visited.\n");
     };
 
     int available() {
-        printf("10 OutputStreamBase<T>::available() visited.\n");
-#if 0
-        T * pThis = static_cast<T *>(this);
-        if (pThis != NULL)
-            return pThis->available();
-        else
-            return 0;
-#endif
+        printf("10 IOStreamBase<T>::available() visited.\n");
+        return 0;
     }
     
     void reset() {}
@@ -79,4 +70,4 @@ public:
 
 }  // namespace JsonFx
 
-#endif  /* _JSONFX_STREAM_OUTPUTSTREAM_H_ */
+#endif  /* _JSONFX_STREAM_IOSTREAM_H_ */

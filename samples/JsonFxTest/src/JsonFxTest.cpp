@@ -6,13 +6,14 @@
 #include <memory.h>
 #include <intrin.h>
 
-#include "JsonFx/Config.h"
+#include "jimic/system/time.h"
+
 #include "JsonFx/JsonFx.h"
 
-//#include "JsonFx/Stream/InputStream.h"
+#include "JsonFx/Config.h"
+#include "JsonFx/Stream/InputStream.h"
 #include "JsonFx/Stream/FileInputStream.h"
-
-#include "jimic/system/time.h"
+#include "JsonFx/Stream/FileStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
 //#include "jimi/basic/vld.h"
@@ -24,30 +25,6 @@ void JsonFx_Test()
 #else
     static const size_t kLoopCount = 1000;
 #endif
-
-    JsonFx::FileInputStream fileInputStream;
-    fileInputStream.close();
-    printf("\n");
-
-    JsonFx::InputStream *inputStream = new JsonFx::FileInputStream();
-    inputStream->close();
-    printf("\n");
-
-    if (inputStream)
-        delete inputStream;
-    printf("\n");
-
-    JsonFx::FileInputStreamImpl fileInputStreamImpl;
-    fileInputStreamImpl.close();
-    printf("\n");
-
-    JsonFx::InputStreamImpl<JsonFx::FileInputStreamImpl> *inputStreamImpl = new JsonFx::FileInputStreamImpl();
-    inputStreamImpl->close();
-    printf("\n");
-
-    if (inputStreamImpl)
-        delete inputStreamImpl;
-    printf("\n");
 
     jmc_timestamp_t starttime;
     jmc_timefloat_t elapsedtime;
@@ -148,6 +125,27 @@ void JsonFx_BasicDocumentTest2()
     value.visit();
 }
 
+void JsonFx_Stream_Test()
+{
+    JsonFx::FileStream fileStream;
+    fileStream.close();
+    printf("\n");
+
+#if 1
+    JsonFx::FileInputStream fileInputStream;
+    fileInputStream.close();
+    printf("\n");
+#endif
+
+    JsonFx::InputStream *inputStream = new JsonFx::FileInputStream();
+    inputStream->close();
+    printf("\n");
+
+    if (inputStream)
+        delete inputStream;
+    printf("\n");
+}
+
 int main(int argn, char * argv[])
 {
     JsonFx_Test();
@@ -155,6 +153,8 @@ int main(int argn, char * argv[])
 
     JsonFx_BasicDocumentTest1();
     JsonFx_BasicDocumentTest2();
+
+    //JsonFx_Stream_Test();
 
     printf("kUTF8 = %d\n\n", JsonFx::kUTF8);
 

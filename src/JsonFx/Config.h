@@ -35,6 +35,9 @@
 #endif  /* _UNICODE */
 #endif  /* _Tx */
 
+//! Default encoding chartype
+#define JSONFX_DEFAULT_CHARTYPE     char
+
 namespace JsonFx {
 
 /* define in "JsonFx/Allcator.h" */
@@ -64,11 +67,9 @@ static const size_t gDefaultChunkCapacity = 16 * JSONFX_DEFAULT_PAGESIZE;
 //! Default StdPoolAllocator inner chunk capacity (On stack, recommended settings for less than or equal 64KB.)
 static const size_t gDefaultInnerChunkCapacity = JSONFX_POOL_INNER_BUFSIZE;
 
-//! Default encoding chartype
-#define JSONFX_DEFAULT_CHARTYPE     char
-
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
+typedef JSONFX_DEFAULT_CHARTYPE     _Char;
 
 // Define default stack allocator
 typedef TrivialAllocator            DefaultAllocator;

@@ -13,24 +13,24 @@ namespace JsonFx {
 
 namespace internal {
 
-class Closeable {
+class ICloseable {
 public:
     virtual void close() = 0;
 };
 
-class CloseableImpl {
+class Closeable {
 public:
-    CloseableImpl()  {
-        printf("00 internal::CloseableImpl::CloseableImpl() visited.\n");
+    Closeable()  {
+        printf("00 internal::Closeable::Closeable() visited.\n");
     }
 
-    ~CloseableImpl() {
-        printf("01 internal::CloseableImpl::~CloseableImpl() visited.\n");
+    ~Closeable() {
+        printf("01 internal::Closeable::~Closeable() visited.\n");
         close();
     }
 
     void close() {
-        printf("10 internal::CloseableImpl::close() visited.\n");
+        printf("10 internal::Closeable::close() visited.\n");
     }
 };
 
