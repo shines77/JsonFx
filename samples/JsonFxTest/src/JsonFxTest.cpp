@@ -16,7 +16,9 @@
 #include "JsonFx/Stream/FileStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
-//#include "jimi/basic/vld.h"
+//#include "jimi/basic/vld.h"\
+
+using namespace JsonFx;
 
 void JsonFx_Test()
 {
@@ -30,14 +32,14 @@ void JsonFx_Test()
     jmc_timefloat_t elapsedtime;
     char buffer[4096] = { 0 };
 #if 1
-    JsonFx::DefaultPoolAllocator poolAllocator(buffer, sizeof(buffer));
+    DefaultPoolAllocator poolAllocator(buffer, sizeof(buffer));
 #else
-    JsonFx::DefaultPoolAllocator poolAllocator;
+    DefaultPoolAllocator poolAllocator;
 #endif
 
     static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
     static const char json_test[] = "[0, 1, 2, 3]";
-    JsonFx::Document document(&poolAllocator);
+    Document document(&poolAllocator);
 
     printf("\n");
     starttime = jmc_get_timestamp();
@@ -60,8 +62,8 @@ void JsonFx_Test()
 
     document.test();
 
-    JsonFx::Value value;
-    JsonFx::Value val1;
+    Value value;
+    Value val1;
     value.visit();
 }
 
@@ -78,7 +80,7 @@ void JsonFx_Test2()
 
     static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
     static const char json_test[] = "[0, 1, 2, 3]";
-    JsonFx::Document document;
+    Document document;
 
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
@@ -100,44 +102,42 @@ void JsonFx_Test2()
 
     document.test();
 
-    JsonFx::Value value;
-    JsonFx::Value val1;
+    Value value;
+    Value val1;
     value.visit();
 }
 
 void JsonFx_BasicDocumentTest1()
 {
-    JsonFx::BasicDocument<JsonFx::CharSet::UTF16> document;
+    BasicDocument<CharSet::UTF16> document;
     document.parse(L"[0, 1, 2, 3]");
     document.visit();
 
-    JsonFx::BasicValue<JsonFx::CharSet::UTF16> value;
+    BasicValue<CharSet::UTF16> value;
     value.visit();
 }
 
 void JsonFx_BasicDocumentTest2()
 {
-    JsonFx::BasicDocument<JsonFx::_UTF16> document;
+    BasicDocument<_UTF16> document;
     document.parse(L"[0, 1, 2, 3]");
     document.visit();
 
-    JsonFx::BasicValue<JsonFx::_UTF16> value;
+    BasicValue<_UTF16> value;
     value.visit();
 }
 
 void JsonFx_Stream_Test()
 {
-    JsonFx::FileStream fileStream;
+    FileStream fileStream;
     fileStream.close();
     printf("\n");
 
-#if 1
-    JsonFx::FileInputStream fileInputStream;
+    FileInputStream fileInputStream;
     fileInputStream.close();
     printf("\n");
-#endif
 
-    JsonFx::InputStream *inputStream = new JsonFx::FileInputStream();
+    InputStream *inputStream = new FileInputStream();
     inputStream->close();
     printf("\n");
 
@@ -156,7 +156,7 @@ int main(int argn, char * argv[])
 
     //JsonFx_Stream_Test();
 
-    printf("kUTF8 = %d\n\n", JsonFx::kUTF8);
+    printf("kUTF8 = %d\n\n", kUTF8);
 
     system("pause");
     return 0;

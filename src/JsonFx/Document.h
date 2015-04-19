@@ -87,8 +87,8 @@ private:
         }
     }
 
-    // The space chars including " \t\n\r"
-    bool isSpace(const CharType c) const {
+    // The whitespace chars including " \t\n\r"
+    bool isWhiteSpaces(const CharType c) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
         return (c == _Ch(' ')) || (c >= _Ch('\t') && c <= _Ch('\r'));
     }
@@ -139,8 +139,8 @@ private:
                         // is more than PoolAllocator's kChunkCapacoty bytes, so we find
                         // out the string's length first, and allocate the enough memory
                         // to fill the string's characters.
-                        size_t lenNow = cursor - begin;
-                        p = startLargeString<beginToken>(p, lenNow);
+                        size_t lenScanned = cursor - begin;
+                        p = startLargeString<beginToken>(p, lenScanned);
                         return p;
                     }
                 }
@@ -168,7 +168,7 @@ private:
     }
 
     template <CharType beginToken>
-    CharType * startLargeString(CharType * p, size_t lenNow) {
+    JIMI_NOINLINE_DECLARE(CharType *) startLargeString(CharType * p, size_t lenScanned) {
         // The size of string length field
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
 
@@ -176,7 +176,7 @@ private:
         CharType *origPtr, *savePtr;
 
         // Get the original begin address of p.
-        origPtr = p - lenNow;
+        origPtr = p - lenScanned;
         savePtr = p;
 
         // Find the full length of string
@@ -187,7 +187,7 @@ private:
         // The length of tail characters of string.
         lenTail = p - savePtr;
         // Get the full length
-        lenTotal = lenNow + lenTail + 1;
+        lenTotal = lenScanned + lenTail + 1;
 
         // Allocate the large chunk, and insert it to last.
         jimi_assert(mPoolAllocator != NULL);
@@ -244,24 +244,26 @@ BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
 
     while (*cur != _Ch('\0')) {
         // Skip space chars
-        while (isSpace(*cur))
+        while (isWhiteSpaces(*cur))
             ++cur;
-        if (*cur == _Ch('{')) {
-            // Start a object
-            ++cur;
-            cur = startObject(cur);
-        }
-        else if (*cur == _Ch('"')) {
+        if (*cur == _Ch('"')) {
             // Start a string begin from token "
             beginToken = *cur;
             ++cur;
             cur = startString<_Ch('"')>(cur);
         }
+#if 0
         else if (*cur == _Ch('\'')) {
             // Start a string begin from token \'
             beginToken = *cur;
             ++cur;
             cur = startString<_Ch('\'')>(cur);
+        }
+#endif
+        if (*cur == _Ch('{')) {
+            // Start a object
+            ++cur;
+            cur = startObject(cur);
         }
         if (*cur == _Ch('[')) {
             // Start a array
