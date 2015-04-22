@@ -19,17 +19,17 @@ namespace JsonFx {
 
 // Forward declaration.
 template <typename T>
-class FileOutputStreamBase;
+class BasicFileOutputStream;
 
-// Define default FileOutputStreamBase<T>.
-typedef FileOutputStreamBase<_Char>  FileOutputStream;
+// Define default BasicFileOutputStream<T>.
+typedef BasicFileOutputStream<_Char>  FileOutputStream;
 
 template <typename T>
-class FileOutputStreamBase : public InputStreamBase<T>
+class BasicFileOutputStream : public BasicOutputStream<T>
 {
 public:
-    typedef typename InputStreamBase<T>::CharType    CharType;
-    typedef typename InputStreamBase<T>::SizeType    SizeType;
+    typedef typename BasicOutputStream<T>::CharType    CharType;
+    typedef typename BasicOutputStream<T>::SizeType    SizeType;
 
 public:
     static const bool kSupportMarked = true;
@@ -38,27 +38,27 @@ private:
     FILE *  mFile;
 
 public:
-    FileOutputStreamBase() : mFile(NULL) {
-        printf("00 FileOutputStreamBase<T>::FileOutputStreamBase() visited.\n");
+    BasicFileOutputStream() : mFile(NULL) {
+        printf("00 BasicFileOutputStream<T>::BasicFileOutputStream() visited.\n");
     }
 
-    FileOutputStreamBase(FILE * hFile) : mFile(hFile) {
-        printf("00 FileOutputStreamBase<T>::FileOutputStreamBase(FILE * hFile) visited.\n");
+    BasicFileOutputStream(FILE * hFile) : mFile(hFile) {
+        printf("00 BasicFileOutputStream<T>::BasicFileOutputStream(FILE * hFile) visited.\n");
     }
 
-    FileOutputStreamBase(char * filename) : mFile(NULL) {
-        printf("00 FileOutputStreamBase<T>::FileOutputStreamBase(char * filename) visited.\n");
+    BasicFileOutputStream(char * filename) : mFile(NULL) {
+        printf("00 BasicFileOutputStream<T>::BasicFileOutputStream(char * filename) visited.\n");
         mFile = fopen(filename, "rb");
     }
 
-    FileOutputStreamBase(std::string filename) : mFile(NULL) {
-        printf("00 FileOutputStreamBase<T>::FileOutputStreamBase(std::string filename) visited.\n");
+    BasicFileOutputStream(std::string filename) : mFile(NULL) {
+        printf("00 BasicFileOutputStream<T>::BasicFileOutputStream(std::string filename) visited.\n");
         mFile = fopen(filename.c_str(), "rb");
         jimi_assert(mFile != NULL);
     }
 
-    ~FileOutputStreamBase() {
-        printf("01 FileOutputStreamBase<T>::~FileOutputStreamBase() visited.\n");
+    ~BasicFileOutputStream() {
+        printf("01 BasicFileOutputStream<T>::~BasicFileOutputStream() visited.\n");
         close();
     }
 
@@ -67,7 +67,7 @@ public:
     }
 
     void close() {
-        printf("10 FileOutputStreamBase<T>::close() visited.\n");
+        printf("10 BasicFileOutputStream<T>::close() visited.\n");
         if (mFile != NULL) {
             fclose(mFile);
             mFile = NULL;
@@ -75,15 +75,15 @@ public:
     }
 
     int available() {
-        printf("10 FileOutputStreamBase<T>::available() visited.\n");
+        printf("10 BasicFileOutputStream<T>::available() visited.\n");
         return 0;
     }
     
-    void reset() {}
-    size_t skip(size_t n) { return 0; }
-
-    void mark(int readlimit) {}
     bool markSupported() { return kSupportMarked; }
+    void mark(int readlimit) {}
+    void reset() {}
+
+    size_t skip(size_t n) { return 0; }
 
     /**
      * Reads the next byte of data from the input stream. The value byte is returned as an int in the range 0 to 255.

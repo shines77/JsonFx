@@ -108,6 +108,18 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FileStream.h">
       <Filter>src\JsonFx\Stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\AutoCloseable.h">
+      <Filter>src\JsonFx\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Readable.h">
+      <Filter>src\JsonFx\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Writeable.h">
+      <Filter>src\JsonFx\Internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\IOStreamRoot.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\JsonFx\JsonFx.cpp">

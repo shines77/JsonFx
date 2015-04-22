@@ -9,40 +9,42 @@
 #include <stdio.h>
 
 #include "jimi/basic/stdsize.h"
-#include "JsonFx/Stream/IOStream.h"
+#include "JsonFx/Internal/Writeable.h"
+#include "JsonFx/Stream/IOStreamRoot.h"
 
 namespace JsonFx {
 
 // Forward declaration.
 template <typename T>
-class OutputStreamBase;
+class BasicOutputStream;
 
-// Define default OutputStreamBase<T>
-typedef OutputStreamBase<_Char>  OutputStream;
+// Define default BasicOutputStream<T>
+typedef BasicOutputStream<_Char>  OutputStream;
 
 template <typename T>
-class OutputStreamBase : public IOStreamBase<T>
+class BasicOutputStream : virtual public BasicIOStreamRoot<T>,
+                          public internal::Writeable<T>
 {
 public:
-    typedef typename IOStreamBase<T>::CharType    CharType;
-    typedef typename IOStreamBase<T>::SizeType    SizeType;
+    typedef typename BasicIOStreamRoot<T>::CharType  CharType;
+    typedef typename BasicIOStreamRoot<T>::SizeType  SizeType;
 
 public:
     // Whether support mark() method?
     static const bool kSupportMarked = false;
 
 public:
-    OutputStreamBase() {
-        printf("00 OutputStreamBase<T>::OutputStreamBase() visited.\n");
+    BasicOutputStream() {
+        printf("00 BasicOutputStream<T>::BasicOutputStream() visited.\n");
     }
 
-    ~OutputStreamBase() {
-        printf("00 OutputStreamBase<T>::~OutputStreamBase() visited.\n");
+    ~BasicOutputStream() {
+        printf("00 BasicOutputStream<T>::~BasicOutputStream() visited.\n");
         close();
     }
 
     void close() {
-        printf("10 OutputStreamBase<T>::close() visited.\n");
+        printf("10 BasicOutputStream<T>::close() visited.\n");
 #if 0
         T * pThis = static_cast<T *>(this);
         if (pThis != NULL)
@@ -51,7 +53,7 @@ public:
     };
 
     int available() {
-        printf("10 OutputStreamBase<T>::available() visited.\n");
+        printf("10 BasicOutputStream<T>::available() visited.\n");
 #if 0
         T * pThis = static_cast<T *>(this);
         if (pThis != NULL)
@@ -61,11 +63,11 @@ public:
 #endif
     }
     
-    void reset() {}
-    size_t skip(size_t n) { return 0; }
-
-    void mark(int readlimit) {}
     bool markSupported() { return kSupportMarked; }
+    void mark(int readlimit) {}
+    void reset() {}
+
+    size_t skip(size_t n) { return 0; }
 
     /**
      * Reads the next byte of data from the input stream. The value byte is returned as an int in the range 0 to 255.

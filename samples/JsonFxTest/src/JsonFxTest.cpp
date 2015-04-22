@@ -6,6 +6,15 @@
 #include <memory.h>
 #include <intrin.h>
 
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <istream>
+#include <ostream>
+#include <fstream>
+#include <strstream>
+#include <streambuf>
+
 #include "jimic/system/time.h"
 
 #include "JsonFx/JsonFx.h"
@@ -16,7 +25,7 @@
 #include "JsonFx/Stream/FileStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
-//#include "jimi/basic/vld.h"\
+//#include "jimi/basic/vld.h"
 
 using namespace JsonFx;
 
@@ -144,6 +153,16 @@ void JsonFx_Stream_Test()
     if (inputStream)
         delete inputStream;
     printf("\n");
+
+#if 0
+    const char test_str[] = "This is a test string.";
+    char buf[64];
+
+    std::ios ios1;
+    std::ios_base ios_base1;
+    std::iostream iostream1;
+#endif
+
 }
 
 int main(int argn, char * argv[])
@@ -154,7 +173,7 @@ int main(int argn, char * argv[])
     JsonFx_BasicDocumentTest1();
     JsonFx_BasicDocumentTest2();
 
-    //JsonFx_Stream_Test();
+    JsonFx_Stream_Test();
 
     printf("kUTF8 = %d\n\n", kUTF8);
 
