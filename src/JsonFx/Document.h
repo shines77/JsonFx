@@ -9,7 +9,6 @@
 #include <stdio.h>
 
 #include "JsonFx/Config.h"
-#include "JsonFx/CharSet.h"
 #include "JsonFx/Allocator.h"
 #include "JsonFx/Value.h"
 
@@ -17,9 +16,22 @@
 
 namespace JsonFx {
 
+// Forward declaration.
 template <typename Encoding = JSONFX_DEFAULT_ENCODING,
           typename PoolAllocator = DefaultPoolAllocator,
           typename Allocator = DefaultAllocator>
+class BasicDocument;
+
+// Define default Document class type
+typedef BasicDocument<>    Document;
+
+// Save and setting the packing alignment
+#pragma pack(push)
+#pragma pack(1)
+
+template <typename Encoding /* = JSONFX_DEFAULT_ENCODING */,
+          typename PoolAllocator /* = DefaultPoolAllocator */,
+          typename Allocator /* = DefaultAllocator */>
 class BasicDocument : public BasicValue<Encoding, PoolAllocator>
 {
 public:
@@ -108,7 +120,7 @@ private:
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
         // Reserve string size
         static const size_t kReserveStringSize = 8;
-        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->reserve(kSizeOfHeadField, kReserveStringSize));
+        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfHeadField, kReserveStringSize));
         jimi_assert(cursor != NULL);
         CharType * begin   = cursor;
         CharType * bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
@@ -120,7 +132,7 @@ private:
             else {
                 // The remain space in the active chunk is not enough to store the string's
                 // characters, so we allocate a new chunk to store it.
-                CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->fastReserve(kSizeOfHeadField, kReserveStringSize));
+                CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->addNewChunkAndSkip(kSizeOfHeadField, kReserveStringSize));
                 CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
                 while (begin != cursor) {
@@ -222,9 +234,6 @@ private:
     }
 };
 
-// Define default Document class type
-typedef BasicDocument<>     Document;
-
 template <typename Encoding, typename PoolAllocator, typename Allocator>
 void BasicDocument<Encoding, PoolAllocator, Allocator>::visit()
 {
@@ -278,6 +287,12 @@ BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
     return *this;
 }
 
+// Recover the packing alignment
+#pragma pack(pop)
+
 }  // namespace JsonFx
+
+// Define default Document class type
+typedef JsonFx::BasicDocument<>     jfxDocument;
 
 #endif  /* !_JSONFX_DOCUMENT_H_ */

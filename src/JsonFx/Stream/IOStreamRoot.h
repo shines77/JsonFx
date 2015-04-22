@@ -16,11 +16,11 @@
 namespace JsonFx {
 
 // Forward declaration.
-template <typename T>
+template <typename T = JSONFX_DEFAULT_CHARTYPE>
 class BasicIOStreamRoot;
 
 // Define default BasicIOStreamRoot<T>.
-typedef BasicIOStreamRoot<_Char>  IOStreamRoot;
+typedef BasicIOStreamRoot<>  IOStreamRoot;
 
 template <typename T>
 class BasicIOStreamRoot : public internal::Closeable<T>
@@ -60,5 +60,8 @@ public:
 };
 
 }  // namespace JsonFx
+
+// Define default IOStreamRoot class type
+typedef JsonFx::BasicIOStreamRoot<JSONFX_DEFAULT_CHARTYPE>    jfxIOStreamRoot;
 
 #endif  /* _JSONFX_STREAM_IOSTREAMROOT_H_ */

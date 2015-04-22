@@ -14,6 +14,10 @@
 
 namespace JsonFx {
 
+// Save and setting the packing alignment
+#pragma pack(push)
+#pragma pack(1)
+
 template <size_t ChunkCapacity = gDefaultChunkCapacity,
           size_t InnerChunkCapacity = gDefaultInnerChunkCapacity,
           typename Allocator = DefaultAllocator>
@@ -271,7 +275,7 @@ public:
         return cursor;
     }
 
-    void * reserve(size_t skipSize) {
+    void * skip(size_t skipSize) {
         jimi_assert(mChunkHead != NULL);
         if (skipSize <= (mChunkHead->capacity - mChunkHead->used)) {
             return reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used + skipSize);
@@ -282,7 +286,7 @@ public:
         }
     }
 
-    void * reserve(size_t skipSize, size_t reserveSize) {
+    void * skip(size_t skipSize, size_t reserveSize) {
         jimi_assert(mChunkHead != NULL);
         if ((skipSize + reserveSize) <= (mChunkHead->capacity - mChunkHead->used)) {
             return reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used + skipSize);
@@ -293,11 +297,11 @@ public:
         }
     }
 
-    inline void * fastReserve(size_t skipSize) {
-        return fastReserve(skipSize, 0);
+    inline void * addNewChunkAndSkip(size_t skipSize) {
+        return addNewChunkAndSkip(skipSize, 0);
     }
 
-    inline void * fastReserve(size_t skipSize, size_t reserveSize) {
+    inline void * addNewChunkAndSkip(size_t skipSize, size_t reserveSize) {
         jimi_assert(mChunkHead != NULL);
         void * cursor;
         if ((skipSize + reserveSize) <= kChunkCapacity) {
@@ -414,6 +418,9 @@ public:
     static void deallocate(void * ptr) { (void)ptr; }                           /* Do nothing! */
     static void deallocate(void * ptr, size_t size) { (void)ptr; (void)size; }  /* Do nothing! */
 };
+
+// Recover the packing alignment
+#pragma pack(pop)
 
 }  // namespace JsonFx
 

@@ -6,6 +6,11 @@
 #pragma once
 #endif
 
+#include "JsonFx/CharSet.h"
+
+//! Default encoding chartype
+#define JSONFX_DEFAULT_CHARTYPE         JSONFX_CHARTYPE
+
 //! The default system pagesize.
 #define JSONFX_DEFAULT_PAGESIZE         4096
 
@@ -34,9 +39,6 @@
 #define _Tx(text)      text
 #endif  /* _UNICODE */
 #endif  /* _Tx */
-
-//! Default encoding chartype
-#define JSONFX_DEFAULT_CHARTYPE     char
 
 namespace JsonFx {
 
@@ -69,12 +71,12 @@ static const size_t gDefaultInnerChunkCapacity = JSONFX_POOL_INNER_BUFSIZE;
 
 // Define default char type
 typedef JSONFX_DEFAULT_CHARTYPE     DefaultCharType;
-typedef JSONFX_DEFAULT_CHARTYPE     _Char;
+typedef JSONFX_DEFAULT_CHARTYPE     _CharT;
 
 // Define default stack allocator
 typedef TrivialAllocator            DefaultAllocator;
 
-#if 1
+#if 0
 typedef SimplePoolAllocator<gDefaultChunkCapacity,
                             gDefaultInnerChunkCapacity,
                             DefaultAllocator>           DefaultPoolAllocator;

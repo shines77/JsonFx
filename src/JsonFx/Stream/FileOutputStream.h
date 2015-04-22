@@ -18,11 +18,11 @@
 namespace JsonFx {
 
 // Forward declaration.
-template <typename T>
+template <typename T = JSONFX_DEFAULT_CHARTYPE>
 class BasicFileOutputStream;
 
 // Define default BasicFileOutputStream<T>.
-typedef BasicFileOutputStream<_Char>  FileOutputStream;
+typedef BasicFileOutputStream<>  FileOutputStream;
 
 template <typename T>
 class BasicFileOutputStream : public BasicOutputStream<T>

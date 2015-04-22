@@ -161,8 +161,8 @@ void JsonFx_Stream_Test()
     std::ios ios1;
     std::ios_base ios_base1;
     std::iostream iostream1;
+    std::istream is;
 #endif
-
 }
 
 int main(int argn, char * argv[])
@@ -173,7 +173,7 @@ int main(int argn, char * argv[])
     JsonFx_BasicDocumentTest1();
     JsonFx_BasicDocumentTest2();
 
-    JsonFx_Stream_Test();
+    //JsonFx_Stream_Test();
 
     printf("kUTF8 = %d\n\n", kUTF8);
 

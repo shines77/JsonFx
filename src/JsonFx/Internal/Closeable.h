@@ -7,8 +7,8 @@
 #endif
 
 #include <stdio.h>
-#include "jimi/basic/stdsize.h"
 
+#include "jimi/basic/stdsize.h"
 #include "JsonFx/Internal/AutoCloseable.h"
 
 /* Whether use template polymorphism ? */

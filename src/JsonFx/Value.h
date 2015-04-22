@@ -13,7 +13,6 @@
 #include "jimi/basic/stdsize.h"
 
 #include "JsonFx/Config.h"
-#include "JsonFx/CharSet.h"
 #include "JsonFx/Allocator.h"
 #include "JsonFx/StringRef.h"
 
@@ -104,8 +103,12 @@ enum ValueTypeMask {
 };
 
 // Forward declaration.
-template <typename Encoding, typename PoolAllocator>
+template <typename Encoding = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocator = DefaultPoolAllocator>
 class BasicValue;
+
+// Define default Value class type
+typedef BasicValue<>    Value;
 
 template <typename Encoding = JSONFX_DEFAULT_ENCODING,
           typename PoolAllocator = DefaultPoolAllocator> 
@@ -188,8 +191,8 @@ private:
 #pragma pack(push)
 #pragma pack(1)
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING,
-          typename PoolAllocator = DefaultPoolAllocator>
+template <typename Encoding /* = JSONFX_DEFAULT_ENCODING */,
+          typename PoolAllocator /* = DefaultPoolAllocator */>
 class BasicValue {
 public:
     typedef typename Encoding::CharType     CharType;
@@ -456,9 +459,9 @@ void BasicValue<Encoding, PoolAllocator>::visit()
     printf("JsonFx::BasicValue::visit(). EncodingType = %d\n\n", EncodingType::type);
 }
 
-// Define default Value class type
-typedef BasicValue<>   Value;
-
 }  // namespace JsonFx
+
+// Define default Value class type
+typedef JsonFx::BasicValue<>     jfxValue;
 
 #endif  /* !_JSONFX_VALUE_H_ */

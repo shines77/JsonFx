@@ -16,19 +16,19 @@
 namespace JsonFx {
 
 // Forward declaration.
-template <typename T>
+template <typename T = JSONFX_DEFAULT_CHARTYPE>
 class BasicIOStream;
 
 // Define default BasicIOStream<T>.
-typedef BasicIOStream<_Char>  IOStream;
+typedef BasicIOStream<>  IOStream;
 
 template <typename T>
 class BasicIOStream : public BasicInputStream<T>,
                       public BasicOutputStream<T>
 {
 public:
-    typedef T       CharType;
-    typedef size_t  SizeType;
+    typedef typename BasicInputStream<T>::CharType  CharType;
+    typedef typename BasicInputStream<T>::SizeType  SizeType;
 
 public:
     // Whether support mark() method?
@@ -71,5 +71,8 @@ public:
 };
 
 }  // namespace JsonFx
+
+// Define default IOStream class type
+typedef JsonFx::BasicIOStream<JSONFX_DEFAULT_CHARTYPE>    jfxIOStream;
 
 #endif  /* _JSONFX_STREAM_IOSTREAM_H_ */

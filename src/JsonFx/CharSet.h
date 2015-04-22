@@ -6,47 +6,78 @@
 #pragma once
 #endif
 
-#include "JsonFx/Config.h"
+//! Default encoding chartype
+#define JSONFX_ENCODING     JSONFX_UTF8
+
+#define JSONFX_UNKNOWN      0
+#define JSONFX_UTF8         1
+
+#define JSONFX_UTF16        2
+#define JSONFX_UTF16LE      3
+#define JSONFX_UTF16BE      4
+
+#define JSONFX_UTF32        5
+#define JSONFX_UTF32LE      6
+#define JSONFX_UTF32BE      7
+
+#ifndef JSONFX_ENCODING
+#define JSONFX_ENCODING     JSONFX_UTF8
+#endif
+
+#ifdef JSONFX_CHARTYPE
+#undef JSONFX_CHARTYPE
+#endif
+
+#if (JSONFX_ENCODING == JSONFX_UTF16) || (JSONFX_ENCODING == JSONFX_UTF16LE) || (JSONFX_ENCODING == JSONFX_UTF16BE)
+  #if defined(__linux__)
+    #define JSONFX_CHARTYPE     unsigned short
+  #else
+    #define JSONFX_CHARTYPE     wchat_t
+  #endif
+#elif (JSONFX_ENCODING == JSONFX_UTF32) || (JSONFX_ENCODING == JSONFX_UTF32LE) || (JSONFX_ENCODING == JSONFX_UTF32BE)
+  #if defined(__linux__)
+    #define JSONFX_CHARTYPE     wchat_t
+  #else
+    #define JSONFX_CHARTYPE     unsigned
+  #endif
+#else
+    #define JSONFX_CHARTYPE     char
+#endif
 
 /* Whether use class wrapper in encoding classes? */
-#define ENCODING_USE_CLASS_WRAPPER      1
+#define ENCODING_USE_CLASS_WRAPPER      0
 
 namespace JsonFx {
 
 enum {
-    kUTFUnknown,
-    kUTF8,
+    kUTFUnknown = JSONFX_UNKNOWN,
+    kUTF8       = JSONFX_UTF8,
 
-    kUTF16,
-    kUTF16LE,
-    kUTF16BE,
+    kUTF16      = JSONFX_UTF16,
+    kUTF16LE    = JSONFX_UTF16LE,
+    kUTF16BE    = JSONFX_UTF16BE,
 
-    kUTF32,
-    kUTF32LE,
-    kUTF32BE,
+    kUTF32      = JSONFX_UTF32,
+    kUTF32LE    = JSONFX_UTF32LE,
+    kUTF32BE    = JSONFX_UTF32BE,
 
     kUTFMax
 };
 
-template <typename _CharType = JSONFX_DEFAULT_CHARTYPE,
+template <typename CharT = JSONFX_CHARTYPE,
           size_t _EncodingType = kUTFUnknown>
 struct BasicEncoding
 {
 public:
-    typedef _CharType CharType;
+    typedef CharT CharType;
     enum { type = _EncodingType };
 };
 
 // Define default encoding -- BasicEncoding<char, kUTF8>
-#define JSONFX_DEFAULT_ENCODING     BasicEncoding<JSONFX_DEFAULT_CHARTYPE, kUTF8>
+#define JSONFX_DEFAULT_ENCODING     BasicEncoding<JSONFX_CHARTYPE, JSONFX_ENCODING>
 
 // Define default Encoding class type
-typedef BasicEncoding<JSONFX_DEFAULT_CHARTYPE, kUTF8>  Encoding;
-
-// Define default encoding type -- CharSet::UTF8
-#if defined(JSONFX_DEFAULT_ENCODING)
-typedef JSONFX_DEFAULT_ENCODING     DefaultEncoding;
-#endif
+typedef JSONFX_DEFAULT_ENCODING     Encoding;
 
 #if defined(ENCODING_USE_CLASS_WRAPPER) && (ENCODING_USE_CLASS_WRAPPER != 0)
 

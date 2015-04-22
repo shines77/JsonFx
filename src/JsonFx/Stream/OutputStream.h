@@ -15,15 +15,15 @@
 namespace JsonFx {
 
 // Forward declaration.
-template <typename T>
+template <typename T = JSONFX_DEFAULT_CHARTYPE>
 class BasicOutputStream;
 
 // Define default BasicOutputStream<T>
-typedef BasicOutputStream<_Char>  OutputStream;
+typedef BasicOutputStream<>  OutputStream;
 
 template <typename T>
 class BasicOutputStream : virtual public BasicIOStreamRoot<T>,
-                          public internal::Writeable<T>
+                                  public internal::Writeable<T>
 {
 public:
     typedef typename BasicIOStreamRoot<T>::CharType  CharType;
@@ -80,5 +80,8 @@ public:
 };
 
 }  // namespace JsonFx
+
+// Define default OutputStream class type
+typedef JsonFx::BasicOutputStream<JSONFX_DEFAULT_CHARTYPE>    jfxOutputStream;
 
 #endif  /* _JSONFX_STREAM_OUTPUTSTREAM_H_ */
