@@ -17,9 +17,9 @@
 namespace JsonFx {
 
 // Forward declaration.
-template <typename Encoding = JSONFX_DEFAULT_ENCODING,
-          typename PoolAllocator = DefaultPoolAllocator,
-          typename Allocator = DefaultAllocator>
+template <typename EncodingT = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocatorT = DefaultPoolAllocator,
+          typename AllocatorT = DefaultAllocator>
 class BasicDocument;
 
 // Define default Document class type
@@ -29,17 +29,17 @@ typedef BasicDocument<>    Document;
 #pragma pack(push)
 #pragma pack(1)
 
-template <typename Encoding /* = JSONFX_DEFAULT_ENCODING */,
-          typename PoolAllocator /* = DefaultPoolAllocator */,
-          typename Allocator /* = DefaultAllocator */>
-class BasicDocument : public BasicValue<Encoding, PoolAllocator>
+template <typename EncodingT /* = JSONFX_DEFAULT_ENCODING */,
+          typename PoolAllocatorT /* = DefaultPoolAllocator */,
+          typename AllocatorT /* = DefaultAllocator */>
+class BasicDocument : public BasicValue<EncodingT, PoolAllocatorT>
 {
 public:
-    typedef typename Encoding::CharType         CharType;           //!< Character type derived from Encoding.
-    typedef BasicValue<Encoding, PoolAllocator> ValueType;          //!< Value type of the document.
-    typedef Encoding                            EncodingType;       //!< Character encoding type.
-    typedef PoolAllocator                       PoolAllocatorType;  //!< Pool allocator type from template parameter.
-    typedef Allocator                           AllocatorType;      //!< Stack allocator type from template parameter.
+    typedef typename EncodingT::CharType            CharType;           //!< Character type derived from Encoding.
+    typedef BasicValue<EncodingT, PoolAllocatorT>   ValueType;          //!< Value type of the document.
+    typedef EncodingT                               EncodingType;       //!< Character encoding type.
+    typedef PoolAllocatorT                          PoolAllocatorType;  //!< Pool allocator type from template parameter.
+    typedef AllocatorT                              AllocatorType;      //!< Stack allocator type from template parameter.
 
 private:    
     PoolAllocatorType * mPoolAllocator;
@@ -234,15 +234,15 @@ private:
     }
 };
 
-template <typename Encoding, typename PoolAllocator, typename Allocator>
-void BasicDocument<Encoding, PoolAllocator, Allocator>::visit()
+template <typename EncodingT, typename PoolAllocatorT, typename AllocatorT>
+void BasicDocument<EncodingT, PoolAllocatorT, AllocatorT>::visit()
 {
     printf("JsonFx::BasicDocument::visit(). EncodingType = %d\n\n", EncodingType::type);
 }
 
-template <typename Encoding, typename PoolAllocator, typename Allocator>
-BasicDocument<Encoding, PoolAllocator, Allocator> &
-BasicDocument<Encoding, PoolAllocator, Allocator>::parse(const CharType * text)
+template <typename EncodingT, typename PoolAllocatorT, typename AllocatorT>
+BasicDocument<EncodingT, PoolAllocatorT, AllocatorT> &
+BasicDocument<EncodingT, PoolAllocatorT, AllocatorT>::parse(const CharType * text)
 {
     jimi_assert(text != NULL);
     //printf("JsonFx::BasicDocument::parse() visited.\n\n");

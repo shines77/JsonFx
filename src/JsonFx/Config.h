@@ -40,6 +40,22 @@
 #endif  /* _UNICODE */
 #endif  /* _Tx */
 
+#define JSONFX_SWITCH_IOSTREAM_TRACE    0
+
+#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || (defined(__GNUC__) && (__GUNC__ >= 4))
+  #define JSONFX_CONFIG_C99_SUPPORT     1
+#endif
+
+#ifndef jfx_iostream_trace
+  #ifdef JSONFX_CONFIG_C99_SUPPORT
+    #if defined(JSONFX_SWITCH_IOSTREAM_TRACE) && (JSONFX_SWITCH_IOSTREAM_TRACE != 0)
+      #define jfx_iostream_trace(format, ...)   printf(format, ##__VA_ARGS__)
+    #else
+      #define jfx_iostream_trace(format, ...)   do { } while(0)
+    #endif  /* JSONFX_SWITCH_IOSTREAM_TRACE */
+  #endif
+#endif  /* jfx_iostream_trace */
+
 namespace JsonFx {
 
 /* define in "JsonFx/Allcator.h" */

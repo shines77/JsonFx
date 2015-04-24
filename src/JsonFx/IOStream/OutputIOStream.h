@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_OUTPUTSTREAM_H_
-#define _JSONFX_STREAM_OUTPUTSTREAM_H_
+#ifndef _JSONFX_IOSTREAM_OUTPUTIOSTREAM_H_
+#define _JSONFX_IOSTREAM_OUTPUTIOSTREAM_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -10,20 +10,20 @@
 
 #include "jimi/basic/stdsize.h"
 #include "JsonFx/Internal/Writeable.h"
-#include "JsonFx/Stream/IOStreamRoot.h"
+#include "JsonFx/IOStream/IOStreamRoot.h"
 
 namespace JsonFx {
 
 // Forward declaration.
 template <typename T = JSONFX_DEFAULT_CHARTYPE>
-class BasicOutputStream;
+class BasicOutputIOStream;
 
-// Define default BasicOutputStream<T>
-typedef BasicOutputStream<>  OutputStream;
+// Define default BasicOutputIOStream<T>
+typedef BasicOutputIOStream<>   OutputIOStream;
 
 template <typename T>
-class BasicOutputStream : virtual public BasicIOStreamRoot<T>,
-                                  public internal::Writeable<T>
+class BasicOutputIOStream : virtual public BasicIOStreamRoot<T>,
+                                    public internal::Writeable<T>
 {
 public:
     typedef typename BasicIOStreamRoot<T>::CharType  CharType;
@@ -34,17 +34,17 @@ public:
     static const bool kSupportMarked = false;
 
 public:
-    BasicOutputStream() {
-        printf("00 BasicOutputStream<T>::BasicOutputStream() visited.\n");
+    BasicOutputIOStream() {
+        jfx_iostream_trace("00 BasicOutputIOStream<T>::BasicOutputIOStream() visited.\n");
     }
 
-    ~BasicOutputStream() {
-        printf("00 BasicOutputStream<T>::~BasicOutputStream() visited.\n");
+    ~BasicOutputIOStream() {
+        jfx_iostream_trace("00 BasicOutputIOStream<T>::~BasicOutputIOStream() visited.\n");
         close();
     }
 
     void close() {
-        printf("10 BasicOutputStream<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicOutputIOStream<T>::close() visited.\n");
 #if 0
         T * pThis = static_cast<T *>(this);
         if (pThis != NULL)
@@ -53,7 +53,7 @@ public:
     };
 
     int available() {
-        printf("10 BasicOutputStream<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicOutputIOStream<T>::available() visited.\n");
 #if 0
         T * pThis = static_cast<T *>(this);
         if (pThis != NULL)
@@ -82,6 +82,6 @@ public:
 }  // namespace JsonFx
 
 // Define default OutputStream class type
-typedef JsonFx::BasicOutputStream<JSONFX_DEFAULT_CHARTYPE>    jfxOutputStream;
+typedef JsonFx::BasicOutputIOStream<JSONFX_DEFAULT_CHARTYPE>    jfxOutputIOStream;
 
-#endif  /* _JSONFX_STREAM_OUTPUTSTREAM_H_ */
+#endif  /* _JSONFX_IOSTREAM_OUTPUTIOSTREAM_H_ */

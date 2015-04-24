@@ -33,13 +33,13 @@
     #define JSONFX_CHARTYPE     unsigned short
   #else
     #define JSONFX_CHARTYPE     wchat_t
-  #endif
+  #endif  /* __linux__ */
 #elif (JSONFX_ENCODING == JSONFX_UTF32) || (JSONFX_ENCODING == JSONFX_UTF32LE) || (JSONFX_ENCODING == JSONFX_UTF32BE)
   #if defined(__linux__)
     #define JSONFX_CHARTYPE     wchat_t
   #else
     #define JSONFX_CHARTYPE     unsigned
-  #endif
+  #endif  /* __linux__ */
 #else
     #define JSONFX_CHARTYPE     char
 #endif
@@ -148,17 +148,17 @@ public:
     typedef BasicEncoding<unsigned short, kUTF16LE> UTF16LE;
     typedef BasicEncoding<unsigned short, kUTF16BE> UTF16BE;
 
-    typedef BasicEncoding<wchar_t, kUTF32>      UTF32;
-    typedef BasicEncoding<wchar_t, kUTF32LE>    UTF32LE;
-    typedef BasicEncoding<wchar_t, kUTF32BE>    UTF32BE;
+    typedef BasicEncoding<wchar_t, kUTF32>          UTF32;
+    typedef BasicEncoding<wchar_t, kUTF32LE>        UTF32LE;
+    typedef BasicEncoding<wchar_t, kUTF32BE>        UTF32BE;
 #else  /* !__linux__ */
-    typedef BasicEncoding<wchar_t, kUTF16>      UTF16;
-    typedef BasicEncoding<wchar_t, kUTF16LE>    UTF16LE;
-    typedef BasicEncoding<wchar_t, kUTF16BE>    UTF16BE;
+    typedef BasicEncoding<wchar_t, kUTF16>          UTF16;
+    typedef BasicEncoding<wchar_t, kUTF16LE>        UTF16LE;
+    typedef BasicEncoding<wchar_t, kUTF16BE>        UTF16BE;
 
-    typedef BasicEncoding<unsigned, kUTF32>     UTF32;
-    typedef BasicEncoding<unsigned, kUTF32LE>   UTF32LE;
-    typedef BasicEncoding<unsigned, kUTF32BE>   UTF32BE;
+    typedef BasicEncoding<unsigned, kUTF32>         UTF32;
+    typedef BasicEncoding<unsigned, kUTF32LE>       UTF32LE;
+    typedef BasicEncoding<unsigned, kUTF32BE>       UTF32BE;
 #endif  /* __linux__ */
 };
 
@@ -169,17 +169,17 @@ public:
     typedef BasicEncoding<unsigned short, kUTF16LE> _UTF16LE;
     typedef BasicEncoding<unsigned short, kUTF16BE> _UTF16BE;
 
-    typedef BasicEncoding<wchar_t, kUTF32>      _UTF32;
-    typedef BasicEncoding<wchar_t, kUTF32LE>    _UTF32LE;
-    typedef BasicEncoding<wchar_t, kUTF32BE>    _UTF32BE;
+    typedef BasicEncoding<wchar_t, kUTF32>          _UTF32;
+    typedef BasicEncoding<wchar_t, kUTF32LE>        _UTF32LE;
+    typedef BasicEncoding<wchar_t, kUTF32BE>        _UTF32BE;
 #else  /* !__linux__ */
-    typedef BasicEncoding<wchar_t, kUTF16>      _UTF16;
-    typedef BasicEncoding<wchar_t, kUTF16LE>    _UTF16LE;
-    typedef BasicEncoding<wchar_t, kUTF16BE>    _UTF16BE;
+    typedef BasicEncoding<wchar_t, kUTF16>          _UTF16;
+    typedef BasicEncoding<wchar_t, kUTF16LE>        _UTF16LE;
+    typedef BasicEncoding<wchar_t, kUTF16BE>        _UTF16BE;
 
-    typedef BasicEncoding<unsigned, kUTF32>     _UTF32;
-    typedef BasicEncoding<unsigned, kUTF32LE>   _UTF32LE;
-    typedef BasicEncoding<unsigned, kUTF32BE>   _UTF32BE;
+    typedef BasicEncoding<unsigned, kUTF32>         _UTF32;
+    typedef BasicEncoding<unsigned, kUTF32LE>       _UTF32LE;
+    typedef BasicEncoding<unsigned, kUTF32BE>       _UTF32BE;
 #endif  /* __linux__ */
 
 #endif  /* defined(ENCODING_USE_CLASS_WRAPPER) */

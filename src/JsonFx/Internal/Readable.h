@@ -34,27 +34,27 @@ public:
 
 public:
     Readable()  {
-        printf("00 internal::Readable::Readable() visited.\n");
+        jfx_iostream_trace("00 internal::Readable::Readable() visited.\n");
     }
 
     ~Readable() {
-        printf("01 internal::Readable::~Readable() visited.\n");
+        jfx_iostream_trace("01 internal::Readable::~Readable() visited.\n");
     }
 
     int read() {
-        printf("10 internal::Readable::read() visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read() visited.\n");
     }
 
     int read(CharType & c) {
-        printf("10 internal::Readable::read(char &c); visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read(char &c); visited.\n");
     }
 
     int read(void * buffer, int size) {
-        printf("10 internal::Readable::read(void *buffer, int size); visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read(void *buffer, int size); visited.\n");
     }
 
     int read(void * buffer, int size, int offset, int len) {
-        printf("10 internal::Readable::read(void *buffer, int size, int offset, int len); visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read(void *buffer, int size, int offset, int len); visited.\n");
     }
 };
 

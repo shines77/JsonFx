@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_FILE_INPUTSTREAM_H_
-#define _JSONFX_STREAM_FILE_INPUTSTREAM_H_
+#ifndef _JSONFX_IOSTREAM_FILE_INPUTSTREAM_H_
+#define _JSONFX_IOSTREAM_FILE_INPUTSTREAM_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -12,8 +12,8 @@
 #include "jimi/basic/stdsize.h"
 #include "jimi/basic/assert.h"
 
-#include "JsonFx/Stream/Detail/FileDef.h"
-#include "JsonFx/Stream/InputStream.h"
+#include "JsonFx/IOStream/Detail/FileDef.h"
+#include "JsonFx/IOStream/InputIOStream.h"
 
 namespace JsonFx {
 
@@ -25,11 +25,11 @@ class BasicFileInputStream;
 typedef BasicFileInputStream<>  FileInputStream;
 
 template <typename T>
-class BasicFileInputStream : public BasicInputStream<T>
+class BasicFileInputStream : public BasicInputIOStream<T>
 {
 public:
-    typedef typename BasicInputStream<T>::CharType    CharType;
-    typedef typename BasicInputStream<T>::SizeType    SizeType;
+    typedef typename BasicInputIOStream<T>::CharType    CharType;
+    typedef typename BasicInputIOStream<T>::SizeType    SizeType;
 
 public:
     static const bool kSupportMarked = true;
@@ -39,26 +39,26 @@ private:
 
 public:
     BasicFileInputStream() : mFile(NULL) {
-        printf("00 BasicFileInputStream<T>::BasicFileInputStream() visited.\n");
+        jfx_iostream_trace("00 BasicFileInputStream<T>::BasicFileInputStream() visited.\n");
     }
 
     BasicFileInputStream(FILE * hFile) : mFile(hFile) {
-        printf("00 BasicFileInputStream<T>::BasicFileInputStream(FILE * hFile) visited.\n");
+        jfx_iostream_trace("00 BasicFileInputStream<T>::BasicFileInputStream(FILE * hFile) visited.\n");
     }
 
     BasicFileInputStream(char * filename) : mFile(NULL) {
-        printf("00 BasicFileInputStream<T>::BasicFileInputStream(char * filename) visited.\n");
+        jfx_iostream_trace("00 BasicFileInputStream<T>::BasicFileInputStream(char * filename) visited.\n");
         mFile = fopen(filename, "rb");
     }
 
     BasicFileInputStream(std::string filename) : mFile(NULL) {
-        printf("00 BasicFileInputStream<T>::BasicFileInputStream(std::string filename) visited.\n");
+        jfx_iostream_trace("00 BasicFileInputStream<T>::BasicFileInputStream(std::string filename) visited.\n");
         mFile = fopen(filename.c_str(), "rb");
         jimi_assert(mFile != NULL);
     }
 
     ~BasicFileInputStream() {
-        printf("01 BasicFileInputStream<T>::~BasicFileInputStream() visited.\n");
+        jfx_iostream_trace("01 BasicFileInputStream<T>::~BasicFileInputStream() visited.\n");
         close();
     }
 
@@ -67,7 +67,7 @@ public:
     }
 
     void close() {
-        printf("10 BasicFileInputStream<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicFileInputStream<T>::close() visited.\n");
         if (mFile != NULL) {
             fclose(mFile);
             mFile = NULL;
@@ -75,7 +75,7 @@ public:
     }
 
     int available() {
-        printf("10 BasicFileInputStream<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicFileInputStream<T>::available() visited.\n");
         return 0;
     }
     
@@ -98,4 +98,4 @@ public:
 
 }  // namespace JsonFx
 
-#endif  /* _JSONFX_STREAM_FILE_INPUTSTREAM_H_ */
+#endif  /* _JSONFX_IOSTREAM_FILE_INPUTSTREAM_H_ */

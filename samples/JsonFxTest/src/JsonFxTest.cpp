@@ -16,13 +16,16 @@
 #include <streambuf>
 
 #include "jimic/system/time.h"
+#include "jimic/system/console.h"
 
 #include "JsonFx/JsonFx.h"
 
 #include "JsonFx/Config.h"
-#include "JsonFx/Stream/InputStream.h"
-#include "JsonFx/Stream/FileInputStream.h"
-#include "JsonFx/Stream/FileStream.h"
+#include "JsonFx/IOStream/InputIOStream.h"
+#include "JsonFx/IOStream/FileInputStream.h"
+#include "JsonFx/IOStream/FileStream.h"
+
+#include "JsonFx/Stream/StringStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
 //#include "jimi/basic/vld.h"
@@ -140,19 +143,24 @@ void JsonFx_Stream_Test()
 {
     FileStream fileStream;
     fileStream.close();
-    printf("\n");
+    jfx_iostream_trace("\n");
 
     FileInputStream fileInputStream;
     fileInputStream.close();
-    printf("\n");
+    jfx_iostream_trace("\n");
 
-    InputStream *inputStream = new FileInputStream();
-    inputStream->close();
-    printf("\n");
+    InputIOStream *inputIOStream = new FileInputStream();
+    inputIOStream->close();
+    jfx_iostream_trace("\n");
 
-    if (inputStream)
-        delete inputStream;
-    printf("\n");
+    if (inputIOStream)
+        delete inputIOStream;
+    jfx_iostream_trace("\n");
+
+     static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    StringStream stream(json);
+    stream.isEof();
+    stream.get();
 
 #if 0
     const char test_str[] = "This is a test string.";
@@ -173,10 +181,10 @@ int main(int argn, char * argv[])
     JsonFx_BasicDocumentTest1();
     JsonFx_BasicDocumentTest2();
 
-    //JsonFx_Stream_Test();
+    JsonFx_Stream_Test();
 
     printf("kUTF8 = %d\n\n", kUTF8);
 
-    system("pause");
+    jimi_console_readkeyln(false, true, false);
     return 0;
 }

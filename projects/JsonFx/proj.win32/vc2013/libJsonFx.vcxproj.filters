@@ -22,11 +22,14 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="src\JsonFx\Stream">
+    <Filter Include="src\JsonFx\IOStream">
       <UniqueIdentifier>{02f74158-9de2-4601-ae90-9c2c61375068}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\JsonFx\Stream\Detail">
+    <Filter Include="src\JsonFx\IOStream\Detail">
       <UniqueIdentifier>{c5e48d04-7181-4480-8ead-a837b1e6b7d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\JsonFx\Stream">
+      <UniqueIdentifier>{2f548296-8ce7-4ea9-97d0-f122f78d3c89}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -69,44 +72,8 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h">
       <Filter>src\JsonFx\Allocator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\InputStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\OutputStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FileInputStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FileOutputStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringBufferInputStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringBufferOutputStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Closeable.h">
       <Filter>src\JsonFx\Internal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\IOStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\Detail\InputStream.h">
-      <Filter>src\JsonFx\Stream\Detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\Detail\IOStream.h">
-      <Filter>src\JsonFx\Stream\Detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\Detail\OutputStream.h">
-      <Filter>src\JsonFx\Stream\Detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\Detail\FileDef.h">
-      <Filter>src\JsonFx\Stream\Detail</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FileStream.h">
-      <Filter>src\JsonFx\Stream</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\JsonFx\Internal\AutoCloseable.h">
       <Filter>src\JsonFx\Internal</Filter>
@@ -117,7 +84,46 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Writeable.h">
       <Filter>src\JsonFx\Internal</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\IOStreamRoot.h">
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\FileInputStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\FileOutputStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\FileStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\InputIOStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\IOStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\IOStreamRoot.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\OutputIOStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\StringBufferInputStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\StringBufferOutputStream.h">
+      <Filter>src\JsonFx\IOStream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\Detail\FileDef.h">
+      <Filter>src\JsonFx\IOStream\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\Detail\InputIOStream.h">
+      <Filter>src\JsonFx\IOStream\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\Detail\IOStream.h">
+      <Filter>src\JsonFx\IOStream\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\Detail\OutputIOStream.h">
+      <Filter>src\JsonFx\IOStream\Detail</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringStream.h">
       <Filter>src\JsonFx\Stream</Filter>
     </ClInclude>
   </ItemGroup>

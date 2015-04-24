@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_IOSTREAM_H_
-#define _JSONFX_STREAM_IOSTREAM_H_
+#ifndef _JSONFX_IOSTREAM_IOSTREAM_H_
+#define _JSONFX_IOSTREAM_IOSTREAM_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -10,8 +10,8 @@
 
 #include "jimi/basic/stdsize.h"
 
-#include "JsonFx/Stream/InputStream.h"
-#include "JsonFx/Stream/OutputStream.h"
+#include "JsonFx/IOStream/InputIOStream.h"
+#include "JsonFx/IOStream/OutputIOStream.h"
 
 namespace JsonFx {
 
@@ -23,12 +23,12 @@ class BasicIOStream;
 typedef BasicIOStream<>  IOStream;
 
 template <typename T>
-class BasicIOStream : public BasicInputStream<T>,
-                      public BasicOutputStream<T>
+class BasicIOStream : public BasicInputIOStream<T>,
+                      public BasicOutputIOStream<T>
 {
 public:
-    typedef typename BasicInputStream<T>::CharType  CharType;
-    typedef typename BasicInputStream<T>::SizeType  SizeType;
+    typedef typename BasicInputIOStream<T>::CharType    CharType;
+    typedef typename BasicInputIOStream<T>::SizeType    SizeType;
 
 public:
     // Whether support mark() method?
@@ -36,20 +36,20 @@ public:
 
 public:
     BasicIOStream() {
-        printf("00 BasicIOStream<T>::BasicIOStream() visited.\n");
+        jfx_iostream_trace("00 BasicIOStream<T>::BasicIOStream() visited.\n");
     }
 
     ~BasicIOStream() {
-        printf("00 BasicIOStream<T>::~BasicIOStream() visited.\n");
+        jfx_iostream_trace("00 BasicIOStream<T>::~BasicIOStream() visited.\n");
         close();
     }
 
     void close() {
-        printf("10 BasicIOStream<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicIOStream<T>::close() visited.\n");
     };
 
     int available() {
-        printf("10 BasicIOStream<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicIOStream<T>::available() visited.\n");
         return 0;
     }
     
@@ -75,4 +75,4 @@ public:
 // Define default IOStream class type
 typedef JsonFx::BasicIOStream<JSONFX_DEFAULT_CHARTYPE>    jfxIOStream;
 
-#endif  /* _JSONFX_STREAM_IOSTREAM_H_ */
+#endif  /* _JSONFX_IOSTREAM_IOSTREAM_H_ */

@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_DETAIL_FILEDEF_H_
-#define _JSONFX_STREAM_DETAIL_FILEDEF_H_
+#ifndef _JSONFX_IOSTREAM_DETAIL_FILEDEF_H_
+#define _JSONFX_IOSTREAM_DETAIL_FILEDEF_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -17,4 +17,4 @@ namespace JsonFx {
 
 }  // namespace JsonFx
 
-#endif  /* _JSONFX_STREAM_DETAIL_FILEDEF_H_ */
+#endif  /* _JSONFX_IOSTREAM_DETAIL_FILEDEF_H_ */

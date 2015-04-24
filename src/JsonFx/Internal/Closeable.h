@@ -37,16 +37,16 @@ public:
 
 public:
     Closeable()  {
-        printf("00 internal::Closeable<T>::Closeable() visited.\n");
+        jfx_iostream_trace("00 internal::Closeable<T>::Closeable() visited.\n");
     }
 
     ~Closeable() {
-        printf("01 internal::Closeable<T>::~Closeable() visited.\n");
+        jfx_iostream_trace("01 internal::Closeable<T>::~Closeable() visited.\n");
         close();
     }
 
     void close() {
-        printf("10 internal::Closeable<T>::close() visited.\n");
+        jfx_iostream_trace("10 internal::Closeable<T>::close() visited.\n");
     }
 };
 

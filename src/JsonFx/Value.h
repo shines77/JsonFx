@@ -103,33 +103,34 @@ enum ValueTypeMask {
 };
 
 // Forward declaration.
-template <typename Encoding = JSONFX_DEFAULT_ENCODING,
-          typename PoolAllocator = DefaultPoolAllocator>
+template <typename EncodingT = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocatorT = DefaultPoolAllocator>
 class BasicValue;
 
 // Define default Value class type
 typedef BasicValue<>    Value;
 
-template <typename Encoding = JSONFX_DEFAULT_ENCODING,
-          typename PoolAllocator = DefaultPoolAllocator> 
+template <typename EncodingT = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocatorT = DefaultPoolAllocator> 
 class BasicMember
 {
 public:
-    BasicValue<Encoding, PoolAllocator> name;    //!< name of member (must be a string)
-    BasicValue<Encoding, PoolAllocator> value;   //!< value of member.
+    BasicValue<EncodingT, PoolAllocatorT> name;    //!< name of member (must be a string)
+    BasicValue<EncodingT, PoolAllocatorT> value;   //!< value of member.
 };
 
+// Define default Member class type
 typedef BasicMember<>   Member;
 
-template <bool IsConst, typename Encoding, typename PoolAllocator>
+template <bool IsConst, typename EncodingT, typename PoolAllocatorT>
 class BasicMemberIterator
     : public std::iterator<std::random_access_iterator_tag,
-             typename internal::MaybeAddConst<IsConst, BasicMember<Encoding, PoolAllocator> >::Type>
+             typename internal::MaybeAddConst<IsConst, BasicMember<EncodingT, PoolAllocatorT> >::Type>
 {
-    friend class BasicValue<Encoding, PoolAllocator>;
+    friend class BasicValue<EncodingT, PoolAllocatorT>;
     template <bool, typename, typename> friend class BasicMemberIterator;
 
-    typedef BasicMember<Encoding, PoolAllocator>                        PlainType;
+    typedef BasicMember<EncodingT, PoolAllocatorT>                      PlainType;
     typedef typename internal::MaybeAddConst<IsConst, PlainType>::Type  ValueType;
     typedef std::iterator<std::random_access_iterator_tag, ValueType>   BaseType;
 
@@ -138,9 +139,9 @@ public:
     typedef BasicMemberIterator Iterator;
 
     //! Constant iterator type
-    typedef BasicMemberIterator<true,  Encoding, PoolAllocator> ConstIterator;
+    typedef BasicMemberIterator<true,  EncodingT, PoolAllocatorT>   ConstIterator;
     //! Non-constant iterator type
-    typedef BasicMemberIterator<false, Encoding, PoolAllocator> NonConstIterator;
+    typedef BasicMemberIterator<false, EncodingT, PoolAllocatorT>   NonConstIterator;
 
     //! Pointer to (const) GenericMember
     typedef typename BaseType::pointer         Pointer;
@@ -173,7 +174,7 @@ public:
     bool operator < (ConstIterator that) const { return mPtr <  that.mPtr; }
     bool operator > (ConstIterator that) const { return mPtr >  that.mPtr; }
 
-    Reference operator *() const  { return *mPtr; }
+    Reference operator * () const { return *mPtr; }
     Pointer   operator ->() const { return  mPtr; }
     Reference operator [](DifferenceType n) const { return mPtr[n]; }
 
@@ -191,24 +192,24 @@ private:
 #pragma pack(push)
 #pragma pack(1)
 
-template <typename Encoding /* = JSONFX_DEFAULT_ENCODING */,
-          typename PoolAllocator /* = DefaultPoolAllocator */>
+template <typename EncodingT /* = JSONFX_DEFAULT_ENCODING */,
+          typename PoolAllocatorT /* = DefaultPoolAllocator */>
 class BasicValue {
 public:
-    typedef typename Encoding::CharType     CharType;
-    typedef Encoding                        EncodingType;
-    typedef PoolAllocator                   PoolAllocatorType;
+    typedef typename EncodingT::CharType    CharType;
+    typedef EncodingT                       EncodingType;
+    typedef PoolAllocatorT                  PoolAllocatorType;
     typedef BasicStringRef<CharType>        StringRefType;      //!< Reference to a constant string
 
-    typedef BasicMember<Encoding, PoolAllocator> MemberType;
+    typedef BasicMember<EncodingT, PoolAllocatorT>  MemberType;
 
     typedef BasicValue *                    ValueIterator;      //!< Value iterator for iterating in array.
     typedef const BasicValue *              ConstValueIterator; //!< Constant value iterator for iterating in array.
 
     //!< Member iterator for iterating in object.
-    typedef typename BasicMemberIterator<false, Encoding, PoolAllocator>::Iterator MemberIterator;
+    typedef typename BasicMemberIterator<false, EncodingT, PoolAllocatorT>::Iterator    MemberIterator;
     //!< Constant member iterator for iterating in object.
-    typedef typename BasicMemberIterator<true,  Encoding, PoolAllocator>::Iterator ConstMemberIterator;
+    typedef typename BasicMemberIterator<true,  EncodingT, PoolAllocatorT>::Iterator    ConstMemberIterator;
 
     typedef uint32_t                        SizeType;
     typedef uint32_t                        ValueType;
@@ -247,7 +248,8 @@ public:
         mValueData.obj.capacity = 0;
     }
 
-    ValueType getType() const { return static_cast<ValueType>(mValueType & kTypeMask); }
+    ValueType getType()  const { return static_cast<ValueType>(mValueType & kTypeMask); }
+    ValueType getFlags() const { return static_cast<ValueType>(mValueType & kFlagMask); }
 
     bool isNull()   const { return (mValueType == kNullFlags);              }
     bool isFalse()  const { return (mValueType == kFalseFlags);             }
@@ -274,8 +276,8 @@ public:
         return const_cast<BasicValue &>(*this).findMember(name);
     }
 
-    template <typename SourceAllocator>
-    MemberIterator findMember(const BasicValue<Encoding, SourceAllocator> & name) {
+    template <typename SourceAllocatorT>
+    MemberIterator findMember(const BasicValue<EncodingT, SourceAllocatorT> & name) {
         jimi_assert(isObject());
         jimi_assert(name.isString());
         MemberIterator member = getMemberBegin();
@@ -286,8 +288,8 @@ public:
         return member;
     }
 
-    template <typename SourceAllocator>
-    ConstMemberIterator findMember(const BasicValue<Encoding, SourceAllocator> & name) const {
+    template <typename SourceAllocatorT>
+    ConstMemberIterator findMember(const BasicValue<EncodingT, SourceAllocatorT> & name) const {
         return const_cast<BasicValue &>(*this).findMember(name);
     }
 
@@ -313,13 +315,13 @@ public:
         return (findMember(name) != getMemberEnd());
     }
 
-    template <typename SourceAllocator>
-    bool hasMember(const BasicValue<Encoding, SourceAllocator> & name) const {
+    template <typename SourceAllocatorT>
+    bool hasMember(const BasicValue<EncodingT, SourceAllocatorT> & name) const {
         return findMember(name) != getMemberEnd();
     }
 
-    template <typename SourceAllocator>
-    BasicValue & operator[] (const BasicValue<Encoding, SourceAllocator> & name) {
+    template <typename SourceAllocatorT>
+    BasicValue & operator[] (const BasicValue<EncodingT, SourceAllocatorT> & name) {
         MemberIterator member = findMember(name);
         if (member != getMemberEnd()) {
             return member->value;
@@ -332,8 +334,8 @@ public:
         }
     }
 
-    template <typename SourceAllocator>
-    bool stringEqual(const BasicValue<Encoding, SourceAllocator> & rhs) const {
+    template <typename SourceAllocatorT>
+    bool stringEqual(const BasicValue<EncodingT, SourceAllocatorT> & rhs) const {
         jimi_assert(isString());
         jimi_assert(rhs.isString());
 
@@ -361,6 +363,11 @@ public:
 
 public:
     union Number {
+        char        c;
+        int8_t      i8;
+        uint8_t     u8;
+        int16_t     i16;
+        uint16_t    u16;
         int32_t     i32;
         uint32_t    u32;
         int64_t     i64;
@@ -370,17 +377,17 @@ public:
     };
 
     struct String {
-        const CharType *data;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
+        const CharType *data;
     };
 
     struct SmallString {
-        const CharType *data;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
+        const CharType *data;
 
         SizeType GetLength() const { return size; }
     };
@@ -390,17 +397,17 @@ public:
     };
 
     struct Array {
-        BasicValue *    elements;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
+        BasicValue *    elements;
     };
 
     struct Object {
-        MemberType *    members;
         SizeType        size;
         SizeType        capacity;
         unsigned int    hashCode;
+        MemberType *    members;
     };
 
     union ValueData
@@ -420,8 +427,8 @@ private:
 // Recover the packing alignment
 #pragma pack(pop)
 
-template <typename Encoding, typename PoolAllocator>
-void BasicValue<Encoding, PoolAllocator>::release()
+template <typename EncodingT, typename PoolAllocatorT>
+void BasicValue<EncodingT, PoolAllocatorT>::release()
 {
     //printf("JsonFx::BasicValue::release() enter.\n");
     // Shortcut by Allocator's trait
@@ -453,8 +460,8 @@ void BasicValue<Encoding, PoolAllocator>::release()
     //printf("JsonFx::BasicValue::release() over.\n");
 }
 
-template <typename Encoding, typename PoolAllocator>
-void BasicValue<Encoding, PoolAllocator>::visit()
+template <typename EncodingT, typename PoolAllocatorT>
+void BasicValue<EncodingT, PoolAllocatorT>::visit()
 {
     printf("JsonFx::BasicValue::visit(). EncodingType = %d\n\n", EncodingType::type);
 }
