@@ -41,26 +41,26 @@ private:
 
 public:
     BasicFileStream() : mFile(NULL) {
-        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream() visited.\n");
+        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream();\n");
     }
 
     BasicFileStream(FILE * hFile) : mFile(hFile) {
-        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream(FILE * hFile) visited.\n");
+        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream(FILE * hFile);\n");
     }
 
     BasicFileStream(char * filename) : mFile(NULL) {
-        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream(char * filename) visited.\n");
+        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream(char * filename);\n");
         mFile = fopen(filename, "rb");
     }
 
     BasicFileStream(std::string filename) : mFile(NULL) {
-        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream(std::string filename) visited.\n");
+        jfx_iostream_trace("00 BasicFileStream<T>::BasicFileStream(std::string filename);\n");
         mFile = fopen(filename.c_str(), "rb");
         jimi_assert(mFile != NULL);
     }
 
     ~BasicFileStream() {
-        jfx_iostream_trace("01 BasicFileStream<T>::~BasicFileStream() visited.\n");
+        jfx_iostream_trace("01 BasicFileStream<T>::~BasicFileStream();\n");
         close();
     }
 
@@ -69,7 +69,7 @@ public:
     }
 
     void close() {
-        jfx_iostream_trace("10 BasicFileStream<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicFileStream<T>::close();\n");
         if (mFile != NULL) {
             fclose(mFile);
             mFile = NULL;
@@ -77,7 +77,7 @@ public:
     }
 
     int available() {
-        jfx_iostream_trace("10 BasicFileStream<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicFileStream<T>::available();\n");
         return 0;
     }
     

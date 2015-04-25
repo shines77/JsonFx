@@ -33,23 +33,23 @@ public:
 
 public:
     Writeable()  {
-        jfx_iostream_trace("00 internal::Writeable::Writeable() visited.\n");
+        jfx_iostream_trace("00 internal::Writeable::Writeable();\n");
     }
 
     ~Writeable() {
-        jfx_iostream_trace("01 internal::Writeable::~Writeable() visited.\n");
+        jfx_iostream_trace("01 internal::Writeable::~Writeable();\n");
     }
 
     int write(CharType c) {
-        jfx_iostream_trace("10 internal::Writeable::write(char c); visited.\n");
+        jfx_iostream_trace("10 internal::Writeable::write(char c);\n");
     }
 
     int write(void * buffer, int size) {
-        jfx_iostream_trace("10 internal::Writeable::write(void *buffer, int size); visited.\n");
+        jfx_iostream_trace("10 internal::Writeable::write(void *buffer, int size);\n");
     }
 
     int write(void * buffer, int size, int offset, int len) {
-        jfx_iostream_trace("10 internal::Writeable::write(void *buffer, int size, int offset, int len); visited.\n");
+        jfx_iostream_trace("10 internal::Writeable::write(void *buffer, int size, int offset, int len);\n");
     }
 };
 

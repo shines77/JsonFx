@@ -80,7 +80,7 @@ public:
     }
 
     ~BasicStringStream() {
-        jfx_iostream_trace("00 BasicStringStream<T>::~BasicStringStream() visited.\n");
+        jfx_iostream_trace("01 BasicStringStream<T>::~BasicStringStream();\n");
     }
 };
 

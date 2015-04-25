@@ -43,13 +43,13 @@ public:
           mSize(STREAM_ROUND_CHARSIZE(reinterpret_cast<const CharType *>(kMaxMemoryAddress) - src))
 
     {
-        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src); visited.\n");
+        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src);\n");
     }
 
     BasicStringStreamRoot(const CharType * src, SizeType size)
         : BasicStreamRoot<CharT>(src), mEnd(src + size), mSize(size)
     {
-        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src, SizeType size); visited.\n");
+        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src, SizeType size);\n");
     }
 
     BasicStringStreamRoot(const void * src)
@@ -57,7 +57,7 @@ public:
           mEnd(reinterpret_cast<const CharType *>(kMaxMemoryAddress)),
           mSize(STREAM_ROUND_CHARSIZE(reinterpret_cast<const CharType *>(kMaxMemoryAddress) - src))
     {
-        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src); visited.\n");
+        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const void * src);\n");
     }
 
     BasicStringStreamRoot(const void * src, SizeType size)
@@ -65,11 +65,11 @@ public:
           mEnd(reinterpret_cast<const CharType *>(reinterpret_cast<const char *>(src) + STREAM_ROUND_CHARSIZE(size))),
           mSize(STREAM_GET_CHARSIZE(size))
     {
-        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src, SizeType size); visited.\n");
+        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const void * src, SizeType size);\n");
     }
 
     ~BasicStringStreamRoot() {
-        jfx_iostream_trace("01 BasicStringStreamRoot<T>::~BasicStringStreamRoot() visited.\n");
+        jfx_iostream_trace("01 BasicStringStreamRoot<T>::~BasicStringStreamRoot();\n");
     }
 
     // Get properties

@@ -34,27 +34,27 @@ public:
 
 public:
     Readable()  {
-        jfx_iostream_trace("00 internal::Readable::Readable() visited.\n");
+        jfx_iostream_trace("00 internal::Readable::Readable();\n");
     }
 
     ~Readable() {
-        jfx_iostream_trace("01 internal::Readable::~Readable() visited.\n");
+        jfx_iostream_trace("01 internal::Readable::~Readable();\n");
     }
 
     int read() {
-        jfx_iostream_trace("10 internal::Readable::read() visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read();\n");
     }
 
     int read(CharType & c) {
-        jfx_iostream_trace("10 internal::Readable::read(char &c); visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read(char &c);\n");
     }
 
     int read(void * buffer, int size) {
-        jfx_iostream_trace("10 internal::Readable::read(void *buffer, int size); visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read(void *buffer, int size);\n");
     }
 
     int read(void * buffer, int size, int offset, int len) {
-        jfx_iostream_trace("10 internal::Readable::read(void *buffer, int size, int offset, int len); visited.\n");
+        jfx_iostream_trace("10 internal::Readable::read(void *buffer, int size, int offset, int len);\n");
     }
 };
 

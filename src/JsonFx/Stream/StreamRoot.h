@@ -46,7 +46,7 @@ public:
 
     BasicStreamRoot(const void * src) : mBegin(reinterpret_cast<const CharType *>(src))
     {
-        jfx_iostream_trace("00 BasicStreamRoot<T>::BasicStreamRoot();\n");
+        jfx_iostream_trace("00 BasicStreamRoot<T>::BasicStreamRoot(const void * src);\n");
     }
 
     ~BasicStreamRoot() {

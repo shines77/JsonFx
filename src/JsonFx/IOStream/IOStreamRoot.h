@@ -55,18 +55,18 @@ public:
     BasicIOStreamRoot() :
         mCurrent(NULL), mBegin(NULL), mEnd(NULL), mSize(0), mState(0), mAvailable(0), mMark(NULL)
     {
-        jfx_iostream_trace("00 BasicIOStreamRoot<T>::BasicIOStreamRoot() visited.\n");
+        jfx_iostream_trace("00 BasicIOStreamRoot<T>::BasicIOStreamRoot();\n");
     }
 
     BasicIOStreamRoot(void * buffer, SizeType size) :
         mCurrent(buffer), mBegin(buffer), mEnd(mBegin + size * sizeof(CharType)),
         mSize(size), mState(0), mAvailable(0), mMark(NULL)
     {
-        jfx_iostream_trace("00 BasicIOStreamRoot<T>::BasicIOStreamRoot() visited.\n");
+        jfx_iostream_trace("00 BasicIOStreamRoot<T>::BasicIOStreamRoot();\n");
     }
 
     ~BasicIOStreamRoot() {
-        jfx_iostream_trace("01 BasicIOStreamRoot<T>::~BasicIOStreamRoot() visited.\n");
+        jfx_iostream_trace("01 BasicIOStreamRoot<T>::~BasicIOStreamRoot();\n");
         close();
     }
 
@@ -99,15 +99,15 @@ public:
     }
 
     void close() {
-        jfx_iostream_trace("10 BasicIOStreamRoot<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicIOStreamRoot<T>::close();\n");
     }
 
     void flush() {
-        jfx_iostream_trace("10 BasicIOStreamRoot<T>::flush() visited.\n");
+        jfx_iostream_trace("10 BasicIOStreamRoot<T>::flush();\n");
     }
 
     int available() {
-        jfx_iostream_trace("10 BasicIOStreamRoot<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicIOStreamRoot<T>::available();\n");
         return -1;
     }
 

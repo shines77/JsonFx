@@ -195,6 +195,18 @@
 					Name="Internal"
 					>
 					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\AutoCloseable.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Closeable.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Readable.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\..\..\src\JsonFx\Internal\String.h"
 						>
 					</File>
@@ -204,6 +216,10 @@
 					</File>
 					<File
 						RelativePath="..\..\..\..\src\JsonFx\Internal\Utils.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Internal\Writeable.h"
 						>
 					</File>
 				</Filter>
@@ -220,6 +236,90 @@
 					</File>
 					<File
 						RelativePath="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="IOStream"
+					>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\FileInputStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\FileOutputStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\FileStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\InputIOStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\IOStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\IOStreamRoot.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\OutputIOStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\StringBufferInputStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\IOStream\StringBufferOutputStream.h"
+						>
+					</File>
+					<Filter
+						Name="Detail"
+						>
+						<File
+							RelativePath="..\..\..\..\src\JsonFx\IOStream\Detail\FileDef.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\..\src\JsonFx\IOStream\Detail\InputIOStream.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\..\src\JsonFx\IOStream\Detail\IOStream.h"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\..\src\JsonFx\IOStream\Detail\OutputIOStream.h"
+							>
+						</File>
+					</Filter>
+				</Filter>
+				<Filter
+					Name="Stream"
+					>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Stream\StreamRoot.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Stream\StringInputStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Stream\StringOutputStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Stream\StringStream.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\..\src\JsonFx\Stream\StringStreamRoot.h"
 						>
 					</File>
 				</Filter>

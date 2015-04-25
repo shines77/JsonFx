@@ -173,6 +173,8 @@ void JsonFx_StringStream_Test()
 {
     static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
 
+    jfx_iostream_trace("%d\n", 1);
+
     StringStream strStream(json);
     printf("The StringStream buffer is:\n\n");
     while (!strStream.isEof()) {

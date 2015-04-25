@@ -36,20 +36,20 @@ public:
 
 public:
     BasicIOStream() {
-        jfx_iostream_trace("00 BasicIOStream<T>::BasicIOStream() visited.\n");
+        jfx_iostream_trace("00 BasicIOStream<T>::BasicIOStream();\n");
     }
 
     ~BasicIOStream() {
-        jfx_iostream_trace("01 BasicIOStream<T>::~BasicIOStream() visited.\n");
+        jfx_iostream_trace("01 BasicIOStream<T>::~BasicIOStream();\n");
         close();
     }
 
     void close() {
-        jfx_iostream_trace("10 BasicIOStream<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicIOStream<T>::close();\n");
     };
 
     int available() {
-        jfx_iostream_trace("10 BasicIOStream<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicIOStream<T>::available();\n");
         return 0;
     }
     

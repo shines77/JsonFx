@@ -35,16 +35,16 @@ public:
 
 public:
     BasicInputIOStream() {
-        jfx_iostream_trace("00 BasicInputIOStream<T>::BasicInputIOStream() visited.\n");
+        jfx_iostream_trace("00 BasicInputIOStream<T>::BasicInputIOStream();\n");
     }
 
     ~BasicInputIOStream() {
-        jfx_iostream_trace("01 BasicInputIOStream<T>::~BasicInputIOStream() visited.\n");
+        jfx_iostream_trace("01 BasicInputIOStream<T>::~BasicInputIOStream();\n");
         close();
     }
 
     void close() {
-        jfx_iostream_trace("10 BasicInputIOStream<T>::close() visited.\n");
+        jfx_iostream_trace("10 BasicInputIOStream<T>::close();\n");
 #if 0
         T * pThis = static_cast<T *>(this);
         if (pThis != NULL)
@@ -53,7 +53,7 @@ public:
     };
 
     int available() {
-        jfx_iostream_trace("10 BasicInputIOStream<T>::available() visited.\n");
+        jfx_iostream_trace("10 BasicInputIOStream<T>::available();\n");
 #if 0
         T * pThis = static_cast<T *>(this);
         if (pThis != NULL)

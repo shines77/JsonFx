@@ -40,19 +40,21 @@
 #endif  /* _UNICODE */
 #endif  /* _Tx */
 
-#define JSONFX_SWITCH_IOSTREAM_TRACE    0
+#define JSONFX_SWITCH_IOSTREAM_TRACE    1
 
-#if (defined(_MSC_VER) && (_MSC_VER >= 1600)) || (defined(__GNUC__) && (__GUNC__ >= 4))
-  #define JSONFX_CONFIG_C99_SUPPORT     1
+#if (defined(_MSC_VER) && (_MSC_VER >= 1500)) || (defined(__GNUC__) && (__GUNC__ >= 4))
+  #define JSONFX_CONFIG_C99_VA_ARGS_SUPPORT     1
 #endif
 
 #ifndef jfx_iostream_trace
-  #ifdef JSONFX_CONFIG_C99_SUPPORT
+  #ifdef JSONFX_CONFIG_C99_VA_ARGS_SUPPORT
     #if defined(JSONFX_SWITCH_IOSTREAM_TRACE) && (JSONFX_SWITCH_IOSTREAM_TRACE != 0)
       #define jfx_iostream_trace(format, ...)   printf(format, ##__VA_ARGS__)
     #else
       #define jfx_iostream_trace(format, ...)   do { } while(0)
     #endif  /* JSONFX_SWITCH_IOSTREAM_TRACE */
+  #else
+    #define jfx_iostream_trace(format)          do { } while(0)
   #endif
 #endif  /* jfx_iostream_trace */
 

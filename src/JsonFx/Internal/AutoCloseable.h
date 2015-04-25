@@ -31,16 +31,16 @@ public:
 
 public:
     AutoCloseable()  {
-        jfx_iostream_trace("00 internal::AutoCloseable<T>::AutoCloseable() visited.\n");
+        jfx_iostream_trace("00 internal::AutoCloseable<T>::AutoCloseable();\n");
     }
 
     ~AutoCloseable() {
-        jfx_iostream_trace("01 internal::AutoCloseable<T>::~AutoCloseable() visited.\n");
+        jfx_iostream_trace("01 internal::AutoCloseable<T>::~AutoCloseable();\n");
         close();
     }
 
     void close() {
-        jfx_iostream_trace("10 internal::AutoCloseable<T>::close() visited.\n");
+        jfx_iostream_trace("10 internal::AutoCloseable<T>::close();\n");
     }
 };
 
