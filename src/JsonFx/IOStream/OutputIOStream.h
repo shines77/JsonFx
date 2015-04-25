@@ -39,7 +39,7 @@ public:
     }
 
     ~BasicOutputIOStream() {
-        jfx_iostream_trace("00 BasicOutputIOStream<T>::~BasicOutputIOStream() visited.\n");
+        jfx_iostream_trace("01 BasicOutputIOStream<T>::~BasicOutputIOStream() visited.\n");
         close();
     }
 

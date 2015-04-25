@@ -126,6 +126,18 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringStream.h">
       <Filter>src\JsonFx\Stream</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StreamRoot.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringInputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringStreamRoot.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringOutputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\JsonFx\JsonFx.cpp">

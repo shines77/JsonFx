@@ -66,7 +66,7 @@ public:
     }
 
     ~BasicIOStreamRoot() {
-        jfx_iostream_trace("00 BasicIOStreamRoot<T>::~BasicIOStreamRoot() visited.\n");
+        jfx_iostream_trace("01 BasicIOStreamRoot<T>::~BasicIOStreamRoot() visited.\n");
         close();
     }
 

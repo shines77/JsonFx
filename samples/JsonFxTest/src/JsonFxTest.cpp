@@ -26,6 +26,7 @@
 #include "JsonFx/IOStream/FileStream.h"
 
 #include "JsonFx/Stream/StringStream.h"
+#include "JsonFx/Stream/StringInputStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
 //#include "jimi/basic/vld.h"
@@ -139,7 +140,7 @@ void JsonFx_BasicDocumentTest2()
     value.visit();
 }
 
-void JsonFx_Stream_Test()
+void JsonFx_IOStream_Test()
 {
     FileStream fileStream;
     fileStream.close();
@@ -157,11 +158,6 @@ void JsonFx_Stream_Test()
         delete inputIOStream;
     jfx_iostream_trace("\n");
 
-     static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
-    StringStream stream(json);
-    stream.isEof();
-    stream.get();
-
 #if 0
     const char test_str[] = "This is a test string.";
     char buf[64];
@@ -173,6 +169,31 @@ void JsonFx_Stream_Test()
 #endif
 }
 
+void JsonFx_StringStream_Test()
+{
+    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+
+    StringStream strStream(json);
+    printf("The StringStream buffer is:\n\n");
+    while (!strStream.isEof()) {
+        printf("%c", strStream.get());
+        strStream.next();
+    }
+    printf("\n\n");
+    printf("The buffer length is: %d\n", strStream.tell());
+    printf("\n");
+
+    StringInputStream strInputStream(json);
+    printf("The StringInputStream buffer is:\n\n");
+    while (!strInputStream.isEof()) {
+        printf("%c", strInputStream.get());
+        strInputStream.next();
+    }
+    printf("\n\n");
+    printf("The buffer length is: %d\n", strInputStream.tell());
+    printf("\n");
+}
+
 int main(int argn, char * argv[])
 {
     JsonFx_Test();
@@ -181,7 +202,8 @@ int main(int argn, char * argv[])
     JsonFx_BasicDocumentTest1();
     JsonFx_BasicDocumentTest2();
 
-    JsonFx_Stream_Test();
+    JsonFx_IOStream_Test();
+    JsonFx_StringStream_Test();
 
     printf("kUTF8 = %d\n\n", kUTF8);
 
