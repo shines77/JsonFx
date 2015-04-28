@@ -112,6 +112,9 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\StringBufferInputStream.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\StringBufferOutputStream.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\JsonFx.h" />
+    <ClInclude Include="..\..\..\..\src\JsonFx\ParseResult.h" />
+    <ClInclude Include="..\..\..\..\src\JsonFx\Reader.h" />
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stack.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StreamRoot.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringInputStream.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Stream\StringOutputStream.h" />
@@ -125,6 +128,7 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\FastPoolAllocator.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\SimplePoolAllocator.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator\StdPoolAllocator.h" />
+    <ClInclude Include="..\..\..\..\src\JsonFx\Writer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\JsonFx\JsonFx.cpp" />

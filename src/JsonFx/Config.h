@@ -8,6 +8,8 @@
 
 #include "JsonFx/CharSet.h"
 
+#define JSONFX_SWITCH_IOSTREAM_TRACE    0
+
 //! Default encoding chartype
 #define JSONFX_DEFAULT_CHARTYPE         JSONFX_CHARTYPE
 
@@ -39,8 +41,6 @@
 #define _Tx(text)      text
 #endif  /* _UNICODE */
 #endif  /* _Tx */
-
-#define JSONFX_SWITCH_IOSTREAM_TRACE    1
 
 #if (defined(_MSC_VER) && (_MSC_VER >= 1500)) || (defined(__GNUC__) && (__GUNC__ >= 4))
   #define JSONFX_CONFIG_C99_VA_ARGS_SUPPORT     1

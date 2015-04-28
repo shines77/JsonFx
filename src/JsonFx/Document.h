@@ -11,6 +11,10 @@
 #include "JsonFx/Config.h"
 #include "JsonFx/Allocator.h"
 #include "JsonFx/Value.h"
+#include "JsonFx/Reader.h"
+#include "JsonFx/Writer.h"
+
+#include "JsonFx/Stream/StringInputStream.h"
 
 #include "jimi/basic/assert.h"
 
@@ -40,19 +44,15 @@ public:
     typedef EncodingT                               EncodingType;       //!< Character encoding type.
     typedef PoolAllocatorT                          PoolAllocatorType;  //!< Pool allocator type from template parameter.
     typedef AllocatorT                              AllocatorType;      //!< Stack allocator type from template parameter.
+    typedef BasicStringInputStream<CharType>        StringInputStreamT;
 
 private:    
     PoolAllocatorType * mPoolAllocator;
     bool                mPoolAllocatorNeedFree;
 
-    int         mErrno;
-    int         mErrLine;
-    int         nErrOffset;
-
 public:
     BasicDocument(PoolAllocatorType * poolAllocator = NULL)
         : mPoolAllocator(poolAllocator), mPoolAllocatorNeedFree(false)
-        , mErrno(0), mErrLine(-1), nErrOffset(-1)
     {
         initPoolAllocator(poolAllocator);
     }
@@ -69,8 +69,6 @@ private:
 
 public:
     PoolAllocatorType * getAllocator() const { return mPoolAllocator; }
-
-    BasicDocument & parse(const CharType * text);
 
     void visit();
 
@@ -100,16 +98,26 @@ private:
     }
 
     // The whitespace chars including " \t\n\r"
-    bool isWhiteSpaces(const CharType c) const {
+    template <typename InuptStreamT>
+    bool isWhiteSpaces(InuptStreamT & is) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        return (c == _Ch(' ')) || (c >= _Ch('\t') && c <= _Ch('\r'));
+        return (is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'));
     }
 
-    CharType * startObject(CharType * p) {
+    template <typename InuptStreamT>
+    void skipWhiteSpaces(InuptStreamT & is)
+    {
+        // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+        while (isWhiteSpaces(is)) {
+            is.next();
+        }
+    }
+
+    CharType * startObject(CharType *p) {
         return p;
     }
 
-    CharType * startArray(CharType * p) {
+    CharType * startArray(CharType *p) {
         return p;
     }
 
@@ -174,13 +182,13 @@ private:
         }
         else {
             // Error: The tail token is not match.
-            mErrno = -1;
+            //mErrno = -1;
         }
         return p;
     }
 
     template <CharType beginToken>
-    JIMI_NOINLINE_DECLARE(CharType *) startLargeString(CharType * p, size_t lenScanned) {
+    JIMI_NOINLINE_DECLARE(CharType *) startLargeString(CharType *p, size_t lenScanned) {
         // The size of string length field
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
 
@@ -228,67 +236,78 @@ private:
                 }
                 *newCursor = _Ch('\0');
             }
-            mErrno = -1;
+            //mErrno = -1;
         }
         return p;
     }
+
+public:
+    BasicDocument & parse(const CharType * text)
+    {
+        jimi_assert(text != NULL);
+        StringInputStreamT inputStream(text);
+        return parse<0, EncodingT, StringInputStreamT>(inputStream);
+    }
+
+    template <unsigned parseFlags, typename SourceEncodingT, typename InuptStreamT>
+    BasicDocument & parse(InuptStreamT & is)
+    {
+        // Remove existing root if exist
+        ValueType::setNull();
+        BasicReader<SourceEncodingT, EncodingT, PoolAllocatorT> reader(this->getAllocator());
+
+        jimi_assert(is.peek() != NULL);
+        //printf("JsonFx::BasicDocument::parse(const InuptStreamT &) visited.\n\n");
+        //setObject();
+
+        CharType *cur = const_cast<CharType *>(is.getCurrent());
+        CharType beginToken;
+
+        while (*cur != _Ch('\0')) {
+            // Skip the whitespace chars
+            skipWhiteSpaces(is);
+
+            if (*cur == _Ch('"')) {
+                // Start a string begin from token "
+                beginToken = *cur;
+                ++cur;
+                cur = startString<_Ch('"')>(cur);
+            }
+#if 0
+            else if (*cur == _Ch('\'')) {
+                // Start a string begin from token \'
+                beginToken = *cur;
+                ++cur;
+                cur = startString<_Ch('\'')>(cur);
+            }
+#endif
+            if (*cur == _Ch('{')) {
+                // Start a object
+                ++cur;
+                cur = startObject(cur);
+            }
+            if (*cur == _Ch('[')) {
+                // Start a array
+                ++cur;
+                cur = startArray(cur);
+            }
+            else {
+                ++cur;
+            }
+        }
+
+        return *this;
+    }
 };
+
+// Recover the packing alignment
+#pragma pack(pop)
 
 template <typename EncodingT, typename PoolAllocatorT, typename AllocatorT>
 void BasicDocument<EncodingT, PoolAllocatorT, AllocatorT>::visit()
 {
     printf("JsonFx::BasicDocument::visit(). EncodingType = %d\n\n", EncodingType::type);
 }
-
-template <typename EncodingT, typename PoolAllocatorT, typename AllocatorT>
-BasicDocument<EncodingT, PoolAllocatorT, AllocatorT> &
-BasicDocument<EncodingT, PoolAllocatorT, AllocatorT>::parse(const CharType * text)
-{
-    jimi_assert(text != NULL);
-    //printf("JsonFx::BasicDocument::parse() visited.\n\n");
-    setObject();
-
-    CharType *cur = const_cast<CharType *>(text);
-    CharType beginToken;
-
-    while (*cur != _Ch('\0')) {
-        // Skip space chars
-        while (isWhiteSpaces(*cur))
-            ++cur;
-        if (*cur == _Ch('"')) {
-            // Start a string begin from token "
-            beginToken = *cur;
-            ++cur;
-            cur = startString<_Ch('"')>(cur);
-        }
-#if 0
-        else if (*cur == _Ch('\'')) {
-            // Start a string begin from token \'
-            beginToken = *cur;
-            ++cur;
-            cur = startString<_Ch('\'')>(cur);
-        }
-#endif
-        if (*cur == _Ch('{')) {
-            // Start a object
-            ++cur;
-            cur = startObject(cur);
-        }
-        if (*cur == _Ch('[')) {
-            // Start a array
-            ++cur;
-            cur = startArray(cur);
-        }
-        else {
-            ++cur;
-        }
-    }
-
-    return *this;
-}
-
-// Recover the packing alignment
-#pragma pack(pop)
 
 }  // namespace JsonFx
 

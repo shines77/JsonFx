@@ -266,6 +266,8 @@ public:
     bool isDouble() const { return ((mValueType & kDoubleFlags) != 0);      }
     bool isString() const { return ((mValueType & kStringFlags) != 0);      }
 
+    void setNull() { mValueType = kNullFlags; }
+
     //MemberIterator findMember(const CharType * name) { return MemberIterator(NULL); }
     MemberIterator findMember(const CharType * name) {
         BasicValue n(StringRefType(name).mData);

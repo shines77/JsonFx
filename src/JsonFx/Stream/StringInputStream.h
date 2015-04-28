@@ -67,11 +67,11 @@ public:
     }
 
     // Get properties
-    const CharType * getReadCursor()  { return mReadCursor; }
-    const void *     getReadCursorV() { return reinterpret_cast<void *>(mReadCursor); }
+    const CharType * getReadCursor() const  { return mReadCursor; }
+    const void *     getReadCursorV() const { return reinterpret_cast<void *>(mReadCursor); }
 
-    const CharType * getCurrent()     { return getReadCursor();  }
-    const void *     getCurrentV()    { return getReadCursorV(); }
+    const CharType * getCurrent() const     { return getReadCursor();  }
+    const void *     getCurrentV() const    { return getReadCursorV(); }
 
     // Set properties
     void setReadCursor(CharType * newReadCursor) {

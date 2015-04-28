@@ -78,6 +78,7 @@ public:
 
 // Define default Encoding class type
 typedef JSONFX_DEFAULT_ENCODING     Encoding;
+typedef JSONFX_DEFAULT_ENCODING     DefaultEncoding;
 
 #if defined(ENCODING_USE_CLASS_WRAPPER) && (ENCODING_USE_CLASS_WRAPPER != 0)
 
