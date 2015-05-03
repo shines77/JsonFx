@@ -23,7 +23,12 @@ class BasicValue;
 
 /****************************************************************/
 
-#include "JsonFx/Detail/Reader-Fwd.h"
+//#include "JsonFx/Detail/Reader-Fwd.h"
+
+// Forward declaration.
+template <typename EncodingT,
+          typename PoolAllocatorT>
+class BasicValue;
 
 template <typename EncodingT = JSONFX_DEFAULT_ENCODING,
           typename PoolAllocatorT = DefaultPoolAllocator> 

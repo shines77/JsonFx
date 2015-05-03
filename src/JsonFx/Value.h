@@ -111,10 +111,23 @@ class BasicValue;
 
 /****************************************************************/
 
-#include "JsonFx/Detail/Reader-Fwd.h"
+//#include "JsonFx/Detail/Reader-Fwd.h"
+
+// Forward declaration.
+template <typename EncodingT = JSONFX_DEFAULT_ENCODING,
+          typename PoolAllocatorT = DefaultPoolAllocator>
+class BasicValue;
 
 // Define default Value class type
 typedef BasicValue<>    Value;
+
+// Forward declaration.
+template <typename EncodingT,
+          typename PoolAllocatorT> 
+class BasicMember;
+
+template <bool IsConst, typename EncodingT, typename PoolAllocatorT>
+class BasicMemberIterator;
 
 // Save and setting the packing alignment
 #pragma pack(push)
