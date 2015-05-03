@@ -45,7 +45,7 @@ public:
 
     ~BasicReader() {}
 
-    template <unsigned parseFlags, typename InputStream, typename Handler>
+    template <unsigned parseFlags, typename InputStreamT, typename HandlerT>
     ParseResult & parse() {
         return mParseResult;
     }

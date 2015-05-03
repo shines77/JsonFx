@@ -31,6 +31,9 @@
     <Filter Include="src\JsonFx\Stream">
       <UniqueIdentifier>{2f548296-8ce7-4ea9-97d0-f122f78d3c89}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\JsonFx\Detail">
+      <UniqueIdentifier>{1dcadc16-0f3a-4021-8484-92853d96d790}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator.h">
@@ -149,6 +152,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\JsonFx\Stack.h">
       <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Member.h">
+      <Filter>src\JsonFx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Detail\Reader-Fwd.h">
+      <Filter>src\JsonFx\Detail</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

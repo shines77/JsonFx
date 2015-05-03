@@ -93,6 +93,7 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Allocator.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\CharSet.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Config.h" />
+    <ClInclude Include="..\..\..\..\src\JsonFx\Detail\Reader-Fwd.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Document.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Internal\AutoCloseable.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Internal\Closeable.h" />
@@ -112,6 +113,7 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\StringBufferInputStream.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\IOStream\StringBufferOutputStream.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\JsonFx.h" />
+    <ClInclude Include="..\..\..\..\src\JsonFx\Member.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\ParseResult.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Reader.h" />
     <ClInclude Include="..\..\..\..\src\JsonFx\Stack.h" />

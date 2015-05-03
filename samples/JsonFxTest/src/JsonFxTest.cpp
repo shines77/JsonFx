@@ -207,6 +207,7 @@ int main(int argn, char * argv[])
     JsonFx_IOStream_Test();
     JsonFx_StringStream_Test();
 
+    printf("\n");
     printf("kUTF8 = %d\n\n", kUTF8);
 
     jimi_console_readkeyln(false, true, false);
