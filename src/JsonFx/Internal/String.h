@@ -17,7 +17,7 @@ namespace internal {
 
 template <typename CharType>
 size_t StrLen(const CharType * str) {
-    const CharType *orig = str;
+    const CharType * orig = str;
     while (*str++ != CharType('\0')) {
         // Do nothing!
     }
@@ -25,10 +25,14 @@ size_t StrLen(const CharType * str) {
 }
 
 template <>
-size_t StrLen(const char * str) { return ::strlen(str); }
+size_t StrLen(const char * str) {
+    return ::strlen(str);
+}
 
 template <>
-size_t StrLen(const unsigned char * str) { return ::strlen((const char *)str); }
+size_t StrLen(const unsigned char * str) {
+    return ::strlen((const char *)str);
+}
 
 }  // namespace internal
 

@@ -28,8 +28,11 @@
 #include "JsonFx/Stream/StringStream.h"
 #include "JsonFx/Stream/StringInputStream.h"
 
+#include "JsonFx/Stream/SizableStringStream.h"
+#include "JsonFx/Stream/SizableStringInputStream.h"
+
 // Visual Leak Detector(vld) for Visual C++
-//#include "jimi/basic/vld.h"
+#include "jimi/basic/vld.h"
 
 using namespace JsonFx;
 
@@ -175,6 +178,8 @@ void JsonFx_StringStream_Test()
 
     jfx_iostream_trace("%d\n", 1);
 
+    printf("=====================================================\n\n");
+
     StringStream strStream(json);
     printf("The StringStream buffer is:\n\n");
     while (!strStream.isEof()) {
@@ -194,6 +199,39 @@ void JsonFx_StringStream_Test()
     printf("\n\n");
     printf("The buffer length is: %d\n", strInputStream.tell());
     printf("\n");
+
+    printf("=====================================================\n");
+}
+
+void JsonFx_SizableStringStream_Test()
+{
+    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+
+    jfx_iostream_trace("%d\n", 1);
+
+    printf("=====================================================\n\n");
+
+    SizableStringStream strStream(json, _countof(json));
+    printf("The SizableStringStream buffer is:\n\n");
+    while (!strStream.isEof()) {
+        printf("%c", strStream.get());
+        strStream.next();
+    }
+    printf("\n\n");
+    printf("The buffer length is: %d\n", strStream.tell());
+    printf("\n");
+
+    SizableStringInputStream strInputStream(json, _countof(json));
+    printf("The SizableStringInputStream buffer is:\n\n");
+    while (!strInputStream.isEof()) {
+        printf("%c", strInputStream.get());
+        strInputStream.next();
+    }
+    printf("\n\n");
+    printf("The buffer length is: %d\n", strInputStream.tell());
+    printf("\n");
+
+    printf("=====================================================\n");
 }
 
 int main(int argn, char * argv[])
@@ -206,6 +244,7 @@ int main(int argn, char * argv[])
 
     JsonFx_IOStream_Test();
     JsonFx_StringStream_Test();
+    JsonFx_SizableStringStream_Test();
 
     printf("\n");
     printf("kUTF8 = %d\n\n", kUTF8);

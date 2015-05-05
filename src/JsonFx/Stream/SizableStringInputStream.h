@@ -1,6 +1,6 @@
 
-#ifndef _JSONFX_STREAM_STRINGINPUTSTREAM_H_
-#define _JSONFX_STREAM_STRINGINPUTSTREAM_H_
+#ifndef _JSONFX_STREAM_SIZABLESTRINGINPUTSTREAM_H_
+#define _JSONFX_STREAM_SIZABLESTRINGINPUTSTREAM_H_
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
 #pragma once
@@ -8,43 +8,56 @@
 
 #include <stdio.h>
 
-#include "JsonFx/Stream/StringStreamRoot.h"
+#include "JsonFx/Stream/SizableStringStreamRoot.h"
 
 namespace JsonFx {
 
 // Forward declaration.
 template <typename CharT = JSONFX_DEFAULT_CHARTYPE>
-class BasicStringInputStream;
+class BasicSizableStringInputStream;
 
-// Define default BasicStringInputStream<CharT>.
-typedef BasicStringInputStream<>  StringInputStream;
+// Define default BasicSizableStringInputStream<CharT>.
+typedef BasicSizableStringInputStream<>  SizableStringInputStream;
 
 template <typename CharT>
-class BasicStringInputStream : virtual public BasicStringStreamRoot<CharT>
+class BasicSizableStringInputStream : virtual public BasicSizableStringStreamRoot<CharT>
 {
 public:
-    typedef typename BasicStringStreamRoot<CharT>::CharType    CharType;
-    typedef typename BasicStringStreamRoot<CharT>::SizeType    SizeType;
+    typedef typename BasicSizableStringStreamRoot<CharT>::CharType    CharType;
+    typedef typename BasicSizableStringStreamRoot<CharT>::SizeType    SizeType;
 
 protected:
     const CharType * mReadCursor;
 
 public:
-    BasicStringInputStream(const CharType * src)
-        : BasicStringStreamRoot<CharT>(src), mReadCursor(src)
+    BasicSizableStringInputStream(const CharType * src)
+        : BasicSizableStringStreamRoot<CharT>(src), mReadCursor(src)
     {
-        jfx_iostream_trace("00 BasicStringInputStream<T>::BasicStringInputStream(const CharType * src);\n");
+        jfx_iostream_trace("00 BasicSizableStringInputStream<T>::BasicSizableStringInputStream(const CharType * src);\n");
     }
 
-    BasicStringInputStream(const void * src)
-        : BasicStringStreamRoot<CharT>(src),
+    BasicSizableStringInputStream(const CharType * src, SizeType size)
+        : BasicSizableStringStreamRoot<CharT>(src, size), mReadCursor(src)
+    {
+        jfx_iostream_trace("00 BasicSizableStringInputStream<T>::BasicSizableStringInputStream(const CharType * src, SizeType size);\n");
+    }
+
+    BasicSizableStringInputStream(const void * src)
+        : BasicSizableStringStreamRoot<CharT>(src),
           mReadCursor(reinterpret_cast<const CharType *>(src))
     {
-        jfx_iostream_trace("00 BasicStringInputStream<T>::BasicStringInputStream(const void * src);\n");
+        jfx_iostream_trace("00 BasicSizableStringInputStream<T>::BasicSizableStringInputStream(const void * src);\n");
     }
 
-    ~BasicStringInputStream() {
-        jfx_iostream_trace("01 BasicStringInputStream<T>::~BasicStringInputStream();\n");
+    BasicSizableStringInputStream(const void * src, SizeType size)
+        : BasicSizableStringStreamRoot<CharT>(src, size),
+          mReadCursor(reinterpret_cast<const CharType *>(src))
+    {
+        jfx_iostream_trace("00 BasicSizableStringInputStream<T>::BasicSizableStringInputStream(const void * src, SizeType size);\n");
+    }
+
+    ~BasicSizableStringInputStream() {
+        jfx_iostream_trace("01 BasicSizableStringInputStream<T>::~BasicSizableStringInputStream();\n");
     }
 
     // Get properties
@@ -76,8 +89,8 @@ public:
     bool isEof() const { return isReadEof(); }
 
     // Check range
-    bool isReadUnderflow() const { return (mReadCursor < mBegin); }
-    bool isReadOverflow() const  { return (mReadCursor > getEnd());   }
+    bool isReadUnderflow() const { return (mReadCursor < mBegin);   }
+    bool isReadOverflow() const  { return (mReadCursor > getEnd()); }
     bool isReadValid() const     { return (isReadOverflow() && isReadUnderflow()); }
 
     bool underflow() const { return isReadUnderflow(); }
@@ -101,7 +114,7 @@ public:
 
 }  // namespace JsonFx
 
-// Define default StringInputStream class type
-typedef JsonFx::BasicStringInputStream<JSONFX_DEFAULT_CHARTYPE>    jfxStringInputStream;
+// Define default SizableStringInputStream class type
+typedef JsonFx::BasicSizableStringInputStream<JSONFX_DEFAULT_CHARTYPE>      jfxSizableStringInputStream;
 
-#endif  /* _JSONFX_STREAM_STRINGINPUTSTREAM_H_ */
+#endif  /* _JSONFX_STREAM_SIZABLESTRINGINPUTSTREAM_H_ */

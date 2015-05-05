@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #include "jimi/basic/stdsize.h"
+
 #include "JsonFx/Config.h"
 
 #ifndef STREAM_GET_CHARSIZE

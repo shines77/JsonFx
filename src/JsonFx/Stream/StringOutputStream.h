@@ -8,9 +8,6 @@
 
 #include <stdio.h>
 
-#include "jimi/basic/stdsize.h"
-
-#include "JsonFx/Config.h"
 #include "JsonFx/Stream/StringStreamRoot.h"
 
 namespace JsonFx {
@@ -29,9 +26,6 @@ public:
     typedef typename BasicStringStreamRoot<CharT>::CharType    CharType;
     typedef typename BasicStringStreamRoot<CharT>::SizeType    SizeType;
 
-public:
-    static const size_t kMaxMemoryAddress = BasicStringStreamRoot<CharT>::kMaxMemoryAddress;
-
 protected:
     const CharType * mWriteCursor;
 
@@ -42,24 +36,11 @@ public:
         jfx_iostream_trace("00 BasicStringOutputStream<T>::BasicStringOutputStream(const CharType * src);\n");
     }
 
-    BasicStringOutputStream(const CharType * src, SizeType size)
-        : BasicStringStreamRoot<CharT>(src, size), mWriteCursor(src)
-    {
-        jfx_iostream_trace("00 BasicStringOutputStream<T>::BasicStringOutputStream(const CharType * src, SizeType size);\n");
-    }
-
     BasicStringOutputStream(const void * src)
         : BasicStringStreamRoot<CharT>(src),
           mWriteCursor(reinterpret_cast<const CharType *>(src))
     {
         jfx_iostream_trace("00 BasicStringOutputStream<T>::BasicStringOutputStream(const void * src);\n");
-    }
-
-    BasicStringOutputStream(const void * src, SizeType size)
-        : BasicStringStreamRoot<CharT>(src, size),
-          mWriteCursor(reinterpret_cast<const CharType *>(src))
-    {
-        jfx_iostream_trace("00 BasicStringOutputStream<T>::BasicStringOutputStream(const void * src, SizeType size);\n");
     }
 
     ~BasicStringOutputStream() {
@@ -82,13 +63,14 @@ public:
 
     // Get state
     bool isWriteEof() const {
-        jimi_assert(mWriteCursor <= mEnd);
+        jimi_assert(mWriteCursor != NULL);
+        jimi_assert(mWriteCursor < getEnd());
         return (*mWriteCursor == static_cast<SizeType>('\0'));
     }
 
     // Check range
-    bool isWriteUnderflow() const { return (mWriteCursor < mBegin); }
-    bool isWriteOverflow() const  { return (mWriteCursor > mEnd);   }
+    bool isWriteUnderflow() const { return (mWriteCursor < mBegin);   }
+    bool isWriteOverflow() const  { return (mWriteCursor > getEnd()); }
     bool isWriteValid() const     { return (isWriteOverflow() && isWriteUnderflow()); }
 
     // Write

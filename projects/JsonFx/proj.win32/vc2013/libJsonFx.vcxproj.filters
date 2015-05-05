@@ -159,6 +159,24 @@
     <ClInclude Include="..\..\..\..\src\JsonFx\Detail\Reader-Fwd.h">
       <Filter>src\JsonFx\Detail</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\FixedStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\SizableStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\SizableStringInputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\SizableStringOutputStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\SizableStringStream.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\JsonFx\Stream\SizableStringStreamRoot.h">
+      <Filter>src\JsonFx\Stream</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\JsonFx\JsonFx.cpp">

@@ -18,6 +18,12 @@
 
 #include "JsonFx/Internal/Traits.h"
 
+// Just for temporary test!
+#ifdef  jimi_assert
+#undef  jimi_assert
+#define jimi_assert(...)    ((void *)0)
+#endif
+
 namespace JsonFx {
 
 enum ValueType {

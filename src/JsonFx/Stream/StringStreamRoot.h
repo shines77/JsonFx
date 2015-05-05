@@ -8,9 +8,6 @@
 
 #include <stdio.h>
 
-#include "jimi/basic/stdsize.h"
-
-#include "JsonFx/Config.h"
 #include "JsonFx/Stream/StreamRoot.h"
 
 namespace JsonFx {
@@ -31,41 +28,17 @@ public:
 
 public:
     static const size_t kMaxMemoryAddress = static_cast<size_t>(-1);
-
-protected:
-    const CharType * mEnd;
-    SizeType         mSize;
+    static const size_t kSize             = static_cast<size_t>(-1);
 
 public:
-    BasicStringStreamRoot(const CharType * src)
-        : BasicStreamRoot<CharT>(src),
-          mEnd(reinterpret_cast<const CharType *>(kMaxMemoryAddress)),
-          mSize(STREAM_ROUND_CHARSIZE(reinterpret_cast<const CharType *>(kMaxMemoryAddress) - src))
-
+    BasicStringStreamRoot(const CharType * src) : BasicStreamRoot<CharT>(src)
     {
         jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src);\n");
     }
 
-    BasicStringStreamRoot(const CharType * src, SizeType size)
-        : BasicStreamRoot<CharT>(src), mEnd(src + size), mSize(size)
-    {
-        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const CharType * src, SizeType size);\n");
-    }
-
-    BasicStringStreamRoot(const void * src)
-        : BasicStreamRoot<CharT>(src),
-          mEnd(reinterpret_cast<const CharType *>(kMaxMemoryAddress)),
-          mSize(STREAM_ROUND_CHARSIZE(reinterpret_cast<const CharType *>(kMaxMemoryAddress) - src))
+    BasicStringStreamRoot(const void * src) : BasicStreamRoot<CharT>(src)
     {
         jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const void * src);\n");
-    }
-
-    BasicStringStreamRoot(const void * src, SizeType size)
-        : BasicStreamRoot<CharT>(src),
-          mEnd(reinterpret_cast<const CharType *>(reinterpret_cast<const char *>(src) + STREAM_ROUND_CHARSIZE(size))),
-          mSize(STREAM_GET_CHARSIZE(size))
-    {
-        jfx_iostream_trace("00 BasicStringStreamRoot<T>::BasicStringStreamRoot(const void * src, SizeType size);\n");
     }
 
     ~BasicStringStreamRoot() {
@@ -73,16 +46,13 @@ public:
     }
 
     // Get properties
-    const CharType * getBegin() const  { return mBegin; }
-    const void *     getBeginV() const { return reinterpret_cast<void *>(mBegin); }
+    const CharType * getEnd() const  { return reinterpret_cast<const CharType *>(kMaxMemoryAddress); }
+    const void *     getEndV() const { return reinterpret_cast<const void *>(kMaxMemoryAddress);     }
 
-    const CharType * getEnd() const    { return mEnd;   }
-    const void *     getEndV() const   { return reinterpret_cast<void *>(mEnd);   }
+    bool isValid() const  { return (mBegin != NULL); }
+    bool isNormal() const { return true; }
 
-    bool isValid() const  { return (mBegin != NULL && mEnd != NULL); }
-    bool isNormal() const { return (mBegin <= mEnd); }
-
-    SizeType getSize() const { returen mSize; }
+    SizeType getSize() const { return kSize; }
 };
 
 }  // namespace JsonFx
