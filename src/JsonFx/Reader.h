@@ -12,7 +12,16 @@
 #include "JsonFx/Stack.h"
 #include "JsonFx/ParseResult.h"
 
+#define JSONFX_DEFAULT_PARSE_FLAGS      kNoneParseFlag
+
 namespace JsonFx {
+
+enum ParseFlags {
+    kNoneParseFlag = 0,
+    kNoStringEscapeParseFlags,
+    kMaxParseFlags,
+    kDefaultParseFlags = JSONFX_DEFAULT_PARSE_FLAGS
+};
 
 // Forward declaration.
 template <typename SourceEncodingT,

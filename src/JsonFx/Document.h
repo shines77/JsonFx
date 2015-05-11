@@ -242,16 +242,11 @@ private:
     }
 
 public:
-    BasicDocument & parse(const CharType * text)
-    {
-        jimi_assert(text != NULL);
-        StringInputStreamT inputStream(text);
-        return parse<0, EncodingT, StringInputStreamT>(inputStream);
-    }
-
-    template <unsigned parseFlags, typename SourceEncodingT, typename InuptStreamT>
-    BasicDocument & parse(InuptStreamT & is)
-    {
+    //
+    // BasicDocument::parse<parseFlags, SourceEncodingT, InuptStreamT>(is);
+    //
+    template <uint64_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
+    BasicDocument & parse(InuptStreamT & is) {
         // Remove existing root if exist
         ValueType::setNull();
         BasicReader<SourceEncodingT, EncodingT, PoolAllocatorT> reader(this->getAllocator());
@@ -297,6 +292,65 @@ public:
         }
 
         return *this;
+    }
+
+    //
+    // BasicDocument::parse(InputStreamT & is);
+    //
+    template <uint64_t parseFlags, typename InputStreamT>
+    BasicDocument & parse(InputStreamT & is) {
+        return parse<parseFlags, EncodingT, InputStreamT>(is);
+    }
+
+    template <typename InputStreamT>
+    BasicDocument & parse(InputStreamT & is) {
+        return parse<kDefaultParseFlags>(is);
+    }
+
+    //
+    // BasicDocument::parse(StringInputStreamT & is);
+    //
+    template <uint64_t parseFlags, typename SourceEncodingT>
+    BasicDocument & parse(StringInputStreamT & is) {
+        return parse<parseFlags, SourceEncodingT, StringInputStreamT>(is);
+    }
+
+    template <uint64_t parseFlags>
+    BasicDocument & parse(StringInputStreamT & is) {
+        return parse<parseFlags, EncodingT>(is);
+    }
+
+    BasicDocument & parse(StringInputStreamT & is) {
+        return parse<kDefaultParseFlags>(is);
+    }
+
+    //
+    // BasicDocument::parse(const CharType * text);
+    //
+    template <uint64_t parseFlags, typename SourceEncodingT, typename InputStreamT>
+    BasicDocument & parse(const CharType * text) {
+        jimi_assert(text != NULL);
+        InputStreamT inputStream(text);
+        return parse<parseFlags, SourceEncodingT, InputStreamT>(inputStream);
+    }
+
+    template <uint64_t parseFlags, typename SourceEncodingT>
+    BasicDocument & parse(const CharType * text) {
+        return parse<parseFlags, SourceEncodingT, StringInputStreamT>(text);
+    }
+
+    template <typename InputStreamT>
+    BasicDocument & parse(const typename InputStreamT::CharType * text) {
+        return parse<kDefaultParseFlags, EncodingT, InputStreamT>(text);
+    }
+
+    template <uint64_t parseFlags>
+    BasicDocument & parse(const CharType * text) {
+        return parse<parseFlags, EncodingT>(text);
+    }
+
+    BasicDocument & parse(const CharType * text) {
+        return parse<kDefaultParseFlags>(text);
     }
 };
 

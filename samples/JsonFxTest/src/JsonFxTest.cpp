@@ -56,11 +56,24 @@ void JsonFx_Test()
     static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
     static const char json_test[] = "[0, 1, 2, 3]";
     Document document(&poolAllocator);
+    StringInputStream stringStream(json);
 
     printf("\n");
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
         document.parse(json);
+        document.parse<>(json);
+        document.parse<StringInputStream>(json);
+        document.parse(stringStream);
+        document.parse<StringInputStream>(stringStream);
+
+        document.parse(stringStream);
+        document.parse<>(stringStream);
+        document.parse< BasicStringInputStream<char> >(stringStream);
+        document.parse<0>(stringStream);
+        document.parse<0, CharSet::UTF8>(stringStream);
+        document.parse<0, StringInputStream>(stringStream);
+        document.parse<0, CharSet::UTF8, StringInputStream>(stringStream);
         poolAllocator.reset();
     }
     elapsedtime = jmc_get_elapsedtime_msf(starttime);
@@ -234,8 +247,33 @@ void JsonFx_SizableStringStream_Test()
     printf("=====================================================\n");
 }
 
+template < uint64_t parseFlags, typename T >
+class StaticTest {
+public:
+    StaticTest(const char * text, size_t size) : i(0), stream(text, size) {}
+    ~StaticTest() {}
+
+    void print() {
+        if (parseFlags & 0x0001ULL)
+            printf("i1 = %d", i);
+        else if (parseFlags & 0x0002ULL)
+            printf("i2 = %d", i);
+        else
+            printf("ii = %d", i);
+    }
+
+private:
+    T       stream;
+    int     i;
+};
+
 int main(int argn, char * argv[])
 {
+    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+
+    StaticTest<0, SizableStringStream> test(json, _countof(json));
+    test.print();
+
     JsonFx_Test();
     JsonFx_Test2();
 

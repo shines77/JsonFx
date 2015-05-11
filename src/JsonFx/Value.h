@@ -326,17 +326,17 @@ public:
     };
 
     struct String {
-        SizeType        size;
-        SizeType        capacity;
-        unsigned int    hashCode;
-        const CharType *data;
+        SizeType         size;
+        SizeType         capacity;
+        unsigned int     hashCode;
+        const CharType * data;
     };
 
     struct SmallString {
-        SizeType        size;
-        SizeType        capacity;
-        unsigned int    hashCode;
-        const CharType *data;
+        SizeType         size;
+        SizeType         capacity;
+        unsigned int     hashCode;
+        const CharType * data;
 
         SizeType GetLength() const { return size; }
     };
