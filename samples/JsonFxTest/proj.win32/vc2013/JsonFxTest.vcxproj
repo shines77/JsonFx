@@ -58,7 +58,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\..\..\..\samples\JsonFxTest\src;..\..\..\..\..\samples\JsonFxTest\include;..\..\..\..\..\samples\JsonFxTest;..\..\..\..\..\test\UnitTest\src;..\..\..\..\..\test\UnitTest\include;..\..\..\..\..\test\UnitTest;..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;$(SolutionDir)samples\JsonFxTest;$(SolutionDir)test\UnitTest;$(SolutionDir)src;$(SolutionDir)include;.\src;.\include;.\samples;.\test;.\deps;$(ProjectDir)src;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;JSONFX_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -79,7 +79,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>..\..\..\..\..\samples\JsonFxTest\src;..\..\..\..\..\samples\JsonFxTest\include;..\..\..\..\..\samples\JsonFxTest;..\..\..\..\..\test\UnitTest\src;..\..\..\..\..\test\UnitTest\include;..\..\..\..\..\test\UnitTest;..\..\..\..\..\src;..\..\..\..\..\src\JsonFx;..\..\..\..\..\include;..\..\..\..\..\include\JsonFx;..\..\..\..\..\samples;..\..\..\..\..\test;..\..\..\..\..\deps;$(SolutionDir)samples\JsonFxTest;$(SolutionDir)test\UnitTest;$(SolutionDir)src;$(SolutionDir)include;.\src;.\include;.\samples;.\test;.\deps;$(ProjectDir)src;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;JSONFX_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>

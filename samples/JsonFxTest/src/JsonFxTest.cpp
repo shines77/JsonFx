@@ -32,16 +32,24 @@
 #include "JsonFx/Stream/SizableStringInputStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
-#include "jimi/basic/vld.h"
+//#include "jimi/basic/vld.h"
+
+#if 0
+#if defined(_DEBUG) || !defined(NDEBUG)
+#pragma comment(lib, "libJsonFx-x86-Debug.lib")
+#else
+#pragma comment(lib, "libJsonFx-x86-Release.lib")
+#endif
+#endif
 
 using namespace JsonFx;
 
 void JsonFx_Test()
 {
-#if defined(NDEBUG)
-    static const size_t kLoopCount = 200000;
-#else
+#if defined(_DEBUG) || !defined(NDEBUG)
     static const size_t kLoopCount = 1000;
+#else
+    static const size_t kLoopCount = 200000;
 #endif
 
     jmc_timestamp_t starttime;
@@ -64,11 +72,11 @@ void JsonFx_Test()
         document.parse(json);
         document.parse<>(json);
         document.parse<StringInputStream>(json);
-        document.parse(stringStream);
-        document.parse<StringInputStream>(stringStream);
+        document.parse<SizableStringInputStream>(json);
 
         document.parse(stringStream);
         document.parse<>(stringStream);
+        document.parse<StringInputStream>(stringStream);
         document.parse< BasicStringInputStream<char> >(stringStream);
         document.parse<0>(stringStream);
         document.parse<0, CharSet::UTF8>(stringStream);
@@ -98,10 +106,10 @@ void JsonFx_Test()
 
 void JsonFx_Test2()
 {
-#if defined(NDEBUG)
-    static const size_t kLoopCount = 200000;
-#else
+#if defined(_DEBUG) || !defined(NDEBUG)
     static const size_t kLoopCount = 1000;
+#else
+    static const size_t kLoopCount = 200000;
 #endif
 
     jmc_timestamp_t starttime;
@@ -247,32 +255,10 @@ void JsonFx_SizableStringStream_Test()
     printf("=====================================================\n");
 }
 
-template < uint64_t parseFlags, typename T >
-class StaticTest {
-public:
-    StaticTest(const char * text, size_t size) : i(0), stream(text, size) {}
-    ~StaticTest() {}
-
-    void print() {
-        if (parseFlags & 0x0001ULL)
-            printf("i1 = %d", i);
-        else if (parseFlags & 0x0002ULL)
-            printf("i2 = %d", i);
-        else
-            printf("ii = %d", i);
-    }
-
-private:
-    T       stream;
-    int     i;
-};
-
 int main(int argn, char * argv[])
 {
-    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
-
-    StaticTest<0, SizableStringStream> test(json, _countof(json));
-    test.print();
+    Json json;
+    json.visit();
 
     JsonFx_Test();
     JsonFx_Test2();

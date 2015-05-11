@@ -8,6 +8,7 @@
 
 #include "JsonFx/Config.h"
 
+#include "jimi/basic/archdef.h"
 #include "jimi/basic/stdint.h"
 #include "jimi/basic/assert.h"
 
@@ -16,6 +17,7 @@ namespace JsonFx {
 namespace internal {
 
 // If n = 0, round to 1.
+static
 size_t RoundToPowerOf2(size_t n) {
 #if 1
     if (n != 0) {

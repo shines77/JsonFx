@@ -1,5 +1,5 @@
 
-#include "JsonFx.h"
+#include "JsonFx/JsonFx.h"
 
 #include <stdio.h>
 
@@ -13,6 +13,6 @@ void Json::visit()
     printf("JsonFx::Json::visit() over.\n\n");
 }
 
-#endif
+#endif  /* JSONFX_STATIC_LIB */
 
 }  // namespace JsonFx

@@ -14,17 +14,20 @@
 
 namespace JsonFx {
 
-#if defined(JSONFX_STATIC_LIB)
-
 class Json {
 public:
     Json()  {}
     ~Json() {}
 
-    void visit() {}
-};
-
+#if defined(JSONFX_STATIC_LIB)
+    void visit();
+#else
+    void visit() {
+        /* Do nothing! */
+        (void)0;
+    }
 #endif  /* JSONFX_STATIC_LIB */
+};
 
 }  // namespace JsonFx
 

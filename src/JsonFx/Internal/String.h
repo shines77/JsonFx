@@ -16,6 +16,7 @@ namespace JsonFx {
 namespace internal {
 
 template <typename CharType>
+static
 size_t StrLen(const CharType * str) {
     const CharType * orig = str;
     while (*str++ != CharType('\0')) {
@@ -25,11 +26,13 @@ size_t StrLen(const CharType * str) {
 }
 
 template <>
+static
 size_t StrLen(const char * str) {
     return ::strlen(str);
 }
 
 template <>
+static
 size_t StrLen(const unsigned char * str) {
     return ::strlen((const char *)str);
 }
