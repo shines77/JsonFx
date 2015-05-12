@@ -162,6 +162,67 @@ public:
     typedef uint32_t                        ValueType;
 
 public:
+    union Number {
+        char        c;
+        int8_t      i8;
+        uint8_t     u8;
+        int16_t     i16;
+        uint16_t    u16;
+        int32_t     i32;
+        uint32_t    u32;
+        int64_t     i64;
+        uint64_t    u64;
+        float       f;
+        double      d;
+    };
+
+    struct String {
+        SizeType         size;
+        SizeType         capacity;
+        unsigned int     hashCode;
+        const CharType * data;
+    };
+
+    struct SmallString {
+        SizeType         size;
+        SizeType         capacity;
+        unsigned int     hashCode;
+        const CharType * data;
+
+        SizeType GetLength() const { return size; }
+    };
+
+    struct Element {
+        void * data;
+    };
+
+    struct Array {
+        SizeType        size;
+        SizeType        capacity;
+        unsigned int    hashCode;
+        BasicValue *    elements;
+    };
+
+    struct Object {
+        SizeType        size;
+        SizeType        capacity;
+        unsigned int    hashCode;
+        MemberType *    members;
+    };
+
+    union ValueData {
+        String      str;
+        SmallString sso;
+        Number      num;
+        Array       array;
+        Object      obj;
+    };
+
+private:
+    ValueType   mValueType;
+    ValueData   mValueData;
+
+public:
     BasicValue() : mValueType(kNullFlags), mValueData() {}
 
     BasicValue(const CharType * str) {
@@ -180,7 +241,37 @@ private:
 
 public:
     void visit();
-    void release();
+
+    void release() {
+        //printf("JsonFx::BasicValue::release() enter.\n");
+        // Shortcut by Allocator's trait
+        if (PoolAllocatorType::kNeedFree) {
+            switch (mValueType) {
+            case kArrayFlags:
+                for (BasicValue * v = mValueData.array.elements; v != mValueData.array.elements + mValueData.array.size; ++v) {
+                    v->~BasicValue();
+                }
+                PoolAllocatorType::deallocate(mValueData.array.elements);
+                break;
+
+            case kObjectFlags:
+                for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
+                    m->~MemberType();
+                }
+                PoolAllocatorType::deallocate(mValueData.obj.members);
+                break;
+
+            case kCopyStringFlags:
+                PoolAllocatorType::deallocate(const_cast<CharType *>(mValueData.str.data));
+                break;
+
+            default:
+                printf("JsonFx::BasicValue::release() -- switch(mValueType) branch = default, mValueType = 0x%08X\n", mValueType);
+                break;  // Do nothing for other types.
+            }
+        }
+        //printf("JsonFx::BasicValue::release() over.\n");
+    }
 
     void setStringRaw(StringRefType str) {
         mValueType = kConstStringMask;
@@ -309,105 +400,10 @@ public:
         jimi_assert(isString());
         return ((mValueType & kInlineStringMask) ? (mValueData.sso.GetLength()) : mValueData.str.size);
     }
-
-public:
-    union Number {
-        char        c;
-        int8_t      i8;
-        uint8_t     u8;
-        int16_t     i16;
-        uint16_t    u16;
-        int32_t     i32;
-        uint32_t    u32;
-        int64_t     i64;
-        uint64_t    u64;
-        float       f;
-        double      d;
-    };
-
-    struct String {
-        SizeType         size;
-        SizeType         capacity;
-        unsigned int     hashCode;
-        const CharType * data;
-    };
-
-    struct SmallString {
-        SizeType         size;
-        SizeType         capacity;
-        unsigned int     hashCode;
-        const CharType * data;
-
-        SizeType GetLength() const { return size; }
-    };
-
-    struct Element {
-        void * data;
-    };
-
-    struct Array {
-        SizeType        size;
-        SizeType        capacity;
-        unsigned int    hashCode;
-        BasicValue *    elements;
-    };
-
-    struct Object {
-        SizeType        size;
-        SizeType        capacity;
-        unsigned int    hashCode;
-        MemberType *    members;
-    };
-
-    union ValueData
-    {
-        String      str;
-        SmallString sso;
-        Number      num;
-        Array       array;
-        Object      obj;
-    };
-
-private:
-    ValueType   mValueType;
-    ValueData   mValueData;
 };
 
 // Recover the packing alignment
 #pragma pack(pop)
-
-template <typename EncodingT, typename PoolAllocatorT>
-void BasicValue<EncodingT, PoolAllocatorT>::release()
-{
-    //printf("JsonFx::BasicValue::release() enter.\n");
-    // Shortcut by Allocator's trait
-    if (PoolAllocatorType::kNeedFree) {
-        switch (mValueType) {
-        case kArrayFlags:
-            for (BasicValue * v = mValueData.array.elements; v != mValueData.array.elements + mValueData.array.size; ++v) {
-                v->~BasicValue();
-            }
-            PoolAllocatorType::deallocate(mValueData.array.elements);
-            break;
-
-        case kObjectFlags:
-            for (MemberIterator m = getMemberBegin(); m != getMemberEnd(); ++m) {
-                m->~MemberType();
-            }
-            PoolAllocatorType::deallocate(mValueData.obj.members);
-            break;
-
-        case kCopyStringFlags:
-            PoolAllocatorType::deallocate(const_cast<CharType *>(mValueData.str.data));
-            break;
-
-        default:
-            printf("JsonFx::BasicValue::release() -- switch(mValueType) branch = default, mValueType = 0x%08X\n", mValueType);
-            break;  // Do nothing for other types.
-        }
-    }
-    //printf("JsonFx::BasicValue::release() over.\n");
-}
 
 template <typename EncodingT, typename PoolAllocatorT>
 void BasicValue<EncodingT, PoolAllocatorT>::visit()

@@ -17,10 +17,10 @@
 namespace JsonFx {
 
 enum ParseFlags {
-    kNoneParseFlag = 0,
-    kNoStringEscapeParseFlags,
-    kMaxParseFlags,
-    kDefaultParseFlags = JSONFX_DEFAULT_PARSE_FLAGS
+    kNoneParseFlag              = 0,
+    kNoStringEscapeParseFlags   = 1,
+    kMaxParseFlags              = 0x80000000U,
+    kDefaultParseFlags          = JSONFX_DEFAULT_PARSE_FLAGS
 };
 
 // Forward declaration.

@@ -28,6 +28,9 @@ class HeapAllocator {
 public:
     static const bool kNeedFree = false;
 #endif
+public:
+    HeapAllocator()  {}
+    ~HeapAllocator() {}
 };
 
 /* Just define for inheritance. */
@@ -40,6 +43,9 @@ public:
     static const size_t kInnerChunkCapacity = 0;
     static const size_t kAlignmentSize      = JSONFX_POOL_ALIGNMENT_SIZE;
 #endif
+public:
+    PoolAllocator()  {}
+    ~PoolAllocator() {}
 };
 
 // C-RunTime Allocator
@@ -47,6 +53,9 @@ class TrivialAllocator : public HeapAllocator
 {
 public:
     static const bool kNeedFree = true;
+
+    TrivialAllocator()  {}
+    ~TrivialAllocator() {}
 
     static void * malloc(size_t size)  { return std::malloc(size); }
     static void * realloc(void * ptr, size_t size, size_t new_size) {

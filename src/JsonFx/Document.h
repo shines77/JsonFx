@@ -99,18 +99,25 @@ private:
 
     // The whitespace chars including " \t\n\r"
     template <typename InuptStreamT>
+    //JIMI_FORCEINLINE
+    inline
     bool isWhiteSpaces(InuptStreamT & is) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        return (is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'));
+        return (bool)((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r')));
     }
 
     template <typename InuptStreamT>
-    void skipWhiteSpaces(InuptStreamT & is)
-    {
+    void skipWhiteSpaces(InuptStreamT & is) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+#if 1
+        while ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'))) {
+            is.next();
+        }
+#else
         while (isWhiteSpaces(is)) {
             is.next();
         }
+#endif
     }
 
     CharType * startObject(CharType *p) {
@@ -164,7 +171,7 @@ private:
                         return p;
                     }
                 }
-            }            
+            }
         }
         // It's the ending of string token.
         if (*p == beginToken) {

@@ -70,6 +70,7 @@ void JsonFx_Test()
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
         document.parse(json);
+        /*
         document.parse<>(json);
         document.parse<StringInputStream>(json);
         document.parse<SizableStringInputStream>(json);
@@ -82,6 +83,7 @@ void JsonFx_Test()
         document.parse<0, CharSet::UTF8>(stringStream);
         document.parse<0, StringInputStream>(stringStream);
         document.parse<0, CharSet::UTF8, StringInputStream>(stringStream);
+        //*/
         poolAllocator.reset();
     }
     elapsedtime = jmc_get_elapsedtime_msf(starttime);
