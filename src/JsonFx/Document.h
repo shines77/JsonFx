@@ -101,21 +101,23 @@ private:
     template <typename InuptStreamT>
     //JIMI_FORCEINLINE
     inline
-    bool isWhiteSpaces(InuptStreamT & is) const {
+    bool isWhiteSpaces(const InuptStreamT & is) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
         return ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r')));
     }
 
     template <typename InuptStreamT>
-    void skipWhiteSpaces(InuptStreamT & is) {
+    JIMI_FORCEINLINE
+    void skipWhiteSpaces(const InuptStreamT & is) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+        InuptStreamT & nis = const_cast<InuptStreamT &>(is);
 #if 1
-        while ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'))) {
-            is.next();
+        while ((nis.peek() == _Ch(' ')) || (nis.peek() >= _Ch('\t') && nis.peek() <= _Ch('\r'))) {
+            nis.next();
         }
 #else
-        while (isWhiteSpaces(is)) {
-            is.next();
+        while (isWhiteSpaces(nis)) {
+            nis.next();
         }
 #endif
     }
@@ -253,7 +255,7 @@ public:
     // BasicDocument::parse<parseFlags, SourceEncodingT, InuptStreamT>(is);
     //
     template <uint64_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
-    BasicDocument & parse(InuptStreamT & is) {
+    BasicDocument & parse(const InuptStreamT & is) {
         // Remove existing root if exist
         ValueType::setNull();
         BasicReader<SourceEncodingT, EncodingT, PoolAllocatorT> reader(this->getAllocator());
@@ -305,12 +307,12 @@ public:
     // BasicDocument::parse(InputStreamT & is);
     //
     template <uint64_t parseFlags, typename InputStreamT>
-    BasicDocument & parse(InputStreamT & is) {
+    BasicDocument & parse(const InputStreamT & is) {
         return parse<parseFlags, EncodingT, InputStreamT>(is);
     }
 
     template <typename InputStreamT>
-    BasicDocument & parse(InputStreamT & is) {
+    BasicDocument & parse(const InputStreamT & is) {
         return parse<kDefaultParseFlags>(is);
     }
 
@@ -318,16 +320,16 @@ public:
     // BasicDocument::parse(StringInputStreamT & is);
     //
     template <uint64_t parseFlags, typename SourceEncodingT>
-    BasicDocument & parse(StringInputStreamT & is) {
+    BasicDocument & parse(const StringInputStreamT & is) {
         return parse<parseFlags, SourceEncodingT, StringInputStreamT>(is);
     }
 
     template <uint64_t parseFlags>
-    BasicDocument & parse(StringInputStreamT & is) {
+    BasicDocument & parse(const StringInputStreamT & is) {
         return parse<parseFlags, EncodingT>(is);
     }
 
-    BasicDocument & parse(StringInputStreamT & is) {
+    BasicDocument & parse(const StringInputStreamT & is) {
         return parse<kDefaultParseFlags>(is);
     }
 
