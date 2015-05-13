@@ -94,6 +94,78 @@ struct RemoveConst<const T> {
     typedef T Type;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// IsSame, IsConst, IsMoreConst, IsPointer
+//
+template <typename T, typename U> struct IsSame : FalseType {};
+template <typename T> struct IsSame<T, T> : TrueType {};
+
+template <typename T> struct IsConst : FalseType {};
+template <typename T> struct IsConst<const T> : TrueType {};
+
+template <typename CT, typename T>
+struct IsMoreConst
+    : AndExpr<IsSame<typename RemoveConst<CT>::Type, typename RemoveConst<T>::Type>,
+              BoolType<IsConst<CT>::Value >= IsConst<T>::Value> >::Type {};
+
+template <typename T> struct IsPointer : FalseType {};
+template <typename T> struct IsPointer<T*> : TrueType {};
+
+#ifndef jimi_staic_assert
+//#define jimi_staic_assert(expr, ...)    static_assert((expr), __VA_ARGS__)
+#define jimi_staic_assert(expr, ...)
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// IsBaseOf
+//
+#if JSONFX_HAS_CXX11_TYPETRAITS
+
+template <typename B, typename D> struct IsBaseOf
+    : BoolType< ::std::is_base_of<B,D>::value> {};
+
+#else // simplified version adopted from Boost
+
+template<typename B, typename D> struct IsBaseOfImpl {
+    jimi_staic_assert(sizeof(B) != 0);
+    jimi_staic_assert(sizeof(D) != 0);
+
+    typedef char (&Yes)[1];
+    typedef char (&No) [2];
+
+    template <typename T>
+    static Yes Check(const D *, T);
+    static No  Check(const B *, int);
+
+    struct Host {
+        operator const B *() const;
+        operator const D *();
+    };
+
+    enum { Value = (sizeof(Check(Host(), 0)) == sizeof(Yes)) };
+};
+
+template <typename B, typename D> struct IsBaseOf
+    : OrExpr<IsSame<B, D>, BoolExpr<IsBaseOfImpl<B, D> > >::Type {};
+
+#endif // JSONFX_HAS_CXX11_TYPETRAITS
+
+
+//////////////////////////////////////////////////////////////////////////
+// EnableIf / DisableIf
+//
+template <bool Condition, typename T = void> struct EnableIfCond  { typedef T Type; };
+template <typename T> struct EnableIfCond<false, T> { /* empty */ };
+
+template <bool Condition, typename T = void> struct DisableIfCond { typedef T Type; };
+template <typename T> struct DisableIfCond<true, T> { /* empty */ };
+
+template <typename Condition, typename T = void>
+struct EnableIf : EnableIfCond<Condition::Value, T> {};
+
+template <typename Condition, typename T = void>
+struct DisableIf : DisableIfCond<Condition::Value, T> {};
+
 }  // namespace internal
 
 }  // namespace jimi

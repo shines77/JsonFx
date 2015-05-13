@@ -27,8 +27,8 @@ private:
     size_t              mCapacity;
 
 public:
-    BasicStack(PoolAllocatorT * allocator, size_t capacity)
-        : mAllocator(allocator), mCapacity(capacity)
+    BasicStack(const PoolAllocatorT * allocator, size_t capacity)
+        : mAllocator(const_cast<PoolAllocatorT *>(allocator)), mCapacity(capacity)
     {
         /* Do nothing! */
     }

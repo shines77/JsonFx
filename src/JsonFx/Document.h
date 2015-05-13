@@ -43,16 +43,24 @@ public:
     typedef BasicValue<EncodingT, PoolAllocatorT>   ValueType;          //!< Value type of the document.
     typedef EncodingT                               EncodingType;       //!< Character encoding type.
     typedef PoolAllocatorT                          PoolAllocatorType;  //!< Pool allocator type from template parameter.
-    typedef AllocatorT                              AllocatorType;      //!< Stack allocator type from template parameter.
+    typedef AllocatorT                              StackAllocatorType; //!< Stack allocator type from template parameter.
     typedef BasicStringInputStream<CharType>        StringInputStreamT;
+    typedef BasicStack<PoolAllocatorT>              StackType;
+    typedef BasicParseResult<EncodingT>             ParseResultType;
 
-private:    
-    PoolAllocatorType * mPoolAllocator;
-    bool                mPoolAllocatorNeedFree;
+private:
+    PoolAllocatorType *     mPoolAllocator;
+    bool                    mPoolAllocatorNeedFree;
+    StackAllocatorType *    mStackAllocator;
+    bool                    mStackAllocatorNeedFree;
+    StackType               mStack;
+    ParseResultType         mParseResult;
 
 public:
-    BasicDocument(PoolAllocatorType * poolAllocator = NULL)
-        : mPoolAllocator(poolAllocator), mPoolAllocatorNeedFree(false)
+    BasicDocument(const PoolAllocatorType * poolAllocator = NULL)
+        : mPoolAllocator(const_cast<PoolAllocatorType *>(poolAllocator)),
+          mPoolAllocatorNeedFree(false),
+          mStack(poolAllocator, 100), mParseResult()
     {
         initPoolAllocator(poolAllocator);
     }
@@ -68,7 +76,9 @@ private:
     BasicDocument & operator =(const BasicDocument &);
 
 public:
-    PoolAllocatorType * getAllocator() const { return mPoolAllocator; }
+    const PoolAllocatorType *  getPoolAllocator() const  { return mPoolAllocator;  }
+    const StackAllocatorType * getStackAllocator() const { return mStackAllocator; }
+    const PoolAllocatorType *  getAllocator() const      { return getPoolAllocator();  }
 
     void visit();
 
@@ -86,7 +96,7 @@ private:
         }
     }
 
-    void initPoolAllocator(PoolAllocatorType * poolAllocator) {
+    void initPoolAllocator(const PoolAllocatorType * poolAllocator) {
         if (poolAllocator == NULL) {
             PoolAllocatorType * newPoolAllocator = new PoolAllocatorType();
             jimi_assert(newPoolAllocator != NULL);
@@ -97,160 +107,43 @@ private:
         }
     }
 
-    // The whitespace chars including " \t\n\r"
-    template <typename InuptStreamT>
-    //JIMI_FORCEINLINE
-    inline
-    bool isWhiteSpaces(const InuptStreamT & is) const {
-        // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        return ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r')));
-    }
-
-    template <typename InuptStreamT>
-    JIMI_FORCEINLINE
-    void skipWhiteSpaces(const InuptStreamT & is) {
-        // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        InuptStreamT & nis = const_cast<InuptStreamT &>(is);
-#if 1
-        while ((nis.peek() == _Ch(' ')) || (nis.peek() >= _Ch('\t') && nis.peek() <= _Ch('\r'))) {
-            nis.next();
-        }
-#else
-        while (isWhiteSpaces(nis)) {
-            nis.next();
-        }
-#endif
-    }
-
-    CharType * startObject(CharType *p) {
-        return p;
-    }
-
-    CharType * startArray(CharType *p) {
-        return p;
-    }
-
-    template <CharType beginToken>
-    CharType * startString(CharType * p) {
-        jimi_assert(mPoolAllocator != NULL);
-        // The size of string length field
-        static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
-        // Reserve string size
-        static const size_t kReserveStringSize = 8;
-        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfHeadField, kReserveStringSize));
-        jimi_assert(cursor != NULL);
-        CharType * begin   = cursor;
-        CharType * bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
-
-        while (*p != beginToken && *p != _Ch('\0')) {
-            if (cursor < bottom) {
-                *cursor++ = *p++;
-            }
-            else {
-                // The remain space in the active chunk is not enough to store the string's
-                // characters, so we allocate a new chunk to store it.
-                CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->addNewChunkAndSkip(kSizeOfHeadField, kReserveStringSize));
-                CharType * newBegin  = newCursor;
-                jimi_assert(newCursor != NULL);
-                while (begin != cursor) {
-                    *newCursor++ = *begin++;
-                }
-                cursor  = newCursor;
-                begin   = newBegin;
-                bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
-
-                while (*p != beginToken && *p != _Ch('\0')) {
-                    if (cursor < bottom) {
-                        *cursor++ = *p++;
-                    }
-                    else {
-                        // If it need allocate memory second time, mean the string's length
-                        // is more than PoolAllocator's kChunkCapacoty bytes, so we find
-                        // out the string's length first, and allocate the enough memory
-                        // to fill the string's characters.
-                        size_t lenScanned = cursor - begin;
-                        p = startLargeString<beginToken>(p, lenScanned);
-                        return p;
-                    }
-                }
-            }
-        }
-        // It's the ending of string token.
-        if (*p == beginToken) {
-            ++p;
-            *cursor = _Ch('\0');
-            ++cursor;
-            jimi_assert(cursor >= begin);
-            size_t length = cursor - begin;
-            uint32_t * pHeadInfo = reinterpret_cast<uint32_t *>(reinterpret_cast<char *>(begin) - kSizeOfHeadField);
-            jimi_assert(pHeadInfo != NULL);
-            *pHeadInfo = static_cast<uint32_t>(kConstStringFlags);
-            pHeadInfo++;
-            *pHeadInfo = static_cast<uint32_t>(length);
-            mPoolAllocator->allocate(kSizeOfHeadField + length * sizeof(CharType));
-        }
-        else {
-            // Error: The tail token is not match.
-            //mErrno = -1;
-        }
-        return p;
-    }
-
-    template <CharType beginToken>
-    JIMI_NOINLINE_DECLARE(CharType *) startLargeString(CharType *p, size_t lenScanned) {
-        // The size of string length field
-        static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
-
-        size_t lenTail, lenTotal;
-        CharType *origPtr, *savePtr;
-
-        // Get the original begin address of p.
-        origPtr = p - lenScanned;
-        savePtr = p;
-
-        // Find the full length of string
-        while (*p != beginToken && *p != _Ch('\0')) {
-            ++p;
-        }
-
-        // The length of tail characters of string.
-        lenTail = p - savePtr;
-        // Get the full length
-        lenTotal = lenScanned + lenTail + 1;
-
-        // Allocate the large chunk, and insert it to last.
-        jimi_assert(mPoolAllocator != NULL);
-        CharType * newCursor = reinterpret_cast<CharType *>(mPoolAllocator->allocateLarge(kSizeOfHeadField + lenTotal * sizeof(CharType)));
-        jimi_assert(newCursor != NULL);
-
-        uint32_t * pHeadInfo = reinterpret_cast<uint32_t *>(newCursor);
-        *pHeadInfo = static_cast<uint32_t>(kConstStringFlags);
-        pHeadInfo++;
-        *pHeadInfo = static_cast<uint32_t>(lenTotal);
-
-        // Start copy the string's characters.
-        newCursor = reinterpret_cast<CharType *>(pHeadInfo);
-        if (*p == beginToken) {
-            while (*origPtr != beginToken) {
-                *newCursor++ = *origPtr++;
-            }
-            *newCursor = _Ch('\0');
-            ++p;
-        }
-        else {
-            // Error: The tail token is not match.
-            if (*p == _Ch('\0')) {
-                while (*origPtr != _Ch('\0')) {
-                    *newCursor++ = *origPtr++;
-                }
-                *newCursor = _Ch('\0');
-            }
-            //mErrno = -1;
-        }
-        return p;
-    }
-
 public:
+    // Implementation of ReaderHandler
+    bool saxNull()             { new (mStack.template push<ValueType>()) ValueType();  return true; }
+    bool saxBool(bool b)       { new (mStack.template push<ValueType>()) ValueType(b); return true; }
+    bool saxInt(int i)         { new (mStack.template push<ValueType>()) ValueType(i); return true; }
+    bool saxUint(unsigned i)   { new (mStack.template push<ValueType>()) ValueType(i); return true; }
+    bool saxInt64(int64_t i)   { new (mStack.template push<ValueType>()) ValueType(i); return true; }
+    bool saxUint64(uint64_t i) { new (mStack.template push<ValueType>()) ValueType(i); return true; }
+    bool saxDouble(double d)   { new (mStack.template push<ValueType>()) ValueType(d); return true; }
+
+    bool saxString(const CharType * str, SizeType length, bool copy) { 
+        if (copy) 
+            new (mStack.template push<ValueType>()) ValueType(str, length, this->getAllocator());
+        else
+            new (mStack.template push<ValueType>()) ValueType(str, length);
+        return true;
+    }
+
+    bool saxStartObject() { new (mStack.template push<ValueType>()) ValueType(kObjectType); return true; }
+    
+    bool saxKey(const CharType * str, SizeType length, bool copy) { return saxString(str, length, copy); }
+
+    bool saxEndObject(SizeType memberCount) {
+        typename ValueType::MemberType * members = mStack.template pop<typename ValueType::MemberType>(memberCount);
+        mStack.template Top<ValueType>()->setObjectRaw(members, (SizeType)memberCount, this->getAllocator());
+        return true;
+    }
+
+    bool saxStartArray() { new (mStack.template push<ValueType>()) ValueType(kArrayType); return true; }
+    
+    bool saxEndArray(SizeType elementCount) {
+        ValueType * elements = mStack.template pop<ValueType>(elementCount);
+        mStack.template Top<ValueType>()->setArrayRaw(elements, elementCount, this->getAllocator());
+        return true;
+    }
+    // End of implementation of ReaderHandler
+
     //
     // BasicDocument::parse<parseFlags, SourceEncodingT, InuptStreamT>(is);
     //
@@ -258,48 +151,15 @@ public:
     BasicDocument & parse(const InuptStreamT & is) {
         // Remove existing root if exist
         ValueType::setNull();
-        BasicReader<SourceEncodingT, EncodingT, PoolAllocatorT> reader(this->getAllocator());
+        BasicReader<parseFlags, SourceEncodingT, EncodingT, PoolAllocatorT, AllocatorT>
+            reader(this->getPoolAllocator(), false, this->getPoolAllocator());
 
-        jimi_assert(is.peek() != NULL);
-        //printf("JsonFx::BasicDocument::parse(const InuptStreamT &) visited.\n\n");
-        //setObject();
-
-        CharType *cur = const_cast<CharType *>(is.getCurrent());
-        CharType beginToken;
-
-        while (*cur != _Ch('\0')) {
-            // Skip the whitespace chars
-            skipWhiteSpaces(is);
-
-            if (*cur == _Ch('"')) {
-                // Start a string begin from token "
-                beginToken = *cur;
-                ++cur;
-                cur = startString<_Ch('"')>(cur);
-            }
-#if 0
-            else if (*cur == _Ch('\'')) {
-                // Start a string begin from token \'
-                beginToken = *cur;
-                ++cur;
-                cur = startString<_Ch('\'')>(cur);
-            }
-#endif
-            if (*cur == _Ch('{')) {
-                // Start a object
-                ++cur;
-                cur = startObject(cur);
-            }
-            if (*cur == _Ch('[')) {
-                // Start a array
-                ++cur;
-                cur = startArray(cur);
-            }
-            else {
-                ++cur;
-            }
+        // Parse the stream use SAX mode in Reader class.
+        mParseResult = reader.parse(is, *this);
+        if (mParseResult.hasError()) {
+            //
+            mParseResult.getError();
         }
-
         return *this;
     }
 
