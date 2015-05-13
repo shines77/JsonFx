@@ -32,7 +32,7 @@
 #include "JsonFx/Stream/SizableStringInputStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
-//#include "jimi/basic/vld.h"
+#include "jimi/basic/vld.h"
 
 #if 0
 #if defined(_DEBUG) || !defined(NDEBUG)
@@ -51,6 +51,9 @@ void JsonFx_Test()
 #else
     static const size_t kLoopCount = 200000;
 #endif
+
+    //static char static_buffer[4096] = { 0 };
+    //static const DefaultPoolAllocator poolAllocatorConst(buffer, sizeof(buffer));
 
     jmc_timestamp_t starttime;
     jmc_timefloat_t elapsedtime;
@@ -260,7 +263,7 @@ void JsonFx_SizableStringStream_Test()
 int main(int argn, char * argv[])
 {
     Json json;
-    json.visit();
+    //json.visit();
 
     JsonFx_Test();
     JsonFx_Test2();
@@ -269,11 +272,11 @@ int main(int argn, char * argv[])
     JsonFx_BasicDocumentTest2();
 
     JsonFx_IOStream_Test();
-    JsonFx_StringStream_Test();
-    JsonFx_SizableStringStream_Test();
+    //JsonFx_StringStream_Test();
+    //JsonFx_SizableStringStream_Test();
 
-    printf("\n");
-    printf("kUTF8 = %d\n\n", kUTF8);
+    //printf("\n");
+    //printf("kUTF8 = %d\n\n", kUTF8);
 
     jimi_console_readkeyln(false, true, false);
     return 0;

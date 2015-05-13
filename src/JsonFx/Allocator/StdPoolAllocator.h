@@ -50,7 +50,8 @@ public:
         destroy();
     }
 
-    void destroy() {
+    JIMI_FORCEINLINE
+    void release() {
         if (this->kAutoRelease) {
             ChunkHead * pChunkHead = mChunkHead;
             while (pChunkHead != NULL) {
@@ -60,7 +61,6 @@ public:
                 }
                 pChunkHead = next;
             }
-            mChunkHead = NULL;
         }
     }
 
@@ -69,6 +69,14 @@ private:
     StdPoolAllocator(const StdPoolAllocator & rhs);               /* = delete */
     //! Copy assignment operator is not permitted.
     StdPoolAllocator & operator =(const StdPoolAllocator & rhs);  /* = delete */
+
+    JIMI_FORCEINLINE
+    void destroy() {
+        if (this->kAutoRelease) {
+            release();
+            mChunkHead = NULL;
+        }
+    }
 
     void init() {
         if (kInnerChunkCapacity > (sizeof(ChunkHead) + kAlignmentSize))

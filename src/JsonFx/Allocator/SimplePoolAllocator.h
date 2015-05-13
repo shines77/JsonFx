@@ -85,7 +85,8 @@ public:
         destroy();
     }
 
-    void destroy() {
+    JIMI_FORCEINLINE
+    void release() {
         if (this->kAutoRelease) {
             ChunkInfo * pChunkInfo = mChunkHead.head;
             while (pChunkInfo != NULL) {
@@ -95,13 +96,12 @@ public:
                 }
                 pChunkInfo = next;
             }
-            mChunkHead.head = NULL;
         }
     }
 
     void reset() {
-        // Release malloc chunk lists.
-        destroy();
+        // Release the chunk lists.
+        release();
         // Reset used total counter
         mChunkHead.usedTotal = 0;
         // Reset the first chunk info and counter info.
@@ -126,6 +126,14 @@ private:
     SimplePoolAllocator(const SimplePoolAllocator & rhs);               /* = delete */
     //! Copy assignment operator is not permitted.
     SimplePoolAllocator & operator =(const SimplePoolAllocator & rhs);  /* = delete */
+
+    void destroy() {
+        if (this->kAutoRelease) {
+            // Release the chunk lists.
+            release();
+            mChunkHead.head = NULL;
+        }
+    }
 
     void init() {
 #if 0

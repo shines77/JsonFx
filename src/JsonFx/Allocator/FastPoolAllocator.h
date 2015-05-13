@@ -93,7 +93,8 @@ public:
         destroy();
     }
 
-    void destroy() {
+    JIMI_FORCEINLINE
+    void release() {
         if (this->kAutoRelease) {
             ChunkInfo * pChunkInfo = mChunkHead;
             while (pChunkInfo != NULL) {
@@ -103,13 +104,12 @@ public:
                 }
                 pChunkInfo = next;
             }
-            mChunkHead = NULL;
         }
     }
 
     void reset() {
-        // Release malloc chunk lists.
-        destroy();
+        // Release the chunk lists.
+        release();
         // Reset used total counter
         mUsedTotal = 0;
         // Reset the first chunk info and counter info.
@@ -134,6 +134,15 @@ private:
     FastPoolAllocator(const FastPoolAllocator & rhs);               /* = delete */
     //! Copy assignment operator is not permitted.
     FastPoolAllocator & operator =(const FastPoolAllocator & rhs);  /* = delete */
+
+    JIMI_FORCEINLINE
+    void destroy() {
+        if (this->kAutoRelease) {
+            // Release the chunk lists.
+            release();
+            mChunkHead = NULL;
+        }
+    }
 
     void internal_init() {
         mChunkHead      = NULL;
