@@ -155,9 +155,9 @@ public:
             reader(this->getPoolAllocator(), false, this->getPoolAllocator());
 
         // Parse the stream use SAX mode in Reader class.
-        mParseResult = reader.parse(is, *this);
+        mParseResult = reader.parse(const_cast<InuptStreamT &>(is), *this);
         if (mParseResult.hasError()) {
-            //
+            // Get the error code.
             mParseResult.getError();
         }
         return *this;

@@ -19,13 +19,15 @@ namespace JsonFx {
 
 enum ParseFlags {
     kNoneParseFlag              = 0,
-    kNoStringEscapeParseFlags   = 1,
+    kInsituParseFlag            = 1 << 0,
+    kNoStringEscapeParseFlags   = 1 << 8,
+    kAllowSingleQuotesParseFlag = 1 << 9,
     kMaxParseFlags              = 0x80000000U,
     kDefaultParseFlags          = JSONFX_DEFAULT_PARSE_FLAGS
 };
 
 // Forward declaration.
-template <uint64_t ParseFlags,
+template <uint64_t parseFlags,
           typename SourceEncodingT,
           typename TargetEncodingT,
           typename PoolAllocatorT = DefaultPoolAllocator,
@@ -60,7 +62,7 @@ struct BasicReaderHandler {
     bool saxEndArray(SizeType)  { return static_cast<Override &>(*this).saxDefault(); }
 };
 
-template <uint64_t ParseFlags,
+template <uint64_t parseFlags,
           typename SourceEncodingT,
           typename TargetEncodingT,
           typename PoolAllocatorT /* = DefaultPoolAllocator */,
@@ -120,10 +122,17 @@ private:
     }
 
 public:
+    bool hasError() const { return mParseResult.hasError(); }
+    ParseErrorCode getError() const {
+        return mParseResult.getError();
+    }
+    void setError(ParseErrorCode code, size_t line = 0, size_t offset = 0) {
+        return mParseResult.setError(code, line, offset);
+    }
+
     // The whitespace chars including " \t\n\r"
     template <typename InuptStreamT>
-    //JIMI_FORCEINLINE
-    inline
+    JIMI_FORCEINLINE
     bool isWhiteSpaces(const InuptStreamT & is) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
         return ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r')));
@@ -131,43 +140,49 @@ public:
 
     template <typename InuptStreamT>
     JIMI_FORCEINLINE
-    void skipWhiteSpaces(const InuptStreamT & is) {
+    void skipWhiteSpaces(InuptStreamT & is) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        InuptStreamT & nis = const_cast<InuptStreamT &>(is);
 #if 1
-        while ((nis.peek() == _Ch(' ')) || (nis.peek() >= _Ch('\t') && nis.peek() <= _Ch('\r'))) {
-            nis.next();
+        while ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'))) {
+            is.next();
         }
 #else
-        while (isWhiteSpaces(nis)) {
-            nis.next();
+        while (isWhiteSpaces(is)) {
+            is.next();
         }
 #endif
     }
 
-    CharType * startObject(CharType *p) {
-        return p;
+    template <typename InputStreamT, typename ReaderHandlerT>
+    void parseObject(InputStreamT & is, ReaderHandlerT & handler) {
+        //
     }
 
-    CharType * startArray(CharType *p) {
-        return p;
+    template <typename InputStreamT, typename ReaderHandlerT>
+    void parseArray(InputStreamT & is, ReaderHandlerT & handler) {
+        //
     }
 
-    template <CharType beginToken>
-    CharType * startString(CharType * p) {
+    template <CharType beginToken, typename InputStreamT, typename ReaderHandlerT>
+    void parseInsituString(InputStreamT & is, ReaderHandlerT & handler, bool isKey = true) {
+        //
+    }
+
+    template <CharType beginToken, typename InputStreamT, typename ReaderHandlerT>
+    void parseString(InputStreamT & is, ReaderHandlerT & handler, bool isKey = true) {
         jimi_assert(mPoolAllocator != NULL);
         // The size of string length field
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
         // Reserve string size
         static const size_t kReserveStringSize = 8;
-        CharType * cursor  = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfHeadField, kReserveStringSize));
+        CharType * cursor = reinterpret_cast<CharType *>(mPoolAllocator->skip(kSizeOfHeadField, kReserveStringSize));
         jimi_assert(cursor != NULL);
-        CharType * begin   = cursor;
-        CharType * bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
+        CharType * begin  = cursor;
+        CharType * bottom = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
 
-        while (*p != beginToken && *p != _Ch('\0')) {
+        while (is.peek() != beginToken && is.peek() != _Ch('\0')) {
             if (cursor < bottom) {
-                *cursor++ = *p++;
+                *cursor++ = is.take();
             }
             else {
                 // The remain space in the active chunk is not enough to store the string's
@@ -182,9 +197,9 @@ public:
                 begin   = newBegin;
                 bottom  = reinterpret_cast<CharType *>(mPoolAllocator->getChunkBottom());
 
-                while (*p != beginToken && *p != _Ch('\0')) {
+                while (is.peek() != beginToken && is.peek() != _Ch('\0')) {
                     if (cursor < bottom) {
-                        *cursor++ = *p++;
+                        *cursor++ = is.take();
                     }
                     else {
                         // If it need allocate memory second time, mean the string's length
@@ -192,15 +207,14 @@ public:
                         // out the string's length first, and allocate the enough memory
                         // to fill the string's characters.
                         size_t lenScanned = cursor - begin;
-                        p = startLargeString<beginToken>(p, lenScanned);
-                        return p;
+                        this->parseLargeString<beginToken>(is, handler, isKey, lenScanned);
                     }
                 }
             }
         }
         // It's the ending of string token.
-        if (*p == beginToken) {
-            ++p;
+        if (is.peek() == beginToken) {
+            is.next();
             *cursor = _Ch('\0');
             ++cursor;
             jimi_assert(cursor >= begin);
@@ -214,30 +228,33 @@ public:
         }
         else {
             // Error: The tail token is not match.
-            //mErrno = -1;
+            if (isKey)
+                this->setError(kKeyStringMissQuoteError);
+            else
+                this->setError(kValueStringMissQuoteError);
         }
-        return p;
     }
 
-    template <CharType beginToken>
-    JIMI_NOINLINE_DECLARE(CharType *) startLargeString(CharType *p, size_t lenScanned) {
+    template <CharType beginToken, typename InputStreamT, typename ReaderHandlerT>
+    JIMI_NOINLINE_DECLARE(void) parseLargeString(InputStreamT & is, ReaderHandlerT & handler,
+                                                 bool isKey, size_t lenScanned) {
         // The size of string length field
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
 
         size_t lenTail, lenTotal;
-        CharType *origPtr, *savePtr;
+        CharType * origPtr, * savePtr;
 
         // Get the original begin address of p.
-        origPtr = p - lenScanned;
-        savePtr = p;
+        origPtr = is.getCurrent() - lenScanned;
+        savePtr = is.getCurrent();
 
         // Find the full length of string
-        while (*p != beginToken && *p != _Ch('\0')) {
-            ++p;
+        while (is.peek() != beginToken && is.peek() != _Ch('\0')) {
+            is.next();
         }
 
         // The length of tail characters of string.
-        lenTail = p - savePtr;
+        lenTail = is.getCurrent() - savePtr;
         // Get the full length
         lenTotal = lenScanned + lenTail + 1;
 
@@ -253,67 +270,74 @@ public:
 
         // Start copy the string's characters.
         newCursor = reinterpret_cast<CharType *>(pHeadInfo);
-        if (*p == beginToken) {
+        if (is.peek() == beginToken) {
             while (*origPtr != beginToken) {
                 *newCursor++ = *origPtr++;
             }
             *newCursor = _Ch('\0');
-            ++p;
+            is.next();
         }
         else {
-            // Error: The tail token is not match.
-            if (*p == _Ch('\0')) {
+            // Error: The tail token is not match, miss quote.
+            if (is.peek() == _Ch('\0')) {
                 while (*origPtr != _Ch('\0')) {
                     *newCursor++ = *origPtr++;
                 }
                 *newCursor = _Ch('\0');
             }
-            //mErrno = -1;
+            if (isKey)
+                this->setError(kKeyStringMissQuoteError);
+            else
+                this->setError(kValueStringMissQuoteError);
         }
-        return p;
     }
 
     template <typename InputStreamT, typename ReaderHandlerT>
-    ParseResultType parse(const InputStreamT & is, const ReaderHandlerT & handler) {
+    ParseResultType parse(InputStreamT & is, ReaderHandlerT & handler) {
         mParseResult.clear();
 
         jimi_assert(is.peek() != NULL);
         //printf("JsonFx::BasicDocument::parse(const InuptStreamT &) visited.\n\n");
         //setObject();
 
-        CharType *cur = const_cast<CharType *>(is.getCurrent());
-        CharType beginToken;
-
-        while (*cur != _Ch('\0')) {
+        while (is.peek() != _Ch('\0')) {
             // Skip the whitespace chars
             skipWhiteSpaces(is);
 
-            if (*cur == _Ch('"')) {
-                // Start a string begin from token "
-                beginToken = *cur;
-                ++cur;
-                cur = startString<_Ch('"')>(cur);
+            if (is.peek() == _Ch('"')) {
+                // Parse a string begin from token "
+                is.next();
+                if (parseFlags & kInsituParseFlag)
+                    parseInsituString<_Ch('"')>(is, handler);
+                else
+                    parseString<_Ch('"')>(is, handler);
             }
-#if 0
-            else if (*cur == _Ch('\'')) {
-                // Start a string begin from token \'
-                beginToken = *cur;
-                ++cur;
-                cur = startString<_Ch('\'')>(cur);
+            /*
+            else if (is.peek() == _Ch('\'')) {
+                // Allow use single quotes
+                if (parseFlags & kAllowSingleQuotesParseFlag) {
+                    // Parse a string begin from token \'
+                    is.next();
+                    if (parseFlags & kInsituParseFlag)
+                        parseInsituString<_Ch('\'')>(is, handler);
+                    else
+                        parseString<_Ch('\'')>(is, handler);
+                }
             }
-#endif
-            if (*cur == _Ch('{')) {
-                // Start a object
-                ++cur;
-                cur = startObject(cur);
+            //*/
+            else if (is.peek() == _Ch('{')) {
+                // Parse a object
+                is.next();
+                parseObject(is, handler);
             }
-            if (*cur == _Ch('[')) {
-                // Start a array
-                ++cur;
-                cur = startArray(cur);
+            else if (is.peek() == _Ch('[')) {
+                // Parse a array
+                is.next();
+                parseArray(is, handler);
             }
             else {
-                ++cur;
+                // Other chars
+                is.next();
             }
         }
 

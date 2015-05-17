@@ -292,12 +292,12 @@ public:
     bool isNull()   const { return (mValueType == kNullFlags);              }
     bool isFalse()  const { return (mValueType == kFalseFlags);             }
     bool isTrue()   const { return (mValueType == kTrueFlags);              }
-    bool isBool()   const { return ((mValueType & kBoolFlags) != 0);        }
+    bool isBool()   const { return ((mValueType & kBoolFlags)   != 0);      }
     bool isObject() const { return (mValueType == kObjectFlags);            }
     bool isArray()  const { return (mValueType == kArrayFlags);             }
-    bool isNumber() const { return ((mValueType & kNumberMask) != 0);       }
-    bool isInt()    const { return ((mValueType & kIntFlags)   != 0);       }
-    bool isUint()   const { return ((mValueType & kUIntFlags)  != 0);       }
+    bool isNumber() const { return ((mValueType & kNumberMask)  != 0);      }
+    bool isInt()    const { return ((mValueType & kIntFlags)    != 0);      }
+    bool isUint()   const { return ((mValueType & kUIntFlags)   != 0);      }
     bool isInt64()  const { return ((mValueType & kInt64Flags)  != 0);      }
     bool isUint64() const { return ((mValueType & kUInt64Flags) != 0);      }
     bool isFloat()  const { return ((mValueType & kFloatFlags)  != 0);      }

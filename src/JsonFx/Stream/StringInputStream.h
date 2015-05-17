@@ -48,11 +48,15 @@ public:
     }
 
     // Get properties
-    const CharType * getReadCursor() const  { return mReadCursor; }
-    const void *     getReadCursorV() const { return reinterpret_cast<void *>(mReadCursor); }
+    CharType *       getReadCursor() const   { return const_cast<CharType *>(mReadCursor); }
+    const CharType * getReadCursorC() const  { return mReadCursor; }
+    void *           getReadCursorV() const  { return reinterpret_cast<void *>(getReadCursor());  }
+    const void *     getReadCursorCV() const { return const_cast<const void *>(getReadCursorV()); }
 
-    const CharType * getCurrent() const     { return getReadCursor();  }
-    const void *     getCurrentV() const    { return getReadCursorV(); }
+    CharType *       getCurrent() const     { return getReadCursor();   }
+    const CharType * getCurrentC() const    { return getReadCursorC();  }
+    void *           getCurrentV() const    { return getReadCursorV();  }
+    const void *     getCurrentCV() const   { return getReadCursorCV(); }
 
     // Set properties
     void setReadCursor(CharType * newReadCursor) {
@@ -96,7 +100,8 @@ public:
     SizeType getReadPosition() const {
         return static_cast<size_t>(mReadCursor - mBegin);
     }
-    SizeType tell() const { return getReadPosition(); }
+    SizeType tell() const    { return getReadPosition(); }
+    SizeType getSize() const { return getReadPosition(); }
 };
 
 }  // namespace JsonFx

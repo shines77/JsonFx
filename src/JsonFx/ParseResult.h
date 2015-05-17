@@ -14,7 +14,9 @@ namespace JsonFx {
 
 enum ParseErrorCode {
     kNoneParseError = 0,
-    kSomeParseError,
+    kAnyParseError,
+    kKeyStringMissQuoteError,
+    kValueStringMissQuoteError,
     kLastParseError
 };
 
@@ -29,12 +31,12 @@ template <typename EncodingT>
 class BasicParseResult {
 private:
     ParseErrorCode  mErrCode;
-    ssize_t         mErrLine;
-    ssize_t         mErrOffset;
-    ssize_t         mReserve;
+    size_t          mErrLine;
+    size_t          mErrOffset;
+    size_t          mReserve;
 
 public:
-    BasicParseResult() : mErrCode(kNoneParseError), mErrLine(-1), mErrOffset(-1) {}
+    BasicParseResult() : mErrCode(kNoneParseError), mErrLine(0), mErrOffset(0) {}
     BasicParseResult(const BasicParseResult & src)
         : mErrCode(src.mErrCode), mErrLine(src.mErrLine), mErrOffset(src.mErrOffset) {}
     BasicParseResult(ParseErrorCode code, ssize_t line, ssize_t offset)
@@ -63,8 +65,8 @@ public:
         return code == err.mErrCode;
     }
 
-    void setError(ParseErrorCode code, ssize_t offset = 0) {
-        mErrCode = code; mErrOffset = offset;
+    void setError(ParseErrorCode code, size_t line = 0, size_t offset = 0) {
+        mErrCode = code; mErrLine = line; mErrOffset = offset;
     }
 
     void clear() {

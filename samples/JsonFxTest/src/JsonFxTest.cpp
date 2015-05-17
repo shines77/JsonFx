@@ -13,7 +13,6 @@
 #include <ostream>
 #include <fstream>
 #include <strstream>
-#include <streambuf>
 
 #include "jimic/system/time.h"
 #include "jimic/system/console.h"
@@ -260,10 +259,28 @@ void JsonFx_SizableStringStream_Test()
     printf("=====================================================\n");
 }
 
+struct foo_t
+{
+    foo_t(int i) : v(i) {}
+    ~foo_t() {}
+
+    void foo() {}
+
+    int v;
+};
+
 int main(int argn, char * argv[])
 {
     Json json;
     //json.visit();
+
+    std::shared_ptr<foo_t *> p = std::make_shared<foo_t *>(new foo_t(5));
+    foo_t ** i = p.get();
+    (*i)->foo();
+
+    std::shared_ptr<foo_t> p2 = std::make_shared<foo_t>(5);
+    foo_t * i2 = p2.get();
+    i2->foo();
 
     JsonFx_Test();
     JsonFx_Test2();
