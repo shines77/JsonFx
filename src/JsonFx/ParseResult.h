@@ -53,7 +53,9 @@ public:
     bool hasError() const { return (getError() != kNoneParseError); }
     operator bool() const { return !hasError(); }
 
-    ParseErrorCode getError() const { return mErrCode; }
+    ParseErrorCode getError() const       { return mErrCode;   }
+    size_t         getErrorLine() const   { return mErrLine;   }
+    size_t         getErrorOffset() const { return mErrOffset; }
 
     bool operator == (const BasicParseResult & that) const {
         return mErrCode == that.mErrCode;
@@ -65,12 +67,18 @@ public:
         return code == err.mErrCode;
     }
 
-    void setError(ParseErrorCode code, size_t line = 0, size_t offset = 0) {
+    void setError(ParseErrorCode code) {
+        mErrCode = code;
+    }
+    void setError(size_t line, size_t offset) {
+        mErrLine = line; mErrOffset = offset;
+    }
+    void setError(ParseErrorCode code, size_t line, size_t offset) {
         mErrCode = code; mErrLine = line; mErrOffset = offset;
     }
 
     void clear() {
-        setError(kNoneParseError);
+        setError(kNoneParseError, 0, 0);
     }
 };
 

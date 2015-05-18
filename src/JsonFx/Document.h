@@ -221,6 +221,84 @@ public:
     BasicDocument & parse(const CharType * text) {
         return parse<kDefaultParseFlags>(text);
     }
+
+    //
+    // BasicDocument::parseFast<parseFlags, SourceEncodingT, InuptStreamT>(is);
+    //
+    template <uint64_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
+    BasicDocument & parseFast(const InuptStreamT & is) {
+        // Remove existing root if exist
+        ValueType::setNull();
+        BasicReader<parseFlags, SourceEncodingT, EncodingT, PoolAllocatorT, AllocatorT>
+            reader(this->getPoolAllocator(), false, this->getPoolAllocator());
+
+        // Parse the stream use SAX mode in Reader class.
+        mParseResult = reader.parseFast(const_cast<InuptStreamT &>(is), *this);
+        if (mParseResult.hasError()) {
+            // Get the error code.
+            mParseResult.getError();
+        }
+        return *this;
+    }
+
+    //
+    // BasicDocument::parseFast(InputStreamT & is);
+    //
+    template <uint64_t parseFlags, typename InputStreamT>
+    BasicDocument & parseFast(const InputStreamT & is) {
+        return parseFast<parseFlags, EncodingT, InputStreamT>(is);
+    }
+
+    template <typename InputStreamT>
+    BasicDocument & parseFast(const InputStreamT & is) {
+        return parseFast<kDefaultParseFlags>(is);
+    }
+
+    //
+    // BasicDocument::parse(StringInputStreamT & is);
+    //
+    template <uint64_t parseFlags, typename SourceEncodingT>
+    BasicDocument & parseFast(const StringInputStreamT & is) {
+        return parseFast<parseFlags, SourceEncodingT, StringInputStreamT>(is);
+    }
+
+    template <uint64_t parseFlags>
+    BasicDocument & parseFast(const StringInputStreamT & is) {
+        return parseFast<parseFlags, EncodingT>(is);
+    }
+
+    BasicDocument & parseFast(const StringInputStreamT & is) {
+        return parseFast<kDefaultParseFlags>(is);
+    }
+
+    //
+    // BasicDocument::parseFast(const CharType * text);
+    //
+    template <uint64_t parseFlags, typename SourceEncodingT, typename InputStreamT>
+    BasicDocument & parseFast(const CharType * text) {
+        jimi_assert(text != NULL);
+        InputStreamT inputStream(text);
+        return parseFast<parseFlags, SourceEncodingT, InputStreamT>(inputStream);
+    }
+
+    template <uint64_t parseFlags, typename SourceEncodingT>
+    BasicDocument & parseFast(const CharType * text) {
+        return parseFast<parseFlags, SourceEncodingT, StringInputStreamT>(text);
+    }
+
+    template <typename InputStreamT>
+    BasicDocument & parseFast(const typename InputStreamT::CharType * text) {
+        return parseFast<kDefaultParseFlags, EncodingT, InputStreamT>(text);
+    }
+
+    template <uint64_t parseFlags>
+    BasicDocument & parseFast(const CharType * text) {
+        return parseFast<parseFlags, EncodingT>(text);
+    }
+
+    BasicDocument & parseFast(const CharType * text) {
+        return parseFast<kDefaultParseFlags>(text);
+    }
 };
 
 // Recover the packing alignment
