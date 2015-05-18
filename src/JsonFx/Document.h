@@ -147,7 +147,7 @@ public:
     //
     // BasicDocument::parse<parseFlags, SourceEncodingT, InuptStreamT>(is);
     //
-    template <uint64_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
+    template <size_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
     BasicDocument & parse(const InuptStreamT & is) {
         // Remove existing root if exist
         ValueType::setNull();
@@ -166,7 +166,7 @@ public:
     //
     // BasicDocument::parse(InputStreamT & is);
     //
-    template <uint64_t parseFlags, typename InputStreamT>
+    template <size_t parseFlags, typename InputStreamT>
     BasicDocument & parse(const InputStreamT & is) {
         return parse<parseFlags, EncodingT, InputStreamT>(is);
     }
@@ -179,12 +179,12 @@ public:
     //
     // BasicDocument::parse(StringInputStreamT & is);
     //
-    template <uint64_t parseFlags, typename SourceEncodingT>
+    template <size_t parseFlags, typename SourceEncodingT>
     BasicDocument & parse(const StringInputStreamT & is) {
         return parse<parseFlags, SourceEncodingT, StringInputStreamT>(is);
     }
 
-    template <uint64_t parseFlags>
+    template <size_t parseFlags>
     BasicDocument & parse(const StringInputStreamT & is) {
         return parse<parseFlags, EncodingT>(is);
     }
@@ -196,14 +196,14 @@ public:
     //
     // BasicDocument::parse(const CharType * text);
     //
-    template <uint64_t parseFlags, typename SourceEncodingT, typename InputStreamT>
+    template <size_t parseFlags, typename SourceEncodingT, typename InputStreamT>
     BasicDocument & parse(const CharType * text) {
         jimi_assert(text != NULL);
         InputStreamT inputStream(text);
         return parse<parseFlags, SourceEncodingT, InputStreamT>(inputStream);
     }
 
-    template <uint64_t parseFlags, typename SourceEncodingT>
+    template <size_t parseFlags, typename SourceEncodingT>
     BasicDocument & parse(const CharType * text) {
         return parse<parseFlags, SourceEncodingT, StringInputStreamT>(text);
     }
@@ -213,7 +213,7 @@ public:
         return parse<kDefaultParseFlags, EncodingT, InputStreamT>(text);
     }
 
-    template <uint64_t parseFlags>
+    template <size_t parseFlags>
     BasicDocument & parse(const CharType * text) {
         return parse<parseFlags, EncodingT>(text);
     }
@@ -225,7 +225,7 @@ public:
     //
     // BasicDocument::parseFast<parseFlags, SourceEncodingT, InuptStreamT>(is);
     //
-    template <uint64_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
+    template <size_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
     BasicDocument & parseFast(const InuptStreamT & is) {
         // Remove existing root if exist
         ValueType::setNull();
@@ -244,7 +244,7 @@ public:
     //
     // BasicDocument::parseFast(InputStreamT & is);
     //
-    template <uint64_t parseFlags, typename InputStreamT>
+    template <size_t parseFlags, typename InputStreamT>
     BasicDocument & parseFast(const InputStreamT & is) {
         return parseFast<parseFlags, EncodingT, InputStreamT>(is);
     }
@@ -257,12 +257,12 @@ public:
     //
     // BasicDocument::parse(StringInputStreamT & is);
     //
-    template <uint64_t parseFlags, typename SourceEncodingT>
+    template <size_t parseFlags, typename SourceEncodingT>
     BasicDocument & parseFast(const StringInputStreamT & is) {
         return parseFast<parseFlags, SourceEncodingT, StringInputStreamT>(is);
     }
 
-    template <uint64_t parseFlags>
+    template <size_t parseFlags>
     BasicDocument & parseFast(const StringInputStreamT & is) {
         return parseFast<parseFlags, EncodingT>(is);
     }
@@ -274,14 +274,14 @@ public:
     //
     // BasicDocument::parseFast(const CharType * text);
     //
-    template <uint64_t parseFlags, typename SourceEncodingT, typename InputStreamT>
+    template <size_t parseFlags, typename SourceEncodingT, typename InputStreamT>
     BasicDocument & parseFast(const CharType * text) {
         jimi_assert(text != NULL);
         InputStreamT inputStream(text);
         return parseFast<parseFlags, SourceEncodingT, InputStreamT>(inputStream);
     }
 
-    template <uint64_t parseFlags, typename SourceEncodingT>
+    template <size_t parseFlags, typename SourceEncodingT>
     BasicDocument & parseFast(const CharType * text) {
         return parseFast<parseFlags, SourceEncodingT, StringInputStreamT>(text);
     }
@@ -291,7 +291,7 @@ public:
         return parseFast<kDefaultParseFlags, EncodingT, InputStreamT>(text);
     }
 
-    template <uint64_t parseFlags>
+    template <size_t parseFlags>
     BasicDocument & parseFast(const CharType * text) {
         return parseFast<parseFlags, EncodingT>(text);
     }

@@ -31,22 +31,22 @@ template <typename EncodingT>
 class BasicParseResult {
 private:
     ParseErrorCode  mErrCode;
-    size_t          mErrLine;
     size_t          mErrOffset;
-    size_t          mReserve;
+    size_t          mErrLine;
+    //size_t          mReserve;
 
 public:
-    BasicParseResult() : mErrCode(kNoneParseError), mErrLine(0), mErrOffset(0) {}
+    BasicParseResult() : mErrCode(kNoneParseError), mErrOffset(0), mErrLine(0) {}
     BasicParseResult(const BasicParseResult & src)
-        : mErrCode(src.mErrCode), mErrLine(src.mErrLine), mErrOffset(src.mErrOffset) {}
+        : mErrCode(src.mErrCode), mErrOffset(src.mErrOffset), mErrLine(src.mErrLine) {}
     BasicParseResult(ParseErrorCode code, ssize_t line, ssize_t offset)
-        : mErrCode(code), mErrLine(line), mErrOffset(offset) {}
+        : mErrCode(code), mErrOffset(offset), mErrLine(line) {}
     ~BasicParseResult() {}
 
     BasicParseResult & operator = (const BasicParseResult & rhs) {
         this->mErrCode   = rhs.mErrCode;
-        this->mErrLine   = rhs.mErrLine;
         this->mErrOffset = rhs.mErrOffset;
+        this->mErrLine   = rhs.mErrLine;
         return (*this);
     }
 
@@ -71,14 +71,29 @@ public:
         mErrCode = code;
     }
     void setError(size_t line, size_t offset) {
-        mErrLine = line; mErrOffset = offset;
+        mErrOffset = offset; mErrLine = line;
     }
     void setError(ParseErrorCode code, size_t line, size_t offset) {
-        mErrCode = code; mErrLine = line; mErrOffset = offset;
+        mErrCode = code; mErrOffset = offset; mErrLine = line;
+    }
+
+    void setErrorLine(size_t line) {
+        mErrLine = line;
+    }
+    void setErrorOffset(size_t offset) {
+        mErrOffset = offset;
     }
 
     void clear() {
         setError(kNoneParseError, 0, 0);
+    }
+
+    void incLine() {
+        mErrLine++;
+    }
+
+    void addLines(int lines) {
+        mErrLine += lines;
     }
 };
 

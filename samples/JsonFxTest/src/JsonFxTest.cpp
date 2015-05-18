@@ -64,6 +64,7 @@ void JsonFx_Test()
 #endif
 
     char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json_n[] = "{\n\"name\": \"wang\",\n\"sex\": \"male\",\n\"age\": \"18\"\n}";
     char json_test[] = "[0, 1, 2, 3]";
     Document document(&poolAllocator);
     StringInputStream stringStream(json);
@@ -127,7 +128,8 @@ void JsonFx_FastTest()
     DefaultPoolAllocator poolAllocator;
 #endif
 
-    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json[]   = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json_n[] = "{\n\"name\": \"wang\",\n\"sex\": \"male\",\n\"age\": \"18\"\n}";
     char json_test[] = "[0, 1, 2, 3]";
     Document document(&poolAllocator);
     StringInputStream stringStream(json);

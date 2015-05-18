@@ -13,21 +13,26 @@
 #include "JsonFx/ParseResult.h"
 #include "JsonFx/Internal/Traits.h"
 
-#define JSONFX_DEFAULT_PARSE_FLAGS      kNoneParseFlag
+#if 0
+#define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag /* | kSupportErrorLineParseFlag */)
+#else
+#define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag | kSupportErrorLineParseFlag)
+#endif
 
 namespace JsonFx {
 
 enum ParseFlags {
-    kNoneParseFlag              = 0,
-    kInsituParseFlag            = 1 << 0,
-    kNoStringEscapeParseFlags   = 1 << 8,
-    kAllowSingleQuotesParseFlag = 1 << 9,
-    kMaxParseFlags              = 0x80000000U,
-    kDefaultParseFlags          = JSONFX_DEFAULT_PARSE_FLAGS
+    kNoneParseFlag                  = 0,
+    kInsituParseFlag                = 1 << 0,
+    kNoStringEscapeParseFlags       = 1 << 8,
+    kAllowSingleQuotesParseFlag     = 1 << 9,
+    kSupportErrorLineParseFlag      = 1 << 20,
+    kMaxParseFlags                  = 0x80000000U,
+    kDefaultParseFlags              = JSONFX_DEFAULT_PARSE_FLAGS
 };
 
 // Forward declaration.
-template <uint64_t parseFlags,
+template <size_t parseFlags,
           typename SourceEncodingT,
           typename TargetEncodingT,
           typename PoolAllocatorT = DefaultPoolAllocator,
@@ -62,7 +67,7 @@ struct BasicReaderHandler {
     bool saxEndArray(SizeType)  { return static_cast<Override &>(*this).saxDefault(); }
 };
 
-template <uint64_t parseFlags,
+template <size_t parseFlags,
           typename SourceEncodingT,
           typename TargetEncodingT,
           typename PoolAllocatorT /* = DefaultPoolAllocator */,
@@ -123,6 +128,7 @@ private:
 
 public:
     bool hasError() const { return mParseResult.hasError(); }
+
     ParseErrorCode getError() const {
         return mParseResult.getError();
     }
@@ -149,10 +155,18 @@ public:
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
 #if 1
         while ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'))) {
+            if (parseFlags & kSupportErrorLineParseFlag) {
+                if (is.peek() == _Ch('\n'))
+                    mParseResult.incLine();
+            }
             is.next();
         }
 #else
         while (isWhiteSpaces(is)) {
+            if (parseFlags & kSupportErrorLineParseFlag) {
+                if (is.peek() == _Ch('\n'))
+                    mParseResult.incLine();
+            }
             is.next();
         }
 #endif
@@ -169,6 +183,10 @@ public:
     const CharType * skipWhiteSpaces(const CharType * src) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
         while ((*src == _Ch(' ')) || (*src >= _Ch('\t') && *src <= _Ch('\r'))) {
+            if (parseFlags & kSupportErrorLineParseFlag) {
+                if (*src == _Ch('\n'))
+                    mParseResult.incLine();
+            }
             ++src;
         }
         return src;
@@ -189,7 +207,7 @@ public:
         //
     }
 
-    template <CharType beginToken, typename InputStreamT, typename ReaderHandlerT>
+    template <CharType quoteToken, typename InputStreamT, typename ReaderHandlerT>
     void parseString(InputStreamT & is, ReaderHandlerT & handler, bool isKey = true) {
         jimi_assert(mPoolAllocator != NULL);
         // The size of string length field
@@ -201,7 +219,7 @@ public:
         CharType * begin  = cursor;
         CharType * bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-        while (is.peek() != beginToken && is.peek() != _Ch('\0')) {
+        while (is.peek() != quoteToken && is.peek() != _Ch('\0')) {
             if (cursor < bottom) {
                 *cursor++ = is.take();
             }
@@ -218,7 +236,7 @@ public:
                 begin  = newBegin;
                 bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-                while (is.peek() != beginToken && is.peek() != _Ch('\0')) {
+                while (is.peek() != quoteToken && is.peek() != _Ch('\0')) {
                     if (cursor < bottom) {
                         *cursor++ = is.take();
                     }
@@ -228,13 +246,13 @@ public:
                         // out the string's length first, and allocate the enough memory
                         // to fill the string's characters.
                         size_t lenScanned = cursor - begin;
-                        this->parseLargeString<beginToken>(is, handler, isKey, lenScanned);
+                        this->parseLargeString<quoteToken>(is, handler, isKey, lenScanned);
                     }
                 }
             }
         }
         // It's the ending of string token.
-        if (is.peek() == beginToken) {
+        if (is.peek() == quoteToken) {
             is.next();
             *cursor = _Ch('\0');
             ++cursor;
@@ -256,7 +274,7 @@ public:
         }
     }
 
-    template <CharType beginToken, typename InputStreamT, typename ReaderHandlerT>
+    template <CharType quoteToken, typename InputStreamT, typename ReaderHandlerT>
     JIMI_NOINLINE_DECLARE(void) parseLargeString(InputStreamT & is, ReaderHandlerT & handler,
                                                  bool isKey, size_t lenScanned) {
         // The size of string length field
@@ -270,7 +288,7 @@ public:
         savePtr = is.getCurrent();
 
         // Find the full length of string
-        while (is.peek() != beginToken && is.peek() != _Ch('\0')) {
+        while (is.peek() != quoteToken && is.peek() != _Ch('\0')) {
             is.next();
         }
 
@@ -291,8 +309,8 @@ public:
 
         // Start copy the string's characters.
         newCursor = reinterpret_cast<CharType *>(pHeadInfo);
-        if (is.peek() == beginToken) {
-            while (*origPtr != beginToken) {
+        if (is.peek() == quoteToken) {
+            while (*origPtr != quoteToken) {
                 *newCursor++ = *origPtr++;
             }
             *newCursor = _Ch('\0');
@@ -362,12 +380,97 @@ public:
         return mParseResult;
     }
 
-    template <CharType beginToken, typename ReaderHandlerT>
+    template <CharType quoteToken, typename ReaderHandlerT>
     const CharType * parseInsituString(const CharType * src, ReaderHandlerT & handler, bool isKey = true) {
         return src;
     }
 
-    template <CharType beginToken, typename ReaderHandlerT>
+    JIMI_FORCEINLINE
+    void escapeChars(CharType * &dest, const CharType * &src) {
+        // Skip the '\\' char.
+        ++src;
+
+        if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
+            // Escape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '\"' chars.
+            if (*src <= _Ch('t') && *src >= _Ch('\"')) {
+                if (*src == _Ch('t'))
+                    *dest++ = _Ch('\t');
+
+                else if (*src == _Ch('\"'))
+                    *dest++ = _Ch('\"');
+
+                else if (*src == _Ch('n'))
+                    *dest++ = _Ch('\n');
+
+                else if (*src == _Ch('r'))
+                    *dest++ = _Ch('\r');
+
+                else if (*src == _Ch('\\'))
+                    *dest++ = _Ch('\\');
+
+                else if (*src == _Ch('/'))
+                    *dest++ = _Ch('/');
+
+                else if (*src == _Ch('u')) {
+                    // '\uXXXX'
+                    src += 4;
+                    *dest++ = _Ch('X');
+                    *dest++ = _Ch('X');
+                    *dest++ = _Ch('X');
+                }
+
+                else if (*src == _Ch('b'))
+                    *dest++ = _Ch('\b');
+
+                else if (*src == _Ch('f'))
+                    *dest++ = _Ch('\f');
+
+                else {
+                    // Unknown escape chars.
+                    --src;
+                }
+                ++src;
+            }
+            else {
+                // Unknown escape chars.
+            }
+        }
+    }
+
+    JIMI_FORCEINLINE
+    void getEscapeCharBytes(const CharType * &src, int & additive) {
+        // Skip the '\\' char.
+        ++src;
+
+        if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
+            // Escape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '\"' chars.
+            if (*src <= _Ch('t') && *src >= _Ch('\"')) {
+                if (   *src == _Ch('t')  || *src == _Ch('\"') || *src == _Ch('n')
+                    || *src == _Ch('r')  || *src == _Ch('\\') || *src == _Ch('/')
+                    || *src == _Ch('b')  || *src == _Ch('f') )
+                {
+                    src++;
+                    additive++;
+                }
+                else if (*src == _Ch('u')) {
+                    // '\uXXXX'
+                    src += 5;
+                    // Needn't subtract the additive, for efficiency.
+                    // additive -= 3;
+                }
+                else {
+                    // Unknown escape chars, needn't decrease the additive, for efficiency.
+                    // additive--; 
+                }
+            }
+            else {
+                // Unknown escape chars, needn't decrease the additive, for efficiency.
+                // additive--; 
+            }
+        }
+    }
+
+    template <CharType quoteToken, typename ReaderHandlerT>
     const CharType * parseString(const CharType * src, ReaderHandlerT & handler, bool isKey = true) {
         jimi_assert(mPoolAllocator != NULL);
         // The size of string length field
@@ -379,9 +482,12 @@ public:
         CharType * begin  = cursor;
         CharType * bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-        while (*src != beginToken && *src != _Ch('\0')) {
+        while (*src != quoteToken && *src != _Ch('\0')) {
             if (cursor < bottom) {
-                *cursor++ = *src++;
+                if (*src != _Ch('\\'))
+                    *cursor++ = *src++;
+                else
+                    this->escapeChars(cursor, src);
             }
             else {
                 // The remain space in the active chunk is not enough to store the string's
@@ -389,6 +495,7 @@ public:
                 CharType * newCursor = mPoolAllocator->addNewChunkAndSkip<CharType *>(kSizeOfHeadField, kReserveStringSize);
                 CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
+                // Copy previous parse strings.
                 while (begin != cursor) {
                     *newCursor++ = *begin++;
                 }
@@ -396,9 +503,12 @@ public:
                 begin  = newBegin;
                 bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-                while (*src != beginToken && *src != _Ch('\0')) {
+                while (*src != quoteToken && *src != _Ch('\0')) {
                     if (cursor < bottom) {
-                        *cursor++ = *src++;
+                        if (*src != _Ch('\\'))
+                            *cursor++ = *src++;
+                        else
+                            this->escapeChars(cursor, src);
                     }
                     else {
                         // If it need allocate memory second time, mean the string's length
@@ -406,14 +516,15 @@ public:
                         // out the string's length first, and allocate the enough memory
                         // to fill the string's characters.
                         size_t lenScanned = cursor - begin;
-                        src = this->parseLargeString<beginToken>(src, handler, isKey, lenScanned);
+                        src = this->parseLargeString<quoteToken>(src, handler, isKey, lenScanned);
                         return src;
                     }
                 }
             }
         }
+
         // It's the ending of string token.
-        if (*src == beginToken) {
+        if (*src == quoteToken) {
             ++src;
             *cursor = _Ch('\0');
             ++cursor;
@@ -433,11 +544,11 @@ public:
                 this->setError(kKeyStringMissQuoteError);
             else
                 this->setError(kValueStringMissQuoteError);
+            return src;
         }
-        return src;
     }
 
-    template <CharType beginToken, typename ReaderHandlerT>
+    template <CharType quoteToken, typename ReaderHandlerT>
     JIMI_NOINLINE_DECLARE(const CharType *)
     parseLargeString(const CharType * src, ReaderHandlerT & handler,
                      bool isKey, size_t lenScanned) {
@@ -445,21 +556,31 @@ public:
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
 
         size_t lenTail, lenTotal;
-        CharType * origPtr, * savePtr;
+        int lenAdditive;
+        const CharType * origPtr, * savePtr;
 
         // Get the original begin address of p.
-        origPtr = const_cast<CharType *>(src) - lenScanned;
-        savePtr = const_cast<CharType *>(src);
+        origPtr = src - lenScanned;
+        savePtr = src;
+
+        // The escape chars additive length.
+        lenAdditive = 0;
 
         // Find the full length of string
-        while (*src != beginToken && *src != _Ch('\0')) {
-            ++src;
+        while (*src != quoteToken && *src != _Ch('\0')) {
+            if (*src != _Ch('\\'))
+                ++src;
+            else
+                this->getEscapeCharBytes(src, lenAdditive);
         }
+
+        // lenAdditive must be >= 0.
+        jimi_assert(lenAdditive >= 0);
 
         // The length of tail characters of string.
         lenTail = src - savePtr;
         // Get the full length
-        lenTotal = lenScanned + lenTail + 1;
+        lenTotal = lenScanned + lenTail + lenAdditive + 1;
 
         // Allocate the large chunk, and insert it to last.
         jimi_assert(mPoolAllocator != NULL);
@@ -473,9 +594,12 @@ public:
 
         // Start copy the string's characters.
         newCursor = reinterpret_cast<CharType *>(pHeadInfo);
-        if (*src == beginToken) {
-            while (*origPtr != beginToken) {
-                *newCursor++ = *origPtr++;
+        if (*src == quoteToken) {
+            while (*origPtr != quoteToken) {
+                if (*origPtr != _Ch('\\'))
+                    *newCursor++ = *origPtr++;
+                else
+                    this->escapeChars(newCursor, origPtr);
             }
             *newCursor = _Ch('\0');
             ++src;
@@ -493,8 +617,8 @@ public:
                 this->setError(kKeyStringMissQuoteError);
             else
                 this->setError(kValueStringMissQuoteError);
+            return src;
         }
-        return src;
     }
 
     template <typename InputStreamT, typename ReaderHandlerT>
@@ -512,22 +636,22 @@ public:
             //skipWhiteSpaces(is);
 
             if (*cur == _Ch('"')) {
-                // Parse a string begin from token "
+                // Parse a string begin from token ["]
                 ++cur;
-                if (parseFlags & kInsituParseFlag)
-                    cur = parseInsituString<_Ch('"')>(cur, handler);
-                else
+                if (!(parseFlags & kInsituParseFlag))
                     cur = parseString<_Ch('"')>(cur, handler);
+                else
+                    cur = parseInsituString<_Ch('"')>(cur, handler);
             }
             else if (*cur == _Ch('\'')) {
                 // Allow use single quotes
                 if (parseFlags & kAllowSingleQuotesParseFlag) {
-                    // Parse a string begin from token \'
+                    // Parse a string begin from token [\']
                     ++cur;
-                    if (parseFlags & kInsituParseFlag)
-                        parseInsituString<_Ch('\'')>(cur, handler);
-                    else
+                    if (!(parseFlags & kInsituParseFlag))
                         parseString<_Ch('\'')>(cur, handler);
+                    else
+                        parseInsituString<_Ch('\'')>(cur, handler);
                 }
             }
             else if (*cur == _Ch('{')) {
