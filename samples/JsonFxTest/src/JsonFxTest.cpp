@@ -63,8 +63,8 @@ void JsonFx_Test()
     DefaultPoolAllocator poolAllocator;
 #endif
 
-    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
-    static const char json_test[] = "[0, 1, 2, 3]";
+    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json_test[] = "[0, 1, 2, 3]";
     Document document(&poolAllocator);
     StringInputStream stringStream(json);
 
@@ -119,8 +119,8 @@ void JsonFx_Test2()
     jmc_timestamp_t starttime;
     jmc_timefloat_t elapsedtime;
 
-    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
-    static const char json_test[] = "[0, 1, 2, 3]";
+    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    const char json_test[] = "[0, 1, 2, 3]";
     Document document;
 
     starttime = jmc_get_timestamp();
@@ -199,7 +199,7 @@ void JsonFx_IOStream_Test()
 
 void JsonFx_StringStream_Test()
 {
-    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
 
     jfx_iostream_trace("%d\n", 1);
 
@@ -259,28 +259,10 @@ void JsonFx_SizableStringStream_Test()
     printf("=====================================================\n");
 }
 
-struct foo_t
-{
-    foo_t(int i) : v(i) {}
-    ~foo_t() {}
-
-    void foo() {}
-
-    int v;
-};
-
 int main(int argn, char * argv[])
 {
-    Json json;
+    //Json json;
     //json.visit();
-
-    std::shared_ptr<foo_t *> p = std::make_shared<foo_t *>(new foo_t(5));
-    foo_t ** i = p.get();
-    (*i)->foo();
-
-    std::shared_ptr<foo_t> p2 = std::make_shared<foo_t>(5);
-    foo_t * i2 = p2.get();
-    i2->foo();
 
     JsonFx_Test();
     JsonFx_Test2();

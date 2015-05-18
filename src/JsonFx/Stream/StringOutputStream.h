@@ -27,18 +27,18 @@ public:
     typedef typename BasicStringStreamRoot<CharT>::SizeType    SizeType;
 
 protected:
-    const CharType * mWriteCursor;
+    CharType * mWriteCursor;
 
 public:
     BasicStringOutputStream(const CharType * src)
-        : BasicStringStreamRoot<CharT>(src), mWriteCursor(src)
+        : BasicStringStreamRoot<CharT>(src), mWriteCursor(const_cast<CharType *>(src))
     {
         jfx_iostream_trace("00 BasicStringOutputStream<T>::BasicStringOutputStream(const CharType * src);\n");
     }
 
     BasicStringOutputStream(const void * src)
         : BasicStringStreamRoot<CharT>(src),
-          mWriteCursor(reinterpret_cast<const CharType *>(src))
+          mWriteCursor(const_cast<CharType *>(src))
     {
         jfx_iostream_trace("00 BasicStringOutputStream<T>::BasicStringOutputStream(const void * src);\n");
     }
@@ -48,8 +48,10 @@ public:
     }
 
     // Get properties
-    const CharType * getWriteCursor() const  { return mWriteCursor; }
-    const void *     getWriteCursorV() const { return reinterpret_cast<void *>(mWriteCursor); }
+    CharType *       getWriteCursor() const   { return mWriteCursor; }
+    const CharType * getWriteCursorC() const  { return const_cast<const CharType *>(mWriteCursor); }
+    void *           getWriteCursorV() const  { return reinterpret_cast<void *>(mWriteCursor);     }
+    const void *     getWriteCursorCV() const { return const_cast<const void *>(getWriteCursor()); }
 
     // Set properties
     void setWriteCursor(CharType * newWriteCursor) {
