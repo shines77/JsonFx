@@ -31,7 +31,7 @@
 #include "JsonFx/Stream/SizableStringInputStream.h"
 
 // Visual Leak Detector(vld) for Visual C++
-#include "jimi/basic/vld.h"
+//#include "jimi/basic/vld.h"
 
 #if 0
 #if defined(_DEBUG) || !defined(NDEBUG)
@@ -230,16 +230,18 @@ void JsonFx_StringStream_Test()
     jfx_iostream_trace("%d\n", 1);
 
     printf("=====================================================\n\n");
-
+#if 0
     StringStream strStream(json);
     printf("The StringStream buffer is:\n\n");
     while (!strStream.isEof()) {
         printf("%c", strStream.get());
         strStream.next();
+        strStream.nextw();
     }
     printf("\n\n");
     printf("The buffer length is: %d\n", strStream.tell());
     printf("\n");
+#endif
 
     StringInputStream strInputStream(json);
     printf("The StringInputStream buffer is:\n\n");
@@ -297,8 +299,8 @@ int main(int argn, char * argv[])
     JsonFx_BasicDocumentTest1();
     //JsonFx_BasicDocumentTest2();
 
-    JsonFx_IOStream_Test();
-    //JsonFx_StringStream_Test();
+    //JsonFx_IOStream_Test();
+    JsonFx_StringStream_Test();
     //JsonFx_SizableStringStream_Test();
 
     //printf("\n");

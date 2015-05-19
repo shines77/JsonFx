@@ -13,8 +13,8 @@
 #include "JsonFx/ParseResult.h"
 #include "JsonFx/Internal/Traits.h"
 
-#if 0
-#define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag /* | kSupportErrorLineParseFlag */)
+#if 1
+#define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag)
 #else
 #define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag | kSupportErrorLineParseFlag)
 #endif

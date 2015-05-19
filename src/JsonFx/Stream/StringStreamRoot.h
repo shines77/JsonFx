@@ -10,6 +10,8 @@
 
 #include "JsonFx/Stream/StreamRoot.h"
 
+#define STRING_STREAM_DERIVED_USE_ROOTCLASS     1
+
 namespace JsonFx {
 
 // Forward declaration.
@@ -51,10 +53,10 @@ public:
     void *           getEndV() const  { return reinterpret_cast<void *>(kMaxMemoryAddress);           }
     const void *     getEndCV() const { return reinterpret_cast<const void *>(kMaxMemoryAddress);     }
 
-    bool isValid() const  { return (mBegin != NULL); }
+    //bool isValid() const  { return (mBegin != NULL); }
     bool isNormal() const { return true; }
 
-    SizeType getSize() const { return kSize; }
+    //SizeType getSize() const { return kSize; }
 };
 
 }  // namespace JsonFx

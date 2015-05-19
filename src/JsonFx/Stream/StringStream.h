@@ -21,8 +21,13 @@ class BasicStringStream;
 typedef BasicStringStream<>  StringStream;
 
 template <typename CharT>
+#if defined(STRING_STREAM_DERIVED_USE_ROOTCLASS) && (STRING_STREAM_DERIVED_USE_ROOTCLASS != 0)
 class BasicStringStream : public BasicStringInputStream<CharT>,
                           public BasicStringOutputStream<CharT>
+#else
+class BasicStringStream : public BasicStringInputStream<CharT>,
+                          public BasicStringOutputStream<CharT>
+#endif
 {
 public:
     typedef typename BasicStringInputStream<CharT>::CharType    CharType;
