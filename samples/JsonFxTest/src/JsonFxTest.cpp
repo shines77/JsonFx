@@ -143,7 +143,7 @@ void JsonFx_FastTest()
     elapsedtime = jmc_get_elapsedtime_msf(starttime);
     printf("elapsed time: %0.3f ms.\n\n", elapsedtime);
     printf("poolAllocator.getUsed():     %u\n"
-           "poolAllocator.getCapacity(): %u\n\n",
+           "poolAllocator.getCapacity(): %u\n",
             poolAllocator.getUsed(), poolAllocator.getCapacity());
 }
 
@@ -181,7 +181,7 @@ void JsonFx_BasicDocumentTest1()
     document.visit();
 
     BasicValue<CharSet::UTF16> value;
-    value.visit();
+    //value.visit();
 }
 
 void JsonFx_BasicDocumentTest2()
@@ -229,28 +229,34 @@ void JsonFx_StringStream_Test()
 
     jfx_iostream_trace("%d\n", 1);
 
-    printf("=====================================================\n\n");
+    printf("=====================================================\n");
 #if 0
     StringStream strStream(json);
-    printf("The StringStream buffer is:\n\n");
+    printf("The StringStream buffer is:\n");
     while (!strStream.isEof()) {
         printf("%c", strStream.get());
         strStream.next();
         strStream.nextw();
+        strStream.tell();
+        strStream.tellw();
+        strStream.isReadOverflow();
+        strStream.isWriteOverflow();
     }
-    printf("\n\n");
-    printf("The buffer length is: %d\n", strStream.tell());
+    printf("\n");
+    printf("The buffer length is: %d", strStream.tell());
     printf("\n");
 #endif
 
     StringInputStream strInputStream(json);
-    printf("The StringInputStream buffer is:\n\n");
+    printf("The StringInputStream buffer is:\n");
     while (!strInputStream.isEof()) {
         printf("%c", strInputStream.get());
         strInputStream.next();
+        strInputStream.tell();
+        strInputStream.isReadOverflow();
     }
-    printf("\n\n");
-    printf("The buffer length is: %d\n", strInputStream.tell());
+    printf("\n");
+    printf("The buffer length is: %d", strInputStream.tell());
     printf("\n");
 
     printf("=====================================================\n");

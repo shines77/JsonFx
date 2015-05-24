@@ -629,7 +629,7 @@ public:
         //printf("JsonFx::BasicDocument::parse(const InuptStreamT &) visited.\n\n");
         //setObject();
 
-        const CharType * cur = is.getCurrentC();
+        const CharType * cur = is.getCurrent();
         while (*cur != _Ch('\0')) {
             // Skip the whitespace chars
             cur = skipWhiteSpaces(cur);

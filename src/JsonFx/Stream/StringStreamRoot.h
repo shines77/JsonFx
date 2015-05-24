@@ -48,10 +48,8 @@ public:
     }
 
     // Get properties
-    CharType *       getEnd() const   { return reinterpret_cast<CharType *>(kMaxMemoryAddress);       }
-    const CharType * getEndC() const  { return reinterpret_cast<const CharType *>(kMaxMemoryAddress); }
-    void *           getEndV() const  { return reinterpret_cast<void *>(kMaxMemoryAddress);           }
-    const void *     getEndCV() const { return reinterpret_cast<const void *>(kMaxMemoryAddress);     }
+    CharType *       getEnd() const   { return reinterpret_cast<CharType *>(kMaxMemoryAddress); }
+    void *           getEndV() const  { return reinterpret_cast<void *>(kMaxMemoryAddress);     }
 
     //bool isValid() const  { return (mBegin != NULL); }
     bool isNormal() const { return true; }

@@ -55,10 +55,8 @@ public:
     }
 
     // Get properties
-    CharType *       getBegin() const   { return const_cast<CharType *>mBegin; }
-    const CharType * getBeginC() const  { return mBegin; }
+    CharType *       getBegin() const   { return const_cast<CharType *>(mBegin);       }
     void *           getBeginV() const  { return reinterpret_cast<void *>(getBegin()); }
-    const void *     getBeginCV() const { return const_cast<const void *>(getBegin()); }
 
     // Status
     bool isValid() const  { return (mBegin != NULL); }
