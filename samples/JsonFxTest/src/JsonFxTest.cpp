@@ -72,7 +72,7 @@ void JsonFx_Test()
     printf("\n");
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
-        document.parse(json);
+        document.parseStream(json);
         /*
         document.parse<>(json);
         document.parse<StringInputStream>(json);
@@ -137,7 +137,7 @@ void JsonFx_FastTest()
     printf("\n");
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
-        document.parseFast(json);
+        document.parse(json);
         poolAllocator.reset();
     }
     elapsedtime = jmc_get_elapsedtime_msf(starttime);

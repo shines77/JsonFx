@@ -13,11 +13,7 @@
 #include "JsonFx/ParseResult.h"
 #include "JsonFx/Internal/Traits.h"
 
-#if 1
 #define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag)
-#else
-#define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag | kSupportErrorLineParseFlag)
-#endif
 
 namespace JsonFx {
 
@@ -26,7 +22,6 @@ enum ParseFlags {
     kInsituParseFlag                = 1 << 0,
     kNoStringEscapeParseFlags       = 1 << 8,
     kAllowSingleQuotesParseFlag     = 1 << 9,
-    kSupportErrorLineParseFlag      = 1 << 20,
     kMaxParseFlags                  = 0x80000000U,
     kDefaultParseFlags              = JSONFX_DEFAULT_PARSE_FLAGS
 };
@@ -155,18 +150,10 @@ public:
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
 #if 1
         while ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'))) {
-            if (parseFlags & kSupportErrorLineParseFlag) {
-                if (is.peek() == _Ch('\n'))
-                    mParseResult.incLine();
-            }
             is.next();
         }
 #else
         while (isWhiteSpaces(is)) {
-            if (parseFlags & kSupportErrorLineParseFlag) {
-                if (is.peek() == _Ch('\n'))
-                    mParseResult.incLine();
-            }
             is.next();
         }
 #endif
@@ -183,10 +170,6 @@ public:
     const CharType * skipWhiteSpaces(const CharType * src) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
         while ((*src == _Ch(' ')) || (*src >= _Ch('\t') && *src <= _Ch('\r'))) {
-            if (parseFlags & kSupportErrorLineParseFlag) {
-                if (*src == _Ch('\n'))
-                    mParseResult.incLine();
-            }
             ++src;
         }
         return src;
@@ -332,7 +315,7 @@ public:
     }
 
     template <typename InputStreamT, typename ReaderHandlerT>
-    ParseResultType parse(InputStreamT & is, ReaderHandlerT & handler) {
+    ParseResultType parseStream(InputStreamT & is, ReaderHandlerT & handler) {
         mParseResult.clear();
 
         jimi_assert(is.peek() != NULL);
@@ -344,7 +327,7 @@ public:
             skipWhiteSpaces(is);
 
             if (is.peek() == _Ch('"')) {
-                // Parse a string begin from token "
+                // Parse a string begin from token ["]
                 is.next();
                 if (parseFlags & kInsituParseFlag)
                     parseInsituString<_Ch('"')>(is, handler);
@@ -352,7 +335,7 @@ public:
                     parseString<_Ch('"')>(is, handler);
             }
             else if (is.peek() == _Ch('\'')) {
-                // Allow use single quotes
+                // Allow use the single quotes [\']
                 if (parseFlags & kAllowSingleQuotesParseFlag) {
                     // Parse a string begin from token \'
                     is.next();
@@ -622,7 +605,7 @@ public:
     }
 
     template <typename InputStreamT, typename ReaderHandlerT>
-    ParseResultType parseFast(const InputStreamT & is, const ReaderHandlerT & handler) {
+    ParseResultType parse(const InputStreamT & is, const ReaderHandlerT & handler) {
         mParseResult.clear();
 
         jimi_assert(is.peek() != NULL);
@@ -644,7 +627,7 @@ public:
                     cur = parseInsituString<_Ch('"')>(cur, handler);
             }
             else if (*cur == _Ch('\'')) {
-                // Allow use single quotes
+                // Allow use the single quotes [\']
                 if (parseFlags & kAllowSingleQuotesParseFlag) {
                     // Parse a string begin from token [\']
                     ++cur;

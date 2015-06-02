@@ -148,6 +148,84 @@ public:
     // BasicDocument::parse<parseFlags, SourceEncodingT, InuptStreamT>(is);
     //
     template <size_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
+    BasicDocument & parseStream(const InuptStreamT & is) {
+        // Remove existing root if exist
+        ValueType::setNull();
+        BasicReader<parseFlags, SourceEncodingT, EncodingT, PoolAllocatorT, AllocatorT>
+            reader(this->getPoolAllocator(), false, this->getPoolAllocator());
+
+        // Parse the stream use SAX mode in Reader class.
+        mParseResult = reader.parseStream(const_cast<InuptStreamT &>(is), *this);
+        if (mParseResult.hasError()) {
+            // Get the error code.
+            mParseResult.getError();
+        }
+        return *this;
+    }
+
+    //
+    // BasicDocument::parse(InputStreamT & is);
+    //
+    template <size_t parseFlags, typename InputStreamT>
+    BasicDocument & parseStream(const InputStreamT & is) {
+        return parseStream<parseFlags, EncodingT, InputStreamT>(is);
+    }
+
+    template <typename InputStreamT>
+    BasicDocument & parseStream(const InputStreamT & is) {
+        return parseStream<kDefaultParseFlags>(is);
+    }
+
+    //
+    // BasicDocument::parse(StringInputStreamT & is);
+    //
+    template <size_t parseFlags, typename SourceEncodingT>
+    BasicDocument & parseStream(const StringInputStreamT & is) {
+        return parseStream<parseFlags, SourceEncodingT, StringInputStreamT>(is);
+    }
+
+    template <size_t parseFlags>
+    BasicDocument & parseStream(const StringInputStreamT & is) {
+        return parseStream<parseFlags, EncodingT>(is);
+    }
+
+    BasicDocument & parseStream(const StringInputStreamT & is) {
+        return parseStream<kDefaultParseFlags>(is);
+    }
+
+    //
+    // BasicDocument::parse(const CharType * text);
+    //
+    template <size_t parseFlags, typename SourceEncodingT, typename InputStreamT>
+    BasicDocument & parseStream(const CharType * text) {
+        jimi_assert(text != NULL);
+        InputStreamT inputStream(text);
+        return parseStream<parseFlags, SourceEncodingT, InputStreamT>(inputStream);
+    }
+
+    template <size_t parseFlags, typename SourceEncodingT>
+    BasicDocument & parseStream(const CharType * text) {
+        return parseStream<parseFlags, SourceEncodingT, StringInputStreamT>(text);
+    }
+
+    template <typename InputStreamT>
+    BasicDocument & parseStream(const typename InputStreamT::CharType * text) {
+        return parseStream<kDefaultParseFlags, EncodingT, InputStreamT>(text);
+    }
+
+    template <size_t parseFlags>
+    BasicDocument & parseStream(const CharType * text) {
+        return parseStream<parseFlags, EncodingT>(text);
+    }
+
+    BasicDocument & parseStream(const CharType * text) {
+        return parseStream<kDefaultParseFlags>(text);
+    }
+
+    //
+    // BasicDocument::parse<parseFlags, SourceEncodingT, InuptStreamT>(is);
+    //
+    template <size_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
     BasicDocument & parse(const InuptStreamT & is) {
         // Remove existing root if exist
         ValueType::setNull();
@@ -220,84 +298,6 @@ public:
 
     BasicDocument & parse(const CharType * text) {
         return parse<kDefaultParseFlags>(text);
-    }
-
-    //
-    // BasicDocument::parseFast<parseFlags, SourceEncodingT, InuptStreamT>(is);
-    //
-    template <size_t parseFlags, typename SourceEncodingT, typename InuptStreamT>
-    BasicDocument & parseFast(const InuptStreamT & is) {
-        // Remove existing root if exist
-        ValueType::setNull();
-        BasicReader<parseFlags, SourceEncodingT, EncodingT, PoolAllocatorT, AllocatorT>
-            reader(this->getPoolAllocator(), false, this->getPoolAllocator());
-
-        // Parse the stream use SAX mode in Reader class.
-        mParseResult = reader.parseFast(const_cast<InuptStreamT &>(is), *this);
-        if (mParseResult.hasError()) {
-            // Get the error code.
-            mParseResult.getError();
-        }
-        return *this;
-    }
-
-    //
-    // BasicDocument::parseFast(InputStreamT & is);
-    //
-    template <size_t parseFlags, typename InputStreamT>
-    BasicDocument & parseFast(const InputStreamT & is) {
-        return parseFast<parseFlags, EncodingT, InputStreamT>(is);
-    }
-
-    template <typename InputStreamT>
-    BasicDocument & parseFast(const InputStreamT & is) {
-        return parseFast<kDefaultParseFlags>(is);
-    }
-
-    //
-    // BasicDocument::parse(StringInputStreamT & is);
-    //
-    template <size_t parseFlags, typename SourceEncodingT>
-    BasicDocument & parseFast(const StringInputStreamT & is) {
-        return parseFast<parseFlags, SourceEncodingT, StringInputStreamT>(is);
-    }
-
-    template <size_t parseFlags>
-    BasicDocument & parseFast(const StringInputStreamT & is) {
-        return parseFast<parseFlags, EncodingT>(is);
-    }
-
-    BasicDocument & parseFast(const StringInputStreamT & is) {
-        return parseFast<kDefaultParseFlags>(is);
-    }
-
-    //
-    // BasicDocument::parseFast(const CharType * text);
-    //
-    template <size_t parseFlags, typename SourceEncodingT, typename InputStreamT>
-    BasicDocument & parseFast(const CharType * text) {
-        jimi_assert(text != NULL);
-        InputStreamT inputStream(text);
-        return parseFast<parseFlags, SourceEncodingT, InputStreamT>(inputStream);
-    }
-
-    template <size_t parseFlags, typename SourceEncodingT>
-    BasicDocument & parseFast(const CharType * text) {
-        return parseFast<parseFlags, SourceEncodingT, StringInputStreamT>(text);
-    }
-
-    template <typename InputStreamT>
-    BasicDocument & parseFast(const typename InputStreamT::CharType * text) {
-        return parseFast<kDefaultParseFlags, EncodingT, InputStreamT>(text);
-    }
-
-    template <size_t parseFlags>
-    BasicDocument & parseFast(const CharType * text) {
-        return parseFast<parseFlags, EncodingT>(text);
-    }
-
-    BasicDocument & parseFast(const CharType * text) {
-        return parseFast<kDefaultParseFlags>(text);
     }
 };
 
