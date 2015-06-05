@@ -164,7 +164,7 @@ void JsonFx_Test2()
 
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
-        document.parse(json);
+        document.parseStream(json);
     }
     elapsedtime = jmc_get_elapsedtime_msf(starttime);
     printf("elapsed time: %0.3f ms.\n\n", elapsedtime);

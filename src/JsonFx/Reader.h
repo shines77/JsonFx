@@ -141,7 +141,7 @@ public:
     JIMI_FORCEINLINE
     bool isWhiteSpaces(const InuptStreamT & is) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        return ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r')));
+        return ((is.peek() == ' ') || (is.peek() >= '\t' && is.peek() <= '\r'));
     }
 
     template <typename InuptStreamT>
@@ -149,7 +149,7 @@ public:
     void skipWhiteSpaces(InuptStreamT & is) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
 #if 1
-        while ((is.peek() == _Ch(' ')) || (is.peek() >= _Ch('\t') && is.peek() <= _Ch('\r'))) {
+        while ((is.peek() == ' ') || (is.peek() >= '\t' && is.peek() <= '\r')) {
             is.next();
         }
 #else
@@ -163,13 +163,13 @@ public:
     JIMI_FORCEINLINE
     bool isWhiteSpaces(const CharType * src) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        return ((*src == _Ch(' ')) || (*src >= _Ch('\t') && *src <= _Ch('\r')));
+        return ((*src == ' ') || (*src >= '\t' && *src <= '\r'));
     }
 
     JIMI_FORCEINLINE
     const CharType * skipWhiteSpaces(const CharType * src) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-        while ((*src == _Ch(' ')) || (*src >= _Ch('\t') && *src <= _Ch('\r'))) {
+        while ((*src == ' ') || (*src >= '\t' && *src <= '\r')) {
             ++src;
         }
         return src;
@@ -202,7 +202,7 @@ public:
         CharType * begin  = cursor;
         CharType * bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-        while (is.peek() != quoteToken && is.peek() != _Ch('\0')) {
+        while (is.peek() != quoteToken && is.peek() != '\0') {
             if (cursor < bottom) {
                 *cursor++ = is.take();
             }
@@ -219,7 +219,7 @@ public:
                 begin  = newBegin;
                 bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-                while (is.peek() != quoteToken && is.peek() != _Ch('\0')) {
+                while (is.peek() != quoteToken && is.peek() != '\0') {
                     if (cursor < bottom) {
                         *cursor++ = is.take();
                     }
@@ -237,7 +237,7 @@ public:
         // It's the ending of string token.
         if (is.peek() == quoteToken) {
             is.next();
-            *cursor = _Ch('\0');
+            *cursor = '\0';
             ++cursor;
             jimi_assert(cursor >= begin);
             size_t length = cursor - begin;
@@ -271,7 +271,7 @@ public:
         savePtr = is.getCurrent();
 
         // Find the full length of string
-        while (is.peek() != quoteToken && is.peek() != _Ch('\0')) {
+        while (is.peek() != quoteToken && is.peek() != '\0') {
             is.next();
         }
 
@@ -296,16 +296,16 @@ public:
             while (*origPtr != quoteToken) {
                 *newCursor++ = *origPtr++;
             }
-            *newCursor = _Ch('\0');
+            *newCursor = '\0';
             is.next();
         }
         else {
             // Error: The tail token is not match, miss quote.
-            if (is.peek() == _Ch('\0')) {
-                while (*origPtr != _Ch('\0')) {
+            if (is.peek() == '\0') {
+                while (*origPtr != '\0') {
                     *newCursor++ = *origPtr++;
                 }
-                *newCursor = _Ch('\0');
+                *newCursor = '\0';
             }
             if (isKey)
                 this->setError(kKeyStringMissQuoteError);
@@ -322,35 +322,35 @@ public:
         //printf("JsonFx::BasicDocument::parse(const InuptStreamT &) visited.\n\n");
         //setObject();
 
-        while (is.peek() != _Ch('\0')) {
+        while (is.peek() != '\0') {
             // Skip the whitespace chars
             skipWhiteSpaces(is);
 
-            if (is.peek() == _Ch('"')) {
+            if (is.peek() == '\"') {
                 // Parse a string begin from token ["]
                 is.next();
                 if (parseFlags & kInsituParseFlag)
-                    parseInsituString<_Ch('"')>(is, handler);
+                    parseInsituString<'\"'>(is, handler);
                 else
-                    parseString<_Ch('"')>(is, handler);
+                    parseString<'\"'>(is, handler);
             }
-            else if (is.peek() == _Ch('\'')) {
+            else if (is.peek() == '\'') {
                 // Allow use the single quotes [\']
                 if (parseFlags & kAllowSingleQuotesParseFlag) {
                     // Parse a string begin from token \'
                     is.next();
                     if (parseFlags & kInsituParseFlag)
-                        parseInsituString<_Ch('\'')>(is, handler);
+                        parseInsituString<'\''>(is, handler);
                     else
-                        parseString<_Ch('\'')>(is, handler);
+                        parseString<'\''>(is, handler);
                 }
             }
-            else if (is.peek() == _Ch('{')) {
+            else if (is.peek() == '{') {
                 // Parse a object
                 is.next();
                 parseObject(is, handler);
             }
-            else if (is.peek() == _Ch('[')) {
+            else if (is.peek() == '[') {
                 // Parse a array
                 is.next();
                 parseArray(is, handler);
@@ -369,45 +369,36 @@ public:
     }
 
     JIMI_FORCEINLINE
-    void escapeChars(CharType * &dest, const CharType * &src) {
+    void unescapeChars(CharType * &dest, const CharType * &src) {
         // Skip the '\\' char.
         ++src;
 
         if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
             // Escape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '\"' chars.
-            if (*src <= _Ch('t') && *src >= _Ch('\"')) {
-                if (*src == _Ch('t'))
-                    *dest++ = _Ch('\t');
-
-                else if (*src == _Ch('\"'))
-                    *dest++ = _Ch('\"');
-
-                else if (*src == _Ch('n'))
-                    *dest++ = _Ch('\n');
-
-                else if (*src == _Ch('r'))
-                    *dest++ = _Ch('\r');
-
-                else if (*src == _Ch('\\'))
-                    *dest++ = _Ch('\\');
-
-                else if (*src == _Ch('/'))
-                    *dest++ = _Ch('/');
-
-                else if (*src == _Ch('u')) {
+            if (*src <= 't' && *src >= '\"') {
+                if (*src == 't')
+                    *dest++ = '\t';
+                else if (*src == '\"')
+                    *dest++ = '\"';
+                else if (*src == 'n')
+                    *dest++ = '\n';
+                else if (*src == 'r')
+                    *dest++ = '\r';
+                else if (*src == '\\')
+                    *dest++ = '\\';
+                else if (*src == '/')
+                    *dest++ = '/';
+                else if (*src == 'u') {
                     // '\uXXXX'
                     src += 4;
-                    *dest++ = _Ch('X');
-                    *dest++ = _Ch('X');
-                    *dest++ = _Ch('X');
+                    *dest++ = 'X';
+                    *dest++ = 'X';
+                    *dest++ = 'X';
                 }
-
-                else if (*src == _Ch('b'))
-                    *dest++ = _Ch('\b');
-
-                else if (*src == _Ch('f'))
-                    *dest++ = _Ch('\f');
-
+                else if (*src == 'b')
+                    *dest++ = '\b';
+                else if (*src == 'f')
+                    *dest++ = '\f';
                 else {
                     // Unknown escape chars.
                     --src;
@@ -421,34 +412,32 @@ public:
     }
 
     JIMI_FORCEINLINE
-    void getEscapeCharBytes(const CharType * &src, int & additive) {
+    void calcUnescapeCharBytes(const CharType * &src, int & additive) {
         // Skip the '\\' char.
         ++src;
 
         if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
             // Escape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '\"' chars.
-            if (*src <= _Ch('t') && *src >= _Ch('\"')) {
-                if (   *src == _Ch('t')  || *src == _Ch('\"') || *src == _Ch('n')
-                    || *src == _Ch('r')  || *src == _Ch('\\') || *src == _Ch('/')
-                    || *src == _Ch('b')  || *src == _Ch('f') )
+            if (*src <= 't' && *src >= '\"') {
+                if (   *src == 't'  || *src == '\"' || *src == 'n'
+                    || *src == 'r'  || *src == '\\' || *src == '/'
+                    || *src == 'b'  || *src == 'f')
                 {
                     src++;
-                    additive++;
+                    additive--;
                 }
-                else if (*src == _Ch('u')) {
+                else if (*src == 'u') {
                     // '\uXXXX'
                     src += 5;
                     // Needn't subtract the additive, for efficiency.
-                    // additive -= 3;
+                    // additive -= 5 - 3;   // A utf-8 unicode character is 3 bytes.
                 }
                 else {
-                    // Unknown escape chars, needn't decrease the additive, for efficiency.
-                    // additive--; 
+                    // Unknown escape chars.
                 }
             }
             else {
-                // Unknown escape chars, needn't decrease the additive, for efficiency.
-                // additive--; 
+                // Unknown escape chars.
             }
         }
     }
@@ -465,12 +454,12 @@ public:
         CharType * begin  = cursor;
         CharType * bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-        while (*src != quoteToken && *src != _Ch('\0')) {
+        while (*src != quoteToken && *src != '\0') {
             if (cursor < bottom) {
-                if (*src != _Ch('\\'))
+                if (*src != '\\')
                     *cursor++ = *src++;
                 else
-                    this->escapeChars(cursor, src);
+                    this->unescapeChars(cursor, src);
             }
             else {
                 // The remain space in the active chunk is not enough to store the string's
@@ -486,12 +475,12 @@ public:
                 begin  = newBegin;
                 bottom = mPoolAllocator->getChunkBottom<CharType *>();
 
-                while (*src != quoteToken && *src != _Ch('\0')) {
+                while (*src != quoteToken && *src != '\0') {
                     if (cursor < bottom) {
-                        if (*src != _Ch('\\'))
+                        if (*src != '\\')
                             *cursor++ = *src++;
                         else
-                            this->escapeChars(cursor, src);
+                            this->unescapeChars(cursor, src);
                     }
                     else {
                         // If it need allocate memory second time, mean the string's length
@@ -509,7 +498,7 @@ public:
         // It's the ending of string token.
         if (*src == quoteToken) {
             ++src;
-            *cursor = _Ch('\0');
+            *cursor = '\0';
             ++cursor;
             jimi_assert(cursor >= begin);
             size_t length = cursor - begin;
@@ -550,15 +539,19 @@ public:
         lenAdditive = 0;
 
         // Find the full length of string
-        while (*src != quoteToken && *src != _Ch('\0')) {
-            if (*src != _Ch('\\'))
+        while (*src != quoteToken && *src != '\0') {
+#if 1
+            ++src;
+#else
+            if (*src != '\\')
                 ++src;
             else
-                this->getEscapeCharBytes(src, lenAdditive);
+                this->calcUnescapeCharBytes(src, lenAdditive);
+#endif
         }
 
-        // lenAdditive must be >= 0.
-        jimi_assert(lenAdditive >= 0);
+        // lenAdditive must be <= 0.
+        jimi_assert(lenAdditive <= 0);
 
         // The length of tail characters of string.
         lenTail = src - savePtr;
@@ -579,22 +572,22 @@ public:
         newCursor = reinterpret_cast<CharType *>(pHeadInfo);
         if (*src == quoteToken) {
             while (*origPtr != quoteToken) {
-                if (*origPtr != _Ch('\\'))
+                if (*origPtr != '\\')
                     *newCursor++ = *origPtr++;
                 else
-                    this->escapeChars(newCursor, origPtr);
+                    this->unescapeChars(newCursor, origPtr);
             }
-            *newCursor = _Ch('\0');
+            *newCursor = '\0';
             ++src;
             return src;
         }
         else {
             // Error: The tail token is not match, miss quote.
-            if (*src == _Ch('\0')) {
-                while (*origPtr != _Ch('\0')) {
+            if (*src == '\0') {
+                while (*origPtr != '\0') {
                     *newCursor++ = *origPtr++;
                 }
-                *newCursor = _Ch('\0');
+                *newCursor = '\0';
             }
             if (isKey)
                 this->setError(kKeyStringMissQuoteError);
@@ -613,36 +606,36 @@ public:
         //setObject();
 
         const CharType * cur = is.getCurrent();
-        while (*cur != _Ch('\0')) {
+        while (*cur != '\0') {
             // Skip the whitespace chars
             cur = skipWhiteSpaces(cur);
             //skipWhiteSpaces(is);
 
-            if (*cur == _Ch('"')) {
+            if (*cur == '\"') {
                 // Parse a string begin from token ["]
                 ++cur;
                 if (!(parseFlags & kInsituParseFlag))
-                    cur = parseString<_Ch('"')>(cur, handler);
+                    cur = parseString<'\"'>(cur, handler);
                 else
-                    cur = parseInsituString<_Ch('"')>(cur, handler);
+                    cur = parseInsituString<'\"'>(cur, handler);
             }
-            else if (*cur == _Ch('\'')) {
+            else if (*cur == '\'') {
                 // Allow use the single quotes [\']
                 if (parseFlags & kAllowSingleQuotesParseFlag) {
                     // Parse a string begin from token [\']
                     ++cur;
                     if (!(parseFlags & kInsituParseFlag))
-                        parseString<_Ch('\'')>(cur, handler);
+                        parseString<'\''>(cur, handler);
                     else
-                        parseInsituString<_Ch('\'')>(cur, handler);
+                        parseInsituString<'\''>(cur, handler);
                 }
             }
-            else if (*cur == _Ch('{')) {
+            else if (*cur == '{') {
                 // Parse a object
                 ++cur;
                 parseObject(is, handler);
             }
-            else if (*cur == _Ch('[')) {
+            else if (*cur == '[') {
                 // Parse a array
                 ++cur;
                 parseArray(is, handler);
