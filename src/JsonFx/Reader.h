@@ -372,6 +372,7 @@ public:
     }
 
 #if 0
+    JIMI_FORCEINLINE
     unsigned parseHex4(const CharType * src) {
         const CharType * end = src + 4;
         unsigned codepoint = 0;
@@ -397,7 +398,8 @@ public:
         return codepoint;
     }
 #else
-    unsigned parseHex4(const CharType * src) {
+    JIMI_FORCEINLINE
+    unsigned parseHex4(const CharType * &src) {
         const CharType * end = src + 4;
         unsigned codepoint = 0;
         do {
@@ -425,7 +427,37 @@ public:
 
     JIMI_FORCEINLINE
     size_t tell(const CharType * src) const {
+        jimi_assert(mInputStream != NULL);
+        jimi_assert(src >= mInputStream->getBegin());
         return static_cast<size_t>(src - mInputStream->getBegin());
+    }
+
+    JIMI_FORCEINLINE
+    void unescapeUnicode(CharType * &dest, const CharType * &src) {
+        ++src;
+        unsigned codepoint = parseHex4(src);
+        //src += 4;
+        if (codepoint >= 0xD800 && codepoint <= 0xDBFF) {
+            // Handle UTF-16 surrogate pair.
+            if (*src++ != '\\' || *src++ != 'u') {
+                this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
+            }
+            unsigned codepoint2 = parseHex4(src);
+            //src += 4;
+            if (codepoint2 < 0xDC00 || codepoint2 > 0xDFFF)
+                this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
+            codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
+        }
+        //TargetEncodingT::encode(dest, codepoint);                    
+        *dest++ = 'X';
+        *dest++ = 'X';
+        *dest++ = 'X';
+#if 0
+        static int count = 0;
+        if (count == 0)
+            printf("codepoint = 0x%08X\n", codepoint);
+        count++;
+#endif
     }
 
     JIMI_FORCEINLINE
@@ -460,16 +492,19 @@ public:
             }
             else if (*src == 'u') {
                 // '\uXXXX'
+#if 0
+                unescapeUnicode(dest, src);
+#else
                 ++src;
                 unsigned codepoint = parseHex4(src);
-                src += 4;
+                //src += 4;
                 if (codepoint >= 0xD800 && codepoint <= 0xDBFF) {
                     // Handle UTF-16 surrogate pair.
                     if (*src++ != '\\' || *src++ != 'u') {
                         this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
                     }
                     unsigned codepoint2 = parseHex4(src);
-                    src += 4;
+                    //src += 4;
                     if (codepoint2 < 0xDC00 || codepoint2 > 0xDFFF)
                         this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
                     codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
@@ -483,6 +518,7 @@ public:
                 if (count == 0)
                     printf("codepoint = 0x%08X\n", codepoint);
                 count++;
+#endif
 #endif
             }
             else {
