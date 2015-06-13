@@ -17,6 +17,8 @@ enum ParseErrorCode {
     kAnyParseError,
     kKeyStringMissQuoteError,
     kValueStringMissQuoteError,
+    kStringUnicodeSurrogateInvalidError,
+    kStringUnicodeEscapeInvalidHexError,
     kLastParseError
 };
 

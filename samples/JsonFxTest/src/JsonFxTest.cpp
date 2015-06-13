@@ -41,9 +41,17 @@
 #endif
 #endif
 
+#if 0
+#define TEST_JSON_STRING    "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }"
+#elif 1
+#define TEST_JSON_STRING    "{ \"name\": \"wang\", \"sex\": \"male\\ufa78\", \"age\": \"18\" }"
+#else
+#define TEST_JSON_STRING    "{\n\"name\": \"wang\",\n\"sex\": \"male\\ufa78\",\n\"age\": \"18\"\n}"
+#endif
+
 using namespace JsonFx;
 
-void JsonFx_Test()
+void JsonFx_FastTest()
 {
 #if defined(_DEBUG) || !defined(NDEBUG)
     static const size_t kLoopCount = 1000;
@@ -63,13 +71,80 @@ void JsonFx_Test()
     DefaultPoolAllocator poolAllocator;
 #endif
 
-    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
-    char json_n[] = "{\n\"name\": \"wang\",\n\"sex\": \"male\",\n\"age\": \"18\"\n}";
+    char json[]   = TEST_JSON_STRING;
     char json_test[] = "[0, 1, 2, 3]";
     Document document(&poolAllocator);
     StringInputStream stringStream(json);
 
     printf("\n");
+    starttime = jmc_get_timestamp();
+    for (size_t i = 0; i < kLoopCount; ++i) {
+        document.parse(json);
+        poolAllocator.reset();
+    }
+    elapsedtime = jmc_get_elapsedtime_msf(starttime);
+    printf("elapsed time: %0.3f ms.\n\n", elapsedtime);
+    printf("poolAllocator.getUsed():     %u\n"
+           "poolAllocator.getCapacity(): %u\n",
+            poolAllocator.getUsed(), poolAllocator.getCapacity());
+
+    printf("\n");
+}
+
+void JsonFx_FastTest2()
+{
+#if defined(_DEBUG) || !defined(NDEBUG)
+    static const size_t kLoopCount = 1000;
+#else
+    static const size_t kLoopCount = 200000;
+#endif
+
+    jmc_timestamp_t starttime;
+    jmc_timefloat_t elapsedtime;
+
+    char json[] = TEST_JSON_STRING;
+    const char json_test[] = "[0, 1, 2, 3]";
+    Document document;
+
+    starttime = jmc_get_timestamp();
+    for (size_t i = 0; i < kLoopCount; ++i) {
+        document.parse(json);
+    }
+    elapsedtime = jmc_get_elapsedtime_msf(starttime);
+    printf("elapsed time: %0.3f ms.\n\n", elapsedtime);
+    printf("poolAllocator.getUsed():     %u\n"
+           "poolAllocator.getCapacity(): %u\n",
+            document.getAllocator()->getUsed(),
+            document.getAllocator()->getCapacity());
+
+    printf("\n");
+}
+
+void JsonFx_StreamTest()
+{
+#if defined(_DEBUG) || !defined(NDEBUG)
+    static const size_t kLoopCount = 1000;
+#else
+    static const size_t kLoopCount = 200000;
+#endif
+
+    //static char static_buffer[4096] = { 0 };
+    //static const DefaultPoolAllocator poolAllocatorConst(buffer, sizeof(buffer));
+
+    jmc_timestamp_t starttime;
+    jmc_timefloat_t elapsedtime;
+    char buffer[4096] = { 0 };
+#if 1
+    DefaultPoolAllocator poolAllocator(buffer, sizeof(buffer));
+#else
+    DefaultPoolAllocator poolAllocator;
+#endif
+
+    char json[] = TEST_JSON_STRING;
+    char json_test[] = "[0, 1, 2, 3]";
+    Document document(&poolAllocator);
+    StringInputStream stringStream(json);
+
     starttime = jmc_get_timestamp();
     for (size_t i = 0; i < kLoopCount; ++i) {
         document.parseStream(json);
@@ -97,6 +172,7 @@ void JsonFx_Test()
 
     document.visit();
 
+#if 0
     if (document.hasMember("test"))
         printf("document.hasMember(\"test\") = true.\n");
     else
@@ -106,48 +182,10 @@ void JsonFx_Test()
 
     Value value;
     value.visit();
+#endif
 }
 
-void JsonFx_FastTest()
-{
-#if defined(_DEBUG) || !defined(NDEBUG)
-    static const size_t kLoopCount = 1000;
-#else
-    static const size_t kLoopCount = 200000;
-#endif
-
-    //static char static_buffer[4096] = { 0 };
-    //static const DefaultPoolAllocator poolAllocatorConst(buffer, sizeof(buffer));
-
-    jmc_timestamp_t starttime;
-    jmc_timefloat_t elapsedtime;
-    char buffer[4096] = { 0 };
-#if 1
-    DefaultPoolAllocator poolAllocator(buffer, sizeof(buffer));
-#else
-    DefaultPoolAllocator poolAllocator;
-#endif
-
-    char json[]   = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
-    char json_n[] = "{\n\"name\": \"wang\",\n\"sex\": \"male\",\n\"age\": \"18\"\n}";
-    char json_test[] = "[0, 1, 2, 3]";
-    Document document(&poolAllocator);
-    StringInputStream stringStream(json);
-
-    printf("\n");
-    starttime = jmc_get_timestamp();
-    for (size_t i = 0; i < kLoopCount; ++i) {
-        document.parse(json);
-        poolAllocator.reset();
-    }
-    elapsedtime = jmc_get_elapsedtime_msf(starttime);
-    printf("elapsed time: %0.3f ms.\n\n", elapsedtime);
-    printf("poolAllocator.getUsed():     %u\n"
-           "poolAllocator.getCapacity(): %u\n",
-            poolAllocator.getUsed(), poolAllocator.getCapacity());
-}
-
-void JsonFx_Test2()
+void JsonFx_StreamTest2()
 {
 #if defined(_DEBUG) || !defined(NDEBUG)
     static const size_t kLoopCount = 1000;
@@ -158,7 +196,7 @@ void JsonFx_Test2()
     jmc_timestamp_t starttime;
     jmc_timefloat_t elapsedtime;
 
-    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json[] = TEST_JSON_STRING;
     const char json_test[] = "[0, 1, 2, 3]";
     Document document;
 
@@ -169,9 +207,11 @@ void JsonFx_Test2()
     elapsedtime = jmc_get_elapsedtime_msf(starttime);
     printf("elapsed time: %0.3f ms.\n\n", elapsedtime);
     printf("poolAllocator.getUsed():     %u\n"
-           "poolAllocator.getCapacity(): %u\n\n",
+           "poolAllocator.getCapacity(): %u\n",
             document.getAllocator()->getUsed(),
             document.getAllocator()->getCapacity());
+
+    printf("\n");
 }
 
 void JsonFx_BasicDocumentTest1()
@@ -225,7 +265,7 @@ void JsonFx_IOStream_Test()
 
 void JsonFx_StringStream_Test()
 {
-    char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    char json[] = TEST_JSON_STRING;
 
     jfx_iostream_trace("%d\n", 1);
 
@@ -264,7 +304,7 @@ void JsonFx_StringStream_Test()
 
 void JsonFx_SizableStringStream_Test()
 {
-    static const char json[] = "{ \"name\": \"wang\", \"sex\": \"male\", \"age\": \"18\" }";
+    static const char json[] = TEST_JSON_STRING;
 
     jfx_iostream_trace("%d\n", 1);
 
@@ -299,8 +339,9 @@ int main(int argn, char * argv[])
     //json.visit();
 
     JsonFx_FastTest();
-    JsonFx_Test();
-    JsonFx_Test2();
+    JsonFx_FastTest2();
+    JsonFx_StreamTest();
+    JsonFx_StreamTest2();
 
     JsonFx_BasicDocumentTest1();
     //JsonFx_BasicDocumentTest2();

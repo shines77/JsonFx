@@ -11,6 +11,7 @@
 #include "JsonFx/Allocator.h"
 #include "JsonFx/Stack.h"
 #include "JsonFx/ParseResult.h"
+#include "JsonFx/Stream/StringInputStream.h"
 #include "JsonFx/Internal/Traits.h"
 
 #define JSONFX_DEFAULT_PARSE_FLAGS      (kNoneParseFlag)
@@ -70,6 +71,7 @@ template <size_t parseFlags,
 class BasicReader {
 public:
     typedef typename SourceEncodingT::CharType  CharType;   //!< SourceEncoding character type
+    typedef BasicStringInputStream<CharType>    StringInputStreamType;
     typedef PoolAllocatorT                      PoolAllocatorType;  //!< Pool allocator type from template parameter.
     typedef StackAllocatorT                     StackAllocatorType; //!< Stack allocator type from template parameter.
     typedef BasicStack<PoolAllocatorT>          StackType;
@@ -78,17 +80,18 @@ public:
     static const size_t kDefaultStackCapacity = 256;
 
 private:
-    PoolAllocatorType * mPoolAllocator;
-    bool                mPoolAllocatorNeedFree;
-    StackType           mStack;
-    ParseResultType     mParseResult;
+    StringInputStreamType * mInputStream;
+    PoolAllocatorType *     mPoolAllocator;
+    bool                    mPoolAllocatorNeedFree;
+    StackType               mStack;
+    ParseResultType         mParseResult;
 
 public:
     BasicReader(const PoolAllocatorType * poolAllocator = NULL,
                 bool poolAllocatorNeedFree = false,
                 const PoolAllocatorType * stackAllocator = NULL,
                 size_t stackCapacity = kDefaultStackCapacity)
-        : mPoolAllocator(const_cast<PoolAllocatorType *>(poolAllocator)),
+        : mInputStream(NULL), mPoolAllocator(const_cast<PoolAllocatorType *>(poolAllocator)),
           mPoolAllocatorNeedFree(poolAllocatorNeedFree),
           mStack(poolAllocator, stackCapacity), mParseResult()
     {
@@ -122,18 +125,18 @@ private:
     }
 
 public:
-    bool hasError() const { return mParseResult.hasError(); }
+    bool hasParseError() const { return mParseResult.hasError(); }
 
-    ParseErrorCode getError() const {
+    ParseErrorCode getParseError() const {
         return mParseResult.getError();
     }
 
-    void setError(ParseErrorCode code) {
+    void setParseError(ParseErrorCode code) {
         mParseResult.setError(code);
     }
 
-    void setError(ParseErrorCode code, size_t line, size_t offset) {
-        mParseResult.setError(code, line, offset);
+    void setParseError(ParseErrorCode code, size_t offset) {
+        mParseResult.setError(code, offset);
     }
 
     // The whitespace chars including " \t\n\r"
@@ -197,10 +200,10 @@ public:
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
         // Reserve string size
         static const size_t kReserveStringSize = 8;
-        CharType * cursor = mPoolAllocator->skip<CharType *>(kSizeOfHeadField, kReserveStringSize);
+        CharType * cursor = (CharType *)mPoolAllocator->skip(kSizeOfHeadField, kReserveStringSize);
         jimi_assert(cursor != NULL);
         CharType * begin  = cursor;
-        CharType * bottom = mPoolAllocator->getChunkBottom<CharType *>();
+        CharType * bottom = (CharType *)mPoolAllocator->getChunkBottom();
 
         while (is.peek() != quoteToken && is.peek() != '\0') {
             if (cursor < bottom) {
@@ -209,7 +212,7 @@ public:
             else {
                 // The remain space in the active chunk is not enough to store the string's
                 // characters, so we allocate a new chunk to store it.
-                CharType * newCursor = mPoolAllocator->addNewChunkAndSkip<CharType *>(kSizeOfHeadField, kReserveStringSize);
+                CharType * newCursor = (CharType *)mPoolAllocator->addNewChunkAndSkip(kSizeOfHeadField, kReserveStringSize);
                 CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
                 while (begin != cursor) {
@@ -217,7 +220,7 @@ public:
                 }
                 cursor = newCursor;
                 begin  = newBegin;
-                bottom = mPoolAllocator->getChunkBottom<CharType *>();
+                bottom = (CharType *)mPoolAllocator->getChunkBottom();
 
                 while (is.peek() != quoteToken && is.peek() != '\0') {
                     if (cursor < bottom) {
@@ -251,9 +254,9 @@ public:
         else {
             // Error: The tail token is not match.
             if (isKey)
-                this->setError(kKeyStringMissQuoteError);
+                this->setParseError(kKeyStringMissQuoteError);
             else
-                this->setError(kValueStringMissQuoteError);
+                this->setParseError(kValueStringMissQuoteError);
         }
     }
 
@@ -282,7 +285,7 @@ public:
 
         // Allocate the large chunk, and insert it to last.
         jimi_assert(mPoolAllocator != NULL);
-        CharType * newCursor = mPoolAllocator->allocateLarge<CharType *>(kSizeOfHeadField + lenTotal * sizeof(CharType));
+        CharType * newCursor = (CharType *)mPoolAllocator->allocateLarge(kSizeOfHeadField + lenTotal * sizeof(CharType));
         jimi_assert(newCursor != NULL);
 
         uint32_t * pHeadInfo = reinterpret_cast<uint32_t *>(newCursor);
@@ -308,9 +311,9 @@ public:
                 *newCursor = '\0';
             }
             if (isKey)
-                this->setError(kKeyStringMissQuoteError);
+                this->setParseError(kKeyStringMissQuoteError);
             else
-                this->setError(kValueStringMissQuoteError);
+                this->setParseError(kValueStringMissQuoteError);
         }
     }
 
@@ -326,13 +329,13 @@ public:
             // Skip the whitespace chars
             skipWhiteSpaces(is);
 
-            if (is.peek() == '\"') {
+            if (is.peek() == '"') {
                 // Parse a string begin from token ["]
                 is.next();
                 if (parseFlags & kInsituParseFlag)
-                    parseInsituString<'\"'>(is, handler);
+                    parseInsituString<'"'>(is, handler);
                 else
-                    parseString<'\"'>(is, handler);
+                    parseString<'"'>(is, handler);
             }
             else if (is.peek() == '\'') {
                 // Allow use the single quotes [\']
@@ -368,18 +371,75 @@ public:
         return src;
     }
 
+#if 0
+    unsigned parseHex4(const CharType * src) {
+        const CharType * end = src + 4;
+        unsigned codepoint = 0;
+        do {
+            CharType c = *src;
+            if (c >= '0' && c <= '9') {
+                c -= '0';
+            }
+            else {
+                c &= (CharType)(~ (CharType)' ');
+                if (c >= 'A' && c <= 'F') {
+                    c -= 'A' - 10;
+                }
+                else {
+                    this->setParseError(kStringUnicodeEscapeInvalidHexError, this->tell(src));
+                    return 0;
+                }
+            }
+            codepoint <<= 4;
+            codepoint |= static_cast<unsigned>(c);
+            ++src;
+        } while (src != end);
+        return codepoint;
+    }
+#else
+    unsigned parseHex4(const CharType * src) {
+        const CharType * end = src + 4;
+        unsigned codepoint = 0;
+        do {
+            unsigned c = (unsigned)(*src);
+            if (c >= '0' && c <= '9') {
+                c -= '0';
+            }
+            else {
+                c &= (unsigned)(~ (unsigned)' ');
+                if (c >= 'A' && c <= 'F') {
+                    c -= 'A' - 10;
+                }
+                else {
+                    this->setParseError(kStringUnicodeEscapeInvalidHexError, this->tell(src));
+                    return 0;
+                }
+            }
+            codepoint <<= 4;
+            codepoint |= static_cast<unsigned>(c);
+            ++src;
+        } while (src != end);
+        return codepoint;
+    }
+#endif
+
+    JIMI_FORCEINLINE
+    size_t tell(const CharType * src) const {
+        return static_cast<size_t>(src - mInputStream->getBegin());
+    }
+
     JIMI_FORCEINLINE
     void unescapeChars(CharType * &dest, const CharType * &src) {
         // Skip the '\\' char.
         ++src;
 
         if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
-            // Escape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '\"' chars.
-            if (*src <= 't' && *src >= '\"') {
+            // Unescape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '"' chars.
+            if (*src <= 't' && *src >= '"') {
                 if (*src == 't')
                     *dest++ = '\t';
-                else if (*src == '\"')
-                    *dest++ = '\"';
+                else if (*src == '"')
+                    *dest++ = '"';
                 else if (*src == 'n')
                     *dest++ = '\n';
                 else if (*src == 'r')
@@ -388,25 +448,45 @@ public:
                     *dest++ = '\\';
                 else if (*src == '/')
                     *dest++ = '/';
-                else if (*src == 'u') {
-                    // '\uXXXX'
-                    src += 4;
-                    *dest++ = 'X';
-                    *dest++ = 'X';
-                    *dest++ = 'X';
-                }
                 else if (*src == 'b')
                     *dest++ = '\b';
                 else if (*src == 'f')
                     *dest++ = '\f';
                 else {
-                    // Unknown escape chars.
+                    // Unknown escape chars, do nothing.
                     --src;
                 }
                 ++src;
             }
+            else if (*src == 'u') {
+                // '\uXXXX'
+                ++src;
+                unsigned codepoint = parseHex4(src);
+                src += 4;
+                if (codepoint >= 0xD800 && codepoint <= 0xDBFF) {
+                    // Handle UTF-16 surrogate pair.
+                    if (*src++ != '\\' || *src++ != 'u') {
+                        this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
+                    }
+                    unsigned codepoint2 = parseHex4(src);
+                    src += 4;
+                    if (codepoint2 < 0xDC00 || codepoint2 > 0xDFFF)
+                        this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
+                    codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
+                }
+                //TargetEncodingT::encode(dest, codepoint);                    
+                *dest++ = 'X';
+                *dest++ = 'X';
+                *dest++ = 'X';
+#if 0
+                static int count = 0;
+                if (count == 0)
+                    printf("codepoint = 0x%08X\n", codepoint);
+                count++;
+#endif
+            }
             else {
-                // Unknown escape chars.
+                // Unknown escape chars, do nothing.
             }
         }
     }
@@ -417,9 +497,9 @@ public:
         ++src;
 
         if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
-            // Escape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '\"' chars.
-            if (*src <= 't' && *src >= '\"') {
-                if (   *src == 't'  || *src == '\"' || *src == 'n'
+            // Unescape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '"' chars.
+            if (*src <= 't' && *src >= '"') {
+                if (   *src == 't'  || *src == '"' || *src == 'n'
                     || *src == 'r'  || *src == '\\' || *src == '/'
                     || *src == 'b'  || *src == 'f')
                 {
@@ -430,7 +510,7 @@ public:
                     // '\uXXXX'
                     src += 5;
                     // Needn't subtract the additive, for efficiency.
-                    // additive -= 5 - 3;   // A utf-8 unicode character is 3 bytes.
+                    // additive -= 5 - 3;   // A utf-8 multi-language unicode character is 3 bytes.
                 }
                 else {
                     // Unknown escape chars.
@@ -449,10 +529,10 @@ public:
         static const size_t kSizeOfHeadField = sizeof(uint32_t) + sizeof(uint32_t);
         // Reserve string size
         static const size_t kReserveStringSize = 8;
-        CharType * cursor = mPoolAllocator->skip<CharType *>(kSizeOfHeadField, kReserveStringSize);
+        CharType * cursor = (CharType *)mPoolAllocator->skip(kSizeOfHeadField, kReserveStringSize);
         jimi_assert(cursor != NULL);
         CharType * begin  = cursor;
-        CharType * bottom = mPoolAllocator->getChunkBottom<CharType *>();
+        CharType * bottom = (CharType *)mPoolAllocator->getChunkBottom();
 
         while (*src != quoteToken && *src != '\0') {
             if (cursor < bottom) {
@@ -464,7 +544,7 @@ public:
             else {
                 // The remain space in the active chunk is not enough to store the string's
                 // characters, so we allocate a new chunk to store it.
-                CharType * newCursor = mPoolAllocator->addNewChunkAndSkip<CharType *>(kSizeOfHeadField, kReserveStringSize);
+                CharType * newCursor = (CharType *)mPoolAllocator->addNewChunkAndSkip(kSizeOfHeadField, kReserveStringSize);
                 CharType * newBegin  = newCursor;
                 jimi_assert(newCursor != NULL);
                 // Copy previous parse strings.
@@ -473,7 +553,7 @@ public:
                 }
                 cursor = newCursor;
                 begin  = newBegin;
-                bottom = mPoolAllocator->getChunkBottom<CharType *>();
+                bottom = (CharType *)mPoolAllocator->getChunkBottom();
 
                 while (*src != quoteToken && *src != '\0') {
                     if (cursor < bottom) {
@@ -513,9 +593,9 @@ public:
         else {
             // Error: The tail token is not match.
             if (isKey)
-                this->setError(kKeyStringMissQuoteError);
+                this->setParseError(kKeyStringMissQuoteError);
             else
-                this->setError(kValueStringMissQuoteError);
+                this->setParseError(kValueStringMissQuoteError);
             return src;
         }
     }
@@ -560,7 +640,7 @@ public:
 
         // Allocate the large chunk, and insert it to last.
         jimi_assert(mPoolAllocator != NULL);
-        CharType * newCursor = mPoolAllocator->allocateLarge<CharType *>(kSizeOfHeadField + lenTotal * sizeof(CharType));
+        CharType * newCursor = (CharType *)mPoolAllocator->allocateLarge(kSizeOfHeadField + lenTotal * sizeof(CharType));
         jimi_assert(newCursor != NULL);
 
         uint32_t * pHeadInfo = reinterpret_cast<uint32_t *>(newCursor);
@@ -590,9 +670,9 @@ public:
                 *newCursor = '\0';
             }
             if (isKey)
-                this->setError(kKeyStringMissQuoteError);
+                this->setParseError(kKeyStringMissQuoteError);
             else
-                this->setError(kValueStringMissQuoteError);
+                this->setParseError(kValueStringMissQuoteError);
             return src;
         }
     }
@@ -605,19 +685,21 @@ public:
         //printf("JsonFx::BasicDocument::parse(const InuptStreamT &) visited.\n\n");
         //setObject();
 
+        mInputStream = &(const_cast<InputStreamT &>(is));
+
         const CharType * cur = is.getCurrent();
         while (*cur != '\0') {
             // Skip the whitespace chars
             cur = skipWhiteSpaces(cur);
             //skipWhiteSpaces(is);
 
-            if (*cur == '\"') {
+            if (*cur == '"') {
                 // Parse a string begin from token ["]
                 ++cur;
                 if (!(parseFlags & kInsituParseFlag))
-                    cur = parseString<'\"'>(cur, handler);
+                    cur = parseString<'"'>(cur, handler);
                 else
-                    cur = parseInsituString<'\"'>(cur, handler);
+                    cur = parseInsituString<'"'>(cur, handler);
             }
             else if (*cur == '\'') {
                 // Allow use the single quotes [\']

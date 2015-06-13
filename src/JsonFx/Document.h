@@ -44,7 +44,7 @@ public:
     typedef EncodingT                               EncodingType;       //!< Character encoding type.
     typedef PoolAllocatorT                          PoolAllocatorType;  //!< Pool allocator type from template parameter.
     typedef AllocatorT                              StackAllocatorType; //!< Stack allocator type from template parameter.
-    typedef BasicStringInputStream<CharType>        StringInputStreamT;
+    typedef BasicStringInputStream<CharType>        StringInputStreamType;
     typedef BasicStack<PoolAllocatorT>              StackType;
     typedef BasicParseResult<EncodingT>             ParseResultType;
 
@@ -177,19 +177,19 @@ public:
     }
 
     //
-    // BasicDocument::parse(StringInputStreamT & is);
+    // BasicDocument::parse(StringInputStreamType & is);
     //
     template <size_t parseFlags, typename SourceEncodingT>
-    BasicDocument & parseStream(const StringInputStreamT & is) {
-        return parseStream<parseFlags, SourceEncodingT, StringInputStreamT>(is);
+    BasicDocument & parseStream(const StringInputStreamType & is) {
+        return parseStream<parseFlags, SourceEncodingT, StringInputStreamType>(is);
     }
 
     template <size_t parseFlags>
-    BasicDocument & parseStream(const StringInputStreamT & is) {
+    BasicDocument & parseStream(const StringInputStreamType & is) {
         return parseStream<parseFlags, EncodingT>(is);
     }
 
-    BasicDocument & parseStream(const StringInputStreamT & is) {
+    BasicDocument & parseStream(const StringInputStreamType & is) {
         return parseStream<kDefaultParseFlags>(is);
     }
 
@@ -205,7 +205,7 @@ public:
 
     template <size_t parseFlags, typename SourceEncodingT>
     BasicDocument & parseStream(const CharType * text) {
-        return parseStream<parseFlags, SourceEncodingT, StringInputStreamT>(text);
+        return parseStream<parseFlags, SourceEncodingT, StringInputStreamType>(text);
     }
 
     template <typename InputStreamT>
@@ -255,19 +255,19 @@ public:
     }
 
     //
-    // BasicDocument::parse(StringInputStreamT & is);
+    // BasicDocument::parse(StringInputStreamType & is);
     //
     template <size_t parseFlags, typename SourceEncodingT>
-    BasicDocument & parse(const StringInputStreamT & is) {
-        return parse<parseFlags, SourceEncodingT, StringInputStreamT>(is);
+    BasicDocument & parse(const StringInputStreamType & is) {
+        return parse<parseFlags, SourceEncodingT, StringInputStreamType>(is);
     }
 
     template <size_t parseFlags>
-    BasicDocument & parse(const StringInputStreamT & is) {
+    BasicDocument & parse(const StringInputStreamType & is) {
         return parse<parseFlags, EncodingT>(is);
     }
 
-    BasicDocument & parse(const StringInputStreamT & is) {
+    BasicDocument & parse(const StringInputStreamType & is) {
         return parse<kDefaultParseFlags>(is);
     }
 
@@ -283,7 +283,7 @@ public:
 
     template <size_t parseFlags, typename SourceEncodingT>
     BasicDocument & parse(const CharType * text) {
-        return parse<parseFlags, SourceEncodingT, StringInputStreamT>(text);
+        return parse<parseFlags, SourceEncodingT, StringInputStreamType>(text);
     }
 
     template <typename InputStreamT>

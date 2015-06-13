@@ -24,6 +24,7 @@ template <size_t ChunkCapacity = gDefaultChunkCapacity,
 class FastPoolAllocator : public PoolAllocator
 {
 public:
+    typedef size_t      SizeType;
     typedef Allocator   AllocatorType;
 
     // Forward declaration.
@@ -76,7 +77,7 @@ public:
 #endif
     {
         jimi_assert(kChunkCapacity >= kMinChunkCapacityThreshold);
-        init();
+        this->init();
     }
 
     FastPoolAllocator(void * userBuffer, size_t bufSize)
@@ -86,11 +87,11 @@ public:
 #endif
     {
         jimi_assert(kChunkCapacity >= kMinChunkCapacityThreshold);
-        init(userBuffer, bufSize);
+        this->init(userBuffer, bufSize);
     }
 
     ~FastPoolAllocator() {
-        destroy();
+        this->destroy();
     }
 
     JIMI_FORCEINLINE
@@ -109,11 +110,11 @@ public:
 
     void reset() {
         // Release the chunk lists.
-        release();
+        this->release();
         // Reset used total counter
         mUsedTotal = 0;
         // Reset the first chunk info and counter info.
-        init(mUserBuffer, mUserBufSize);
+        this->init(mUserBuffer, mUserBufSize);
     }
 
     void * getUserBuffer() const     { return mUserBuffer;  }
@@ -139,7 +140,7 @@ private:
     void destroy() {
         if (this->kAutoRelease) {
             // Release the chunk lists.
-            release();
+            this->release();
             mChunkHead = NULL;
         }
     }
@@ -155,12 +156,12 @@ private:
 
     void init() {
         if (kInnerChunkCapacity > kChunkCapacityLimit) {
-            initInnerChunk();
+            this->initInnerChunk();
             if (kInnerChunkCapacity <= kMinChunkCapacityThreshold)
-                addNewChunk(0);
+                this->addNewChunk(0);
         }
         else {
-            addNewChunk(0);
+            this->addNewChunk(0);
         }
     }
 
@@ -171,7 +172,7 @@ private:
                 return;
             }
         }
-        init();
+        this->init();
     }
 
     void initInnerChunk() {
@@ -245,24 +246,25 @@ private:
     }
 
 public:
-    size_t getUsed() const {
 #if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
+    size_t getUsed() const {
         return (mUsedTotal + mChunkHead->used);
-#else
-        return 0;
-#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
     }
 
     size_t getCapacity() const {
-#if defined(JSONFX_ALLOCATOR_USE_PROFILE) && (JSONFX_ALLOCATOR_USE_PROFILE != 0)
         return mCapacityTotal;
-#else
+    }
+#else  /* !defined(JSONFX_ALLOCATOR_USE_PROFILE) */
+    size_t getUsed() const {
         return 0;
-#endif  /* JSONFX_ALLOCATOR_USE_PROFILE */
     }
 
-    template <typename ReturnType = void *>
-    ReturnType addNewChunk(size_t size) {
+    size_t getCapacity() const {
+        return 0;
+    }
+#endif  /* defined(JSONFX_ALLOCATOR_USE_PROFILE) */
+
+    void * addNewChunk(size_t size) {
         ChunkInfo * newChunk = reinterpret_cast<ChunkInfo *>
                     (AllocatorType::aligned_malloc(kChunkCapacity, kAlignmentSize));
         jimi_assert(newChunk != NULL);
@@ -282,62 +284,56 @@ public:
         mChunkHead = newChunk;
 
         void * cursor = reinterpret_cast<void *>(newChunk + 1);
-        return reinterpret_cast<ReturnType>(cursor);
+        return cursor;
     }
 
-    template <typename ReturnType = void *>
-    ReturnType skip(size_t skipSize) {
-        jimi_assert(mChunkHead != NULL);
-        if (skipSize <= (mChunkHead->capacity - mChunkHead->used)) {
-            return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used + skipSize);
-        }
-        else {
-            void * cursor = addNewChunk(0);
-            return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(cursor) + skipSize);
-        }
+    inline void * addNewChunkAndSkip(size_t skipSize) {
+        return this->addNewChunkAndSkip(skipSize, 0);
     }
 
-    template <typename ReturnType = void *>
-    ReturnType skip(size_t skipSize, size_t reserveSize) {
-        jimi_assert(mChunkHead != NULL);
-        if ((skipSize + reserveSize) <= (mChunkHead->capacity - mChunkHead->used)) {
-            return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used + skipSize);
-        }
-        else {
-            void * cursor = addNewChunk(0);
-            return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(cursor) + skipSize);
-        }
-    }
-
-    template <typename ReturnType = void *>
-    inline ReturnType addNewChunkAndSkip(size_t skipSize) {
-        return addNewChunkAndSkip<ReturnType>(skipSize, 0);
-    }
-
-    template <typename ReturnType = void *>
-    inline ReturnType addNewChunkAndSkip(size_t skipSize, size_t reserveSize) {
+    inline void * addNewChunkAndSkip(size_t skipSize, size_t reserveSize) {
         jimi_assert(mChunkHead != NULL);
         void * cursor;
         if ((skipSize + reserveSize) <= kChunkCapacity) {
-            cursor = addNewChunk(0);
-            return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(cursor) + skipSize);
+            cursor = this->addNewChunk(0);
+            return reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + skipSize);
         }
         else {
-            cursor = addNewChunk(skipSize + reserveSize, 0);
-            return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(cursor) + skipSize);
+            cursor = this->addNewChunk(skipSize + reserveSize, 0);
+            return reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + skipSize);
         }
     }
 
-    template <typename ReturnType = void *>
-    ReturnType getChunkCursor() const {
+    void * skip(size_t skipSize) {
         jimi_assert(mChunkHead != NULL);
-        return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used);
+        if (skipSize <= (mChunkHead->capacity - mChunkHead->used)) {
+            return reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used + skipSize);
+        }
+        else {
+            void * cursor = this->addNewChunk(0);
+            return reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + skipSize);
+        }
     }
 
-    template <typename ReturnType = void *>
-    ReturnType getChunkBottom() const {
+    void * skip(size_t skipSize, size_t reserveSize) {
         jimi_assert(mChunkHead != NULL);
-        return reinterpret_cast<ReturnType>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->capacity);
+        if ((skipSize + reserveSize) <= (mChunkHead->capacity - mChunkHead->used)) {
+            return reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used + skipSize);
+        }
+        else {
+            void * cursor = this->addNewChunk(0);
+            return reinterpret_cast<void *>(reinterpret_cast<char *>(cursor) + skipSize);
+        }
+    }
+
+    void * getChunkCursor() const {
+        jimi_assert(mChunkHead != NULL);
+        return reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used);
+    }
+
+    void * getChunkBottom() const {
+        jimi_assert(mChunkHead != NULL);
+        return reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->capacity);
     }
 
     size_t getChunkRemain() const {
@@ -345,8 +341,7 @@ public:
         return (mChunkHead->capacity - mChunkHead->used);
     }
 
-    template <typename ReturnType = void *>
-    ReturnType allocate(size_t size) {
+    void * allocate(size_t size) {
         void * buffer;
         size_t remain;
         jimi_assert(mChunkHead != NULL);
@@ -355,38 +350,38 @@ public:
         remain = mChunkHead->capacity - mChunkHead->used;
         // If the chunk has enough space to allocate size bytes
         if (size <= remain) {
-            buffer = reinterpret_cast<char *>(mChunkHead) + mChunkHead->used;
+            buffer = reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead) + mChunkHead->used);
             jimi_assert(buffer != NULL);
 
             mChunkHead->used += size;
             jimi_assert(mChunkHead->used <= mChunkHead->capacity);
-            return reinterpret_cast<ReturnType>(buffer);
+            return buffer;
         }
         else {
 #if !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) || (JSONFX_ALLOW_ALLOC_BIGSIZE == 0)
             // The allocate size can not be greater than (kChunkCapacity - sizeof(ChunkInfo)).
             jimi_assert(size <= (kChunkCapacity - sizeof(ChunkInfo)));
             // Add a default capacity size chunk
-            buffer = addNewChunk(size);
+            buffer = this->addNewChunk(size);
 #else  /* !defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
             // Add a default capacity size chunk
             if (size <= (kChunkCapacity - sizeof(ChunkInfo))) {
-                buffer = addNewChunk(size);
+                buffer = this->addNewChunk(size);
             }
             else {
                 size_t newAllocSize = size + sizeof(ChunkInfo);
                 newAllocSize = JIMI_ALIGNED_TO(newAllocSize, kAlignmentSize);
                 if (remain >= 512) {
                     // When remain >= 512
-                    buffer = insertNewChunkToLast(newAllocSize, size);
+                    buffer = this->insertNewChunkToLast(newAllocSize, size);
                 }
                 else {
                     // When remain < 512
                     size_t newChunkCapacity = internal::RoundToPowerOf2(newAllocSize);
                     if ((newChunkCapacity - newAllocSize) >= 1024)
-                        buffer = addNewChunk(newChunkCapacity, size);
+                        buffer = this->addNewChunk(newChunkCapacity, size);
                     else
-                        buffer = insertNewChunkToLast(newAllocSize, size);
+                        buffer = this->insertNewChunkToLast(newAllocSize, size);
                 }
             }
 #endif  /* defined(JSONFX_ALLOW_ALLOC_BIGSIZE) */
@@ -394,44 +389,43 @@ public:
             jimi_assert(mChunkHead->next != NULL);
 
             jimi_assert(buffer != NULL);
-            return reinterpret_cast<ReturnType>(buffer);
+            return buffer;
         }
     }
 
-    template <typename ReturnType = void *>
-    ReturnType allocateLarge(size_t size) {
+    void * allocateLarge(size_t size) {
         size_t allocSize = size + sizeof(ChunkInfo);
         allocSize = JIMI_ALIGNED_TO(allocSize, kAlignmentSize);
 
-        void * buffer = insertNewChunkToLast(allocSize, size);
+        void * buffer = this->insertNewChunkToLast(allocSize, size);
         jimi_assert(mChunkHead != NULL);
         jimi_assert(mChunkHead->next != NULL);
 
         jimi_assert(buffer != NULL);
-        return reinterpret_cast<ReturnType>(buffer);
+        return buffer;
     }
 
-    template <typename ReturnType = void *>
-    ReturnType reallocate(const void * ptr, size_t size, size_t new_size) {
-        // Do not shrink if new size is smaller than original
+    void * reallocate(const void * ptr, size_t size, size_t new_size) {
+        // Do not shrink if new size is smaller than original.
         if (size >= new_size)
             return ptr;
 
-        // Simply expand it if it is the last allocation and there is sufficient space
+        // Simply expand it if it is the last allocation and there is sufficient space.
         if (ptr == reinterpret_cast<void *>(reinterpret_cast<char *>(mChunkHead)
                 + mChunkHead->used - size)) {
-            size_t increment = static_cast<size_t>(new_size - size);
+            // Here always new_size > size.
+            size_t increment = new_size - size;
             increment = JIMI_ALIGNED_TO(increment, kAlignmentSize);
             if (mChunkHead->used + increment <= mChunkHead->capacity) {
                 mChunkHead->used += increment;
-                return reinterpret_cast<ReturnType>(ptr);;
+                return reinterpret_cast<void *>(const_cast<void *>(ptr));
             }
         }
 
         // Realloc process: allocate and copy memory, do not free original buffer.
-        void * newBuffer = this->allocate<ReturnType>(new_size);
+        void * newBuffer = this->allocate(new_size);
         jimi_assert(newBuffer != NULL);     // Do not handle out-of-memory explicitly.
-        return reinterpret_cast<ReturnType>(std::memcpy(newBuffer, ptr, size));
+        return reinterpret_cast<void *>(std::memcpy(newBuffer, ptr, size));
     }
 
     static void deallocate(void * ptr) { (void)ptr; }                           /* Do nothing! */
