@@ -144,15 +144,23 @@ public:
     JIMI_FORCEINLINE
     bool isWhiteSpaces(const InuptStreamT & is) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+#if 0
         return ((is.peek() == ' ') || (is.peek() >= '\t' && is.peek() <= '\r'));
+#else
+        return (is.peek() == ' ' || is.peek() == '\t' || is.peek() == '\r' || is.peek() == '\n');
+#endif
     }
 
     template <typename InuptStreamT>
     JIMI_FORCEINLINE
     void skipWhiteSpaces(InuptStreamT & is) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
-#if 1
+#if 0
         while ((is.peek() == ' ') || (is.peek() >= '\t' && is.peek() <= '\r')) {
+            is.next();
+        }
+#elif 1
+        while (is.peek() == ' ' || is.peek() == '\t' || is.peek() == '\r' || is.peek() == '\n') {
             is.next();
         }
 #else
@@ -166,15 +174,25 @@ public:
     JIMI_FORCEINLINE
     bool isWhiteSpaces(const CharType * src) const {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+#if 0
         return ((*src == ' ') || (*src >= '\t' && *src <= '\r'));
+#else
+        return (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n');
+#endif
     }
 
     JIMI_FORCEINLINE
     const CharType * skipWhiteSpaces(const CharType * src) {
         // '\t' = 0x07, '\n' = 0x0A, '\r' = 0x0D
+#if 0
         while ((*src == ' ') || (*src >= '\t' && *src <= '\r')) {
             ++src;
         }
+#else
+        while (*src == ' ' || *src == '\t' || *src == '\r' || *src == '\n') {
+            ++src;
+        }
+#endif
         return src;
     }
 
@@ -371,6 +389,13 @@ public:
         return src;
     }
 
+    JIMI_FORCEINLINE
+    size_t tell(const CharType * src) const {
+        jimi_assert(mInputStream != NULL);
+        jimi_assert(src >= mInputStream->getBegin());
+        return static_cast<size_t>(src - mInputStream->getBegin());
+    }
+
 #if 0
     JIMI_FORCEINLINE
     unsigned parseHex4(const CharType * src) {
@@ -382,7 +407,7 @@ public:
                 c -= '0';
             }
             else {
-                c &= (CharType)(~ (CharType)' ');
+                c &= (CharType)(~ ' ');
                 if (c >= 'A' && c <= 'F') {
                     c -= 'A' - 10;
                 }
@@ -408,7 +433,7 @@ public:
                 c -= '0';
             }
             else {
-                c &= (unsigned)(~ (unsigned)' ');
+                c &= (unsigned)(~ ' ');
                 if (c >= 'A' && c <= 'F') {
                     c -= 'A' - 10;
                 }
@@ -426,24 +451,15 @@ public:
 #endif
 
     JIMI_FORCEINLINE
-    size_t tell(const CharType * src) const {
-        jimi_assert(mInputStream != NULL);
-        jimi_assert(src >= mInputStream->getBegin());
-        return static_cast<size_t>(src - mInputStream->getBegin());
-    }
-
-    JIMI_FORCEINLINE
     void unescapeUnicode(CharType * &dest, const CharType * &src) {
         ++src;
         unsigned codepoint = parseHex4(src);
-        //src += 4;
         if (codepoint >= 0xD800 && codepoint <= 0xDBFF) {
             // Handle UTF-16 surrogate pair.
             if (*src++ != '\\' || *src++ != 'u') {
                 this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
             }
             unsigned codepoint2 = parseHex4(src);
-            //src += 4;
             if (codepoint2 < 0xDC00 || codepoint2 > 0xDFFF)
                 this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
             codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
@@ -487,6 +503,7 @@ public:
                 else {
                     // Unknown escape chars, do nothing.
                     --src;
+                    //this->setParseError(kStringUnknownEscapeCharsWarnning, this->tell(src));
                 }
                 ++src;
             }
@@ -497,14 +514,12 @@ public:
 #else
                 ++src;
                 unsigned codepoint = parseHex4(src);
-                //src += 4;
                 if (codepoint >= 0xD800 && codepoint <= 0xDBFF) {
                     // Handle UTF-16 surrogate pair.
                     if (*src++ != '\\' || *src++ != 'u') {
                         this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
                     }
                     unsigned codepoint2 = parseHex4(src);
-                    //src += 4;
                     if (codepoint2 < 0xDC00 || codepoint2 > 0xDFFF)
                         this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
                     codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
