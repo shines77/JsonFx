@@ -16,19 +16,19 @@
 
 namespace JsonFx {
 
-template <typename _CharType = JSONFX_DEFAULT_CHARTYPE>
+template <typename CharTypeT = JSONFX_DEFAULT_CHARTYPE>
 class BasicStringRef {
 public:
-    typedef _CharType   CharType;
+	typedef CharTypeT   CharType;
     typedef uint32_t    SizeType;
 
 public:
-    BasicStringRef() : mData(NULL), mSize(0) {}
-    ~BasicStringRef() {}
+	BasicStringRef() : mData(NULL), mSize(0) { /* Do Nothing! */ }
+	~BasicStringRef() { /* Do Nothing! */ }
 
     template<SizeType N>
     BasicStringRef(const CharType (&str)[N])
-        : mData(str), mSize(N - 1) {}
+        : mData(str), mSize(N - 1) { /* Do Nothing! */ }
 
     explicit BasicStringRef(const CharType * str)
         : mData(str), mSize(internal::StrLen(str)) { jimi_assert(mData != NULL); }
