@@ -70,7 +70,7 @@ template <size_t parseFlags,
           typename StackAllocatorT /* = DefaultAllocator */>
 class BasicReader {
 public:
-    typedef typename SourceEncodingT::CharType  CharType;   //!< SourceEncoding character type
+    typedef typename SourceEncodingT::CharType  CharType;			//!< SourceEncoding character type
     typedef BasicStringInputStream<CharType>    StringInputStreamType;
     typedef PoolAllocatorT                      PoolAllocatorType;  //!< Pool allocator type from template parameter.
     typedef StackAllocatorT                     StackAllocatorType; //!< Stack allocator type from template parameter.
@@ -464,7 +464,8 @@ public:
                 this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
             codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
         }
-        //TargetEncodingT::encode(dest, codepoint);                    
+		// TODO:
+        // TargetEncodingT::encode(dest, codepoint);                    
         *dest++ = 'X';
         *dest++ = 'X';
         *dest++ = 'X';
@@ -524,7 +525,8 @@ public:
                         this->setParseError(kStringUnicodeSurrogateInvalidError, this->tell(src) - 2);
                     codepoint = (((codepoint - 0xD800) << 10) | (codepoint2 - 0xDC00)) + 0x10000;
                 }
-                //TargetEncodingT::encode(dest, codepoint);                    
+				// TODO:
+                // TargetEncodingT::encode(dest, codepoint);                    
                 *dest++ = 'X';
                 *dest++ = 'X';
                 *dest++ = 'X';
@@ -550,10 +552,9 @@ public:
         if (sizeof(CharType) == 1 || unsigned(*src) < 256) {
             // Unescape the '\r', '\n', '\t', '\b', '\f', '/', '\\', '"' chars.
             if (*src <= 't' && *src >= '"') {
-                if (   *src == 't'  || *src == '"' || *src == 'n'
-                    || *src == 'r'  || *src == '\\' || *src == '/'
-                    || *src == 'b'  || *src == 'f')
-                {
+                if (*src == 't'  || *src == '"' || *src == 'n'
+                    || *src == 'r' || *src == '\\' || *src == '/'
+                    || *src == 'b' || *src == 'f') {
                     src++;
                     additive--;
                 }
