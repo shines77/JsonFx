@@ -10,7 +10,11 @@
 #include "jimi/basic/compiler.h"
 
 #if JIMI_IS_MSVC
+#if defined(_MSC_VER) && (_MSC_VER < 1700)
+  #ifndef snprintf
     #define snprintf _snprintf
+  #endif
+#endif
 #endif
 
 #define JIMI_LIKELY(x)      (x)
